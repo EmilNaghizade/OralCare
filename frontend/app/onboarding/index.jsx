@@ -12,6 +12,7 @@ import Carousel from "react-native-reanimated-carousel";
 import { useRouter } from "expo-router";
 import Button from "../../components/Button";
 import Typo from "../../components/Typo";
+import { useAuth } from "../_layout";
 
 const { width } = Dimensions.get("window");
 
@@ -37,7 +38,32 @@ const OnboardingScreen = () => {
   const carouselRef = useRef(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const router = useRouter();
+  const auth = useAuth(); 
+  const markOnboardingComplete = auth?.markOnboardingComplete;
+  // Ensure this is correctly imported from your context
+  const handleGetStarted = async () => {
+    console.log("--- Onboarding: handleGetStarted triggered! ---");
+    if (typeof markOnboardingComplete !== "function") {
+      console.error(
+        "Onboarding Error: markOnboardingComplete function not found. Check useAuth import and AuthProvider export."
+      );
+      Alert.alert("Error", "An internal setup error occurred [Auth Context].");
+      return;
+    }
+    try {
+      console.log("Onboarding: Calling markOnboardingComplete...");
+      await markOnboardingComplete();
+      console.log("Onboarding: markOnboardingComplete finished.");
 
+      const targetRoute = "/(auth)/register"; // Or '/(auth)/login'
+      console.log(`Onboarding: Attempting navigation to ${targetRoute}...`);
+      router.push(targetRoute);
+      console.log("Onboarding: Navigation push initiated.");
+    } catch (error) {
+      console.error("--- Onboarding: ERROR in handleGetStarted ---", error);
+      Alert.alert("Error", `Could not proceed: ${error.message}`);
+    }
+  };
   const currentSlideData = slides[activeSlide] || {}; // Handle potential undefined slide
 
   return (
@@ -71,13 +97,19 @@ const OnboardingScreen = () => {
         {/* Welcome Badge */}
         <View style={styles.badge}>
           {/* Assuming Typo can replace Text here if desired */}
-          <Text style={styles.badgeText}>🌟 Welcome to OralCare</Text>
+          <Typo fontWeight="600" size={14} style={styles.badgeText}>
+            🌟 Welcome to OralCare
+          </Typo>
         </View>
 
         {/* Title & Subtitle */}
         {/* Use Typo component if it provides the styling */}
-        <Typo style={styles.title}>{currentSlideData.title}</Typo>
-        <Typo style={styles.subtitle}>{currentSlideData.subtitle}</Typo>
+        <Typo fontWeight="600" size={32} style={styles.title}>
+          {currentSlideData.title}
+        </Typo>
+        <Typo fontWeight="400" size={18} style={styles.subtitle}>
+          {currentSlideData.subtitle}
+        </Typo>
 
         {/* Optional Description from Figma */}
         {/* <Typo style={styles.description}>{currentSlideData.description}</Typo> */}
@@ -97,7 +129,7 @@ const OnboardingScreen = () => {
       <View style={styles.buttonContainer}>
         <Button
           style={styles.getStartedButton} // Renamed style for clarity
-          onPress={() => router.push("/(auth)/register")}
+          onPress={()=> router.push( "/(auth)/register")} // Use the new function
         >
           <Typo color={"#fff"} fontWeight="600" size={16}>
             Get started
