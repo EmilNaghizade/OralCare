@@ -93,14 +93,6 @@ const PasswordScreen = () => {
 
   // Animated styles for the input wrapper view (containing input and icon)
   const animatedWrapperStyle = {
-    borderBottomColor: focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ["#ccc", "#4CAF50"],
-    }),
-    borderBottomWidth: focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [1, 2],
-    }),
     width: "100%",
     flexDirection: "row", // Arrange input and eye icon horizontally
     alignItems: "center", // Align items vertically
@@ -131,7 +123,7 @@ const PasswordScreen = () => {
       // Check if the backend automatically logs the user in and sends a token
       if (result && result.token) {
         // --- Call context login function ---
-        await login(result.token,result.name,result.profileImage);
+        await login(result.token, result.name, result.profileImage);
         // *** REMOVE navigation from here - handled by _layout ***
         // router.replace(HOME_ROUTE);
         console.log("Register success: Context login called.");

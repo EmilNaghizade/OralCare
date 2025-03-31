@@ -47,14 +47,7 @@ const EmailScreen = () => {
 
   // Animated styles for the input wrapper
   const animatedWrapperStyle = {
-    borderBottomColor: focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ["#ccc", "#4CAF50"], // Gray to Green
-    }),
-    borderBottomWidth: focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [1, 2], // Thickness 1 to 2
-    }),
+
     width: "100%",
   };
 

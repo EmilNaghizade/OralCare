@@ -16,6 +16,8 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import BackButton from "../../../components/BackButton"; // Adjust path
 import Button from "../../../components/Button"; // Adjust path
 import Typo from "../../../components/Typo";
+import { authApi } from "../../../services/api";
+import { useAuth } from "../../_layout";
 // import EmailIcon from '../../../assets/icons/email-icon.svg'; // Example if using SVG
 
 // Placeholder for PNG icon - UPDATE PATH
@@ -30,40 +32,17 @@ const Login = () => {
   const router = useRouter();
   const params = useLocalSearchParams(); // Get params passed from previous screen
   const { name, gender } = params; // Extract previous data
+  const [isLoading, setIsLoading] = useState(false); // <-- Add loading state
 
   const [email, setEmail] = useState("");
-  const [isFocused, setIsFocused] = useState(false); // State for animation
-  const focusAnim = useRef(new Animated.Value(0)).current; // Animation value
-
-  useEffect(() => {
-    // Input focus animation logic (same as EnterNameScreen)
-    Animated.timing(focusAnim, {
-      toValue: isFocused ? 1 : 0,
-      duration: 200,
-      easing: Easing.bezier(0.4, 0, 0.2, 1),
-      useNativeDriver: false,
-    }).start();
-  }, [isFocused, focusAnim]);
-
-  // Animated styles for the input wrapper
-  const animatedWrapperStyle = {
-    borderBottomColor: focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ["#ccc", "#4CAF50"], // Gray to Green
-    }),
-    borderBottomWidth: focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [1, 2], // Thickness 1 to 2
-    }),
-    width: "100%",
-  };
 
   const validateEmail = (emailToValidate) => {
     return emailRegex.test(emailToValidate);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const trimmedEmail = email.trim();
+
     if (!trimmedEmail) {
       Alert.alert("Email Required", "Please enter your email address.");
       return;
@@ -73,11 +52,36 @@ const Login = () => {
       return;
     }
 
-    // Navigate to the next screen, passing all collected data
-    router.push({
-      pathname: NEXT_SCREEN_ROUTE,
-      params: { name, gender, email: trimmedEmail }, // Pass name, gender, and email
-    });
+    //check is email have in the database
+    try {
+      // API'ye e-posta kontrol isteği gönder
+      const response = await authApi.checkEmail(trimmedEmail);
+      console.log(response.exists, "RESPONSE HEYYY");
+      if (response.exists) {
+        router.push({
+          pathname: NEXT_SCREEN_ROUTE,
+          params: { email: trimmedEmail },
+        });
+      }
+    } catch (error) {
+      console.error("Error during email check:", error); // Tüm hatayı logla
+      Alert.alert("Error", "User not found. Please try again.");
+    }
+    if (error) {
+      console.error("Error response status:", error.response.status); // Durum kodunu logla
+      console.error("Error response data:", error.response.data); // Dönen veriyi logla
+      if (error.response.status === 404) {
+        Alert.alert("Error", "User not found.");
+      } else {
+        // Daha genel bir hata mesajı gösterilebilir
+        Alert.alert(
+          "Error",
+          "An error occurred during login. Please try again."
+        );
+        // VEYA spesifik backend mesajını göster:
+        // Alert.alert("Error", error.response.data?.error || "An unexpected error occurred.");
+      }
+    }
   };
 
   return (
@@ -94,7 +98,13 @@ const Login = () => {
           </Typo>
 
           {/* Animated Wrapper + TextInput */}
-          <Animated.View style={animatedWrapperStyle}>
+          <View
+            style={{
+              width: "100%",
+              flexDirection: "row",
+              alignItems: "center",
+            }}
+          >
             <TextInput
               style={styles.input}
               placeholder="user@gmail.com" // Placeholder matching image
@@ -107,10 +117,8 @@ const Login = () => {
               textContentType="emailAddress" // Help with autofill (iOS)
               returnKeyType="next" // Keyboard return key says "Next"
               onSubmitEditing={handleNext} // Allow submitting via keyboard
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
             />
-          </Animated.View>
+          </View>
         </View>
 
         <View style={styles.buttonContainer}>

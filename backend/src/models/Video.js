@@ -10,22 +10,55 @@ const videoSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: false, // Optional description
+      required: true,
       trim: true,
     },
-    videoUrl: { // URL to the video file/stream
+    videoUrl: {
       type: String,
       required: true,
     },
-    thumbnailUrl: { // Optional thumbnail image URL
+    thumbnailUrl: {
       type: String,
-      required: false,
+      required: true,
     },
-    duration: { // Optional duration in seconds or string format
-        type: String, // Or Number for seconds
-        required: false,
+    duration: {
+      type: Number, // Duration in seconds
+      required: true,
+      min: 0,
     },
-    // Add other relevant fields like category, tags etc. if needed
+    category: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    tags: [
+      {
+        type: String,
+        trim: true,
+      },
+    ],
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    views: {
+      type: Number,
+      default: 0,
+    },
+    isPublished: {
+      type: Boolean,
+      default: false,
+    },
+    fileSize: {
+      type: Number, // Size in bytes
+      required: true,
+    },
+    format: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
   { timestamps: true }
 );
