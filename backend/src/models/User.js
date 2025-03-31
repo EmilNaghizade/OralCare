@@ -29,6 +29,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    watchedVideos: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Video", // Reference to a 'Video' model (created below)
+      },
+    ],
+    readArticles: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Blog", // Reference to the 'Blog' model (corrected below)
+      },
+    ],
   },
   { timestamps: true }
 );

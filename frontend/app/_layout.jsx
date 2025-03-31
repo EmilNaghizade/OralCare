@@ -16,6 +16,7 @@ function AuthProvider({ children }) {
   const [authToken, setAuthToken] = useState(null);
   const [onboardingComplete, setOnboardingComplete] = useState(false); // New state
   const [isLoading, setIsLoading] = useState(true); // Start loading
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const loadInitialState = async () => {
@@ -27,14 +28,32 @@ function AuthProvider({ children }) {
           console.log("AuthProvider: Token found:", token ? "Yes" : "No");
           setAuthToken(token);
         }
-  
+        try {
+          console.log("AuthProvider: Fetching profile with stored token...");
+          // Pass the token we just loaded
+          const profileData = await getProfileApi(token);
+          // Assuming profileData directly contains the user fields needed
+          // Or if it's nested like { user: {...} }, adjust accordingly
+          fetchedUser = profileData; // Store fetched user
+          console.log("AuthProvider: Profile fetched:", fetchedUser?.email);
+          setUser(fetchedUser); // Set user state
+        } catch (profileError) {
+          console.error(
+            "AuthProvider: Failed to fetch profile with stored token:",
+            profileError
+          );
+          // If profile fetch fails (e.g., token expired), treat as logged out
+          await SecureStore.deleteItemAsync("authToken"); // Clear invalid token
+          setAuthToken(null);
+          setUser(null);
+          token = null; // Ensure token is null for subsequent logic
+        }
         // *** FIX: Read onboarding flag from AsyncStorage ***
         const flag = await SecureStore.getItemAsync("hasCompletedOnboarding");
-        console.log("flag",flag)
+        console.log("flag", flag);
         onboardingFlag = flag === "true";
         console.log("AuthProvider: Onboarding complete flag:", onboardingFlag);
         setOnboardingComplete(onboardingFlag);
-  
       } catch (e) {
         console.error("AuthProvider: Failed to load initial state", e);
       } finally {
@@ -44,24 +63,25 @@ function AuthProvider({ children }) {
     };
     loadInitialState();
   }, []);
-  
+
   const login = async (token) => {
     if (!token) {
-       console.error("AuthProvider: Login called without token");
-       return; // Added early return
+      console.error("AuthProvider: Login called without token");
+      return; // Added early return
     }
     try {
       console.log("AuthProvider: login - Storing token...");
       await SecureStore.setItemAsync("authToken", token);
       console.log("AuthProvider: login - Setting token state...");
       setAuthToken(token); // Update state
-  
+
       // *** FIX: Ensure onboarding flag is written to AsyncStorage ***
       console.log("AuthProvider: login - Marking onboarding complete...");
       await SecureStore.setItemAsync("hasCompletedOnboarding", "true");
       setOnboardingComplete(true); // Update state
-      console.log("AuthProvider: login - Token stored, onboarding marked complete.");
-  
+      console.log(
+        "AuthProvider: login - Token stored, onboarding marked complete."
+      );
     } catch (e) {
       console.error("AuthProvider: Failed to save token/flag on login", e);
       // Consider how to handle this - maybe clear token state if storage fails?
@@ -69,16 +89,16 @@ function AuthProvider({ children }) {
       setOnboardingComplete(false);
     }
   };
-  
+
   // Keep markOnboardingComplete as is (it correctly uses AsyncStorage)
   const markOnboardingComplete = async () => {
-      try {
-          await AsyncStorage.setItemAsync('hasCompletedOnboarding', 'true');
-          setOnboardingComplete(true);
-          console.log("AuthProvider: Onboarding marked as complete.");
-      } catch (e) {
-           console.error('AuthProvider: Failed to mark onboarding complete', e);
-      }
+    try {
+      await AsyncStorage.setItemAsync("hasCompletedOnboarding", "true");
+      setOnboardingComplete(true);
+      console.log("AuthProvider: Onboarding marked as complete.");
+    } catch (e) {
+      console.error("AuthProvider: Failed to mark onboarding complete", e);
+    }
   };
   const logout = async () => {
     try {
@@ -91,8 +111,6 @@ function AuthProvider({ children }) {
     }
   };
 
-
-
   return (
     <AuthContext.Provider
       value={{
@@ -100,6 +118,7 @@ function AuthProvider({ children }) {
         onboardingComplete,
         isLoading,
         login,
+        user,
         logout,
         markOnboardingComplete,
       }}
@@ -123,14 +142,24 @@ export default function RootLayout() {
 function LayoutLogic() {
   const { authToken, onboardingComplete, isLoading } = useAuth();
   const segments = useSegments();
+  const isInModal = segments[0] === "(modal)";
   const router = useRouter();
 
   useEffect(() => {
     if (isLoading) {
-      console.log("LayoutLogic: Still loading...");
       return; // Do nothing while loading state
     }
 
+    const requiredSegment = authToken
+      ? "(tabs)"
+      : onboardingComplete
+      ? "(auth)"
+      : "onboarding";
+    if (segments[0] === requiredSegment || isInModal) {
+      // Already in the correct top-level segment group based on state
+      SplashScreen.hideAsync(); // Hide splash screen if not already hidden
+      return;
+    }
     SplashScreen.hideAsync(); // Hide splash screen once loading is done
 
     const isInTabs = segments[0] === "(tabs)";
@@ -138,7 +167,7 @@ function LayoutLogic() {
     const isOnboarding = segments[0] === "onboarding"; // Assuming onboarding is at app/onboarding.jsx
 
     console.log(
-      `LayoutLogic: isLoading=${isLoading}, authToken=${!!authToken}, onboardingComplete=${onboardingComplete}, isInTabs=${isInTabs}, isInAuth=${isInAuth}, isOnboarding=${isOnboarding}`
+      `LayoutLogic: isLoading=${isLoading}, authToken=${!!authToken}, onboardingComplete=${onboardingComplete}, isInTabs=${isInTabs}, isInAuth=${isInAuth}, isOnboarding=${isOnboarding}, isInModal=${isInModal}`
     );
 
     if (authToken) {
@@ -151,14 +180,25 @@ function LayoutLogic() {
       // User is not logged in
       if (onboardingComplete) {
         // Onboarding done, should be in auth flow
-       
       } else {
         // Onboarding not done yet
-        if (!isOnboarding) {
+        if (onboardingComplete) {
           console.log(
             "LayoutLogic: Not logged in, onboarding incomplete, redirecting to Onboarding..."
           );
-
+          if (!isInAuth) {
+            console.log(
+              "LayoutLogic: Not logged in, onboarding complete, redirecting to Auth/Login..."
+            );
+            router.replace("/(auth)/login");
+          }
+        } else {
+          if (!isOnboarding) {
+            console.log(
+              "LayoutLogic: Not logged in, onboarding not complete, redirecting to Onboarding..."
+            );
+            router.replace("/onboarding");
+          }
         }
       }
     }

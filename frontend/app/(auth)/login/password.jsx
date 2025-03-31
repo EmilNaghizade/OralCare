@@ -132,7 +132,7 @@ const PasswordScreen = () => {
       // Check if the backend automatically logs the user in and sends a token
       if (result.token) {
         // --- Call context login function ---
-        await login(result.token);
+        await login(result.token,result.name,result.profileImage);
         // *** REMOVE navigation from here - handled by _layout ***
         // router.replace(HOME_ROUTE);
         console.log("Login success: Context login called.");

@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     width: "100%",
     alignItems: "center",
-    paddingHorizontal: 30, // Match content padding
+    marginTop: 20, // Match content padding
     paddingBottom: Platform.OS === "ios" ? 30 : 20, // Space from bottom
   },
   button: {
