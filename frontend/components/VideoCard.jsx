@@ -2,15 +2,15 @@ import { Image, Text, TouchableOpacity, View,StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
-export const VideoCard = ({ item }) => (
+export const VideoCard = ({ item, style,styleThumbnail }) => (
   // Use TouchableOpacity for press handling
   <TouchableOpacity
-    style={styles.videoCard}
+    style={[styles.videoCard, style]}
     onPress={() => {
       router.push(`/(modal)/video/${item._id}`); // Use router to navigate
     }}
   >
-    <Image source={item.thumbnailUrl} style={styles.videoThumbnail} />
+    <Image source={item.thumbnailUrl} style={[styles.videoThumbnail,styleThumbnail]} />
     {/* Container View for content below image */}
     <View style={styles.videoInfoContainer}>
       {item.tag && ( // Only show tag if item.tag exists
@@ -31,7 +31,7 @@ export const VideoCard = ({ item }) => (
   </TouchableOpacity>
 );
 
-styles = StyleSheet.create({
+const styles = StyleSheet.create({
   videoCard: {
     width: 210, // Adjust width as needed to fit design/screen
     marginRight: 16,
@@ -87,6 +87,6 @@ styles = StyleSheet.create({
   },
   videoDuration: {
     fontSize: 12,
-    color: "#888", // Gray color for duration
+    color: "#038565", // Gray color for duration
   },
 });

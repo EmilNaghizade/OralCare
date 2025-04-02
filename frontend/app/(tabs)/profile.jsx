@@ -36,7 +36,7 @@ const ProfileListItem = ({ iconName, label, onPress, isLogout = false }) => (
 );
 
 export default function ProfileScreen() {
-  const { authToken } = useAuth();
+  const { authToken, userPoints } = useAuth();
   const { logout } = useAuth(); // Get logout function and maybe user data
   const [user, setUser] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true); // Loading state only for profile]

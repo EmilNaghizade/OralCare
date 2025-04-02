@@ -41,19 +41,19 @@ const ArticleDetail = () => {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.scrollContainer}>
-        <View>
-          <Typo fontWeight="600" size={24} style={styles.title}>
-            New Neonatal and Paediatric Product Catalogue
-          </Typo>
+      <ScrollView contentContainerStyle={styles.scrollContainerContent}>
+        <Typo fontWeight="600" size={24} style={styles.title}>
+          New Neonatal and Paediatric Product Catalogue
+        </Typo>
+        <View style={styles.badgeRow}>
           <Badge>18 March, 2024</Badge>
           <Badge>5 min read</Badge>
-
-          <Image source={ArticleDetailImg} style={styles.coverImage} />
         </View>
 
-        <View>
-          <Typo>
+        <Image source={ArticleDetailImg} style={styles.coverImage} />
+
+        <View style={styles.bodyTextContainer}>
+          <Typo style={styles.bodyText}>
             We are pleased to announce that Edition 10 of our Neonatal and
             Paediatric Product Catalogue is now available. {"\n\n"}
             The new catalogue has been updated to include new products, helpful
@@ -87,9 +87,36 @@ const styles = StyleSheet.create({
     // Simple padding for the touchable area of header icons
     padding: 10,
   },
+  scrollContainerContent: {
+    backgroundColor: "#fff", // Arka plan rengi
+    // ScrollView içeriği için padding
+    paddingHorizontal: 20, // Yanlardan boşluk
+    paddingBottom: 40, // Alttan boşluk
+  },
+  title: {
+    color: "#1c1c1c", // Koyu başlık rengi
+    lineHeight: 36, // Satır yüksekliği
+
+  },
+  badgeRow: {
+    flexDirection: "row", // Rozetleri yan yana dizer
+    alignItems: "center", // Dikeyde ortalar
+    gap: 10, // Rozetler arası boşluk (React Native 0.71+ gerektirir)
+    // Eğer RN < 0.71 ise: ilk Badge'e marginRight: 10 verin
+    marginBottom: 20, // Rozet sırasının altındaki boşluk (resme kadar)
+  },
   coverImage: {
-    width: '100%',
-    height: 220, // Adjust height to match the visual
-    borderRadius: 10, // If the image has rounded corners
+    width: 353, // Tam genişlik
+    height: 237, // Sabit yükseklik
+    borderRadius: 16, // Resim köşelerini yuvarlatma (Tasarima göre ayarlayın)
+    marginBottom: 25, // Resmin altındaki boşluk (metne kadar)
+  },
+  bodyTextContainer: {
+    // Metin için ek sarmalayıcı (gerekirse margin vb. için)
+  },
+  bodyText: {
+    fontSize: 16, // Metin boyutu
+    lineHeight: 26, // Okunabilirlik için satır yüksekliği
+    color: "#333", // Metin rengi
   },
 });

@@ -2,92 +2,128 @@
 import React from "react";
 import {
   View,
-  Text,
   StyleSheet,
-  FlatList, // Use FlatList for grid
+  FlatList,
   Image,
-  TouchableOpacity, // Make cards touchable
-  Dimensions, // To calculate item width
+  TouchableOpacity,
+  Dimensions,
+  SafeAreaView, // <-- SafeAreaView EKLENDİ
+  Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
+// import { useRouter } from "expo-router"; // Şimdilik kullanılmıyor, gerekirse ekleyin
+import Typo from "../../components/Typo"; // Typo bileşeni varsayılıyor
 
 // --- Dummy Data ---
+// Her ürün için ayrı resim eklemek daha iyi olur
+const productImg1 = require("../../assets/images/Product2.png");
+// Örnek: const productImg2 = require("../../assets/images/Product2.png");
+
 const dummyProducts = [
-  { id: "p1", name: "OroCare™ Mini toothbrush" },
-  { id: "p2", name: "OroCare™ Mini toothbrush" },
-  { id: "p3", name: "OroCare™ Mini toothbrush" },
-  { id: "p4", name: "OroCare™ Mini toothbrush" },
-  // Add more products as needed
+  // Her ürüne kendi image özelliğini ekleyin
+  { id: "p1", name: "OroCare™ Mini toothbrush", image: productImg1 },
+  { id: "p2", name: "OroCare™ Mini toothbrush", image: productImg1 }, // Farklı resim kullanın
+  { id: "p3", name: "OroCare™ Mini toothbrush", image: productImg1 },
+  { id: "p4", name: "OroCare™ Mini toothbrush", image: productImg1 },
 ];
 
-const productImg = require("../../assets/images/Product1.png");
-
-// Calculate item width for two columns with spacing
-const PADDING = 15;
+// --- Stil Sabitleri ve Hesaplama ---
+const PADDING = 16; // Yeni padding/gap değeri
 const { width } = Dimensions.get("window");
-const ITEM_WIDTH = (width - PADDING * 3) / 2; // (Screen width - total horizontal padding) / num columns
+// Genişlik hesaplaması: (Ekran Genişliği - Sol Padding - Sağ Padding - Sütunlar Arası Boşluk) / 2
+const ITEM_WIDTH = (width - PADDING * 3) / 2;
 
-// --- Product Card Component ---
+// --- Ürün Kartı Bileşeni ---
 const ProductCard = ({ item }) => {
+  // const router = useRouter(); // Kart tıklanınca yönlendirme için
   return (
-    <TouchableOpacity style={styles.productCard} >
+    <TouchableOpacity
+      style={styles.productCard}
+      activeOpacity={0.8}
+      // onPress={() => router.push(`/product-detail/${item.id}`)} // Örnek yönlendirme
+    >
+      {/* Resim Alanı */}
       <View style={styles.productImageContainer}>
         <Image
-          source={productImg}
+          source={item.image} // item'dan gelen resmi kullan
           style={styles.productImage}
-          resizeMode="contain"
+          resizeMode="contain" // Resmin tamamı görünsün, oran korunsun
         />
       </View>
-      <Text style={styles.productName} numberOfLines={2}>
+      {/* Ürün Adı */}
+      <Typo style={styles.productName} numberOfLines={2}>
         {item.name}
-      </Text>
+      </Typo>
     </TouchableOpacity>
   );
 };
 
-// --- Main Products Screen Component ---
+// --- Ana Ürünler Ekranı Bileşeni ---
 export default function ProductsScreen() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.safeArea}>
+      {/* Özel Başlık Alanı */}
+      <View style={styles.header}>
+        <Typo fontWeight="600" size={20} style={styles.headerTitle}>
+          Oral Care Products
+        </Typo>
+      </View>
+
+      {/* Ürün Listesi (Grid) */}
       <FlatList
         data={dummyProducts}
         renderItem={({ item }) => <ProductCard item={item} />}
         keyExtractor={(item) => item.id}
-        numColumns={2} // Crucial for grid layout
+        numColumns={2} // 2 Sütunlu Grid
         contentContainerStyle={styles.listContainer}
-        // Optional: Add styling to space out columns if needed
-        // columnWrapperStyle={styles.columnWrapper}
+        showsVerticalScrollIndicator={false} // Scroll bar'ı gizle
+        // columnWrapperStyle={styles.columnWrapper} // Gerekirse sütunlar arası boşluk için
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
-// --- Styles ---
+// --- Stiller ---
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    backgroundColor: "#f0f2f5", // Light gray background for the list area
+    backgroundColor: "#fff", // Header altındaki alanın arka planı
+  },
+  header: {
+    backgroundColor: "#fff", // Beyaz header arka planı
+    paddingTop: Platform.OS === "android" ? 20 : 15, // Üst boşluk (statusBar'a göre)
+    paddingBottom: 20, // Alt boşluk
+    paddingHorizontal: PADDING, // Yan boşluklar
+    // Alt köşeleri yuvarlatma
+    borderBottomLeftRadius: 24, // <<< YUVARLAK KÖŞE
+    borderBottomRightRadius: 24, // <<< YUVARLAK KÖŞE
+    // Header'ı listeden ayırmak için gölge (opsiyonel)
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 5, // Android için gölge
+    zIndex: 1, // Header'ın listenin üzerinde görünmesini sağla
+  },
+  headerTitle: {
+    color: "#1c1c1c", // Koyu başlık rengi
+    textAlign: "left", // Başlığı ortala
   },
   listContainer: {
-    paddingHorizontal: PADDING, // Overall horizontal padding for the grid
-    paddingTop: 20, // Space below header
-    paddingBottom: 20, // Space at bottom
+    // Kartlar marginHorizontal kullandığı için padding'i yarıya indiriyoruz
+    paddingHorizontal: PADDING / 2,
+    paddingTop: 20, // Header ile liste arası boşluk
+    paddingBottom: 20, // Listenin altındaki boşluk
   },
-  // Optional: If extra space needed between columns besides item margin
-  // columnWrapper: {
-  //   justifyContent: 'space-between',
-  // },
+
   productCard: {
-    width: ITEM_WIDTH, // Calculated width
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: PADDING, // Vertical spacing between rows
-    // Add horizontal spacing implicitly via FlatList padding and item width calculation
-    // Or add marginHorizontal if not using columnWrapper style adjustments
-    marginHorizontal: PADDING / 2, // Distribute spacing between items
-    padding: 10, // Internal padding
-    alignItems: "center", // Center content
-    // Shadow/Elevation
+    width: ITEM_WIDTH, // Hesaplanan genişlik
+    backgroundColor: "#fff", // Kart arka planı
+    borderRadius: 24, // <<< KÖŞE YUVARLAKLIĞI ARTIRILDI
+    marginBottom: PADDING, // Dikey boşluk (satırlar arası)
+    marginHorizontal: PADDING / 2, // Yatay boşluk (sütunlar arası - toplam PADDING olur)
+    padding: 12, // Kart içi boşluk (biraz azaltıldı)
+    alignItems: "center", // İçeriği ortala
+    // Gölge
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.08,
@@ -95,25 +131,19 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   productImageContainer: {
-    // Container for the image background color/padding
-    width: "100%",
-    aspectRatio: 1, // Make it square (adjust if needed)
-    backgroundColor: "#f8fafd", // Very light background for image area
-    borderRadius: 8, // Slightly rounded corners inside card
-    marginBottom: 10,
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-  },
-  productImage: {
-    width: "80%", // Make image smaller than its container
-    height: "80%", // Make image smaller than its container
+    width: "100%", // Kart genişliğini doldur
+    aspectRatio: 1, // Kare oranını koru
+    borderRadius: 16, // <<< İÇ KÖŞE YUVARLAKLIĞI (Karttan biraz az)
+    marginBottom: 12, // Resim ile yazı arası boşluk
+    justifyContent: "center", // İçeriği (resmi) dikeyde ortala
+    alignItems: "center", // İçeriği (resmi) yatayda ortala
+    overflow: "hidden", // İçerideki resmin taşmasını engelle
   },
   productName: {
     fontSize: 14,
     fontWeight: "500",
     color: "#333",
-    textAlign: "center",
-    marginTop: 5,
+    textAlign: "left",
+    // marginTop kaldırıldı, padding yeterli
   },
 });

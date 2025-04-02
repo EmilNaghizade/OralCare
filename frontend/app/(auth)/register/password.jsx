@@ -161,7 +161,7 @@ const PasswordScreen = () => {
             Create password
           </Typo>
           {/* Animated Wrapper for Input + Eye Icon */}
-          <Animated.View style={animatedWrapperStyle}>
+          <View style={animatedWrapperStyle}>
             <TextInput
               style={styles.input}
               placeholder="Password" // Placeholder matching image
@@ -170,12 +170,11 @@ const PasswordScreen = () => {
               onChangeText={setPassword}
               secureTextEntry={!isPasswordVisible} // Toggle based on state
               autoCapitalize="none"
-              autoComplete="password-new" // Help suggest strong passwords
-              textContentType="newPassword" // Semantic meaning (iOS)
+              autoComplete="password" // Help suggest strong passwords
+              textContentType="password" // Semantic meaning (iOS)
               returnKeyType="done" // Keyboard return key says "Done"
               onSubmitEditing={handleSignUp} // Allow submitting via keyboard
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
+
             />
             {/* Eye Icon Button */}
             <TouchableOpacity
@@ -188,7 +187,7 @@ const PasswordScreen = () => {
                 color="#888" // Icon color
               />
             </TouchableOpacity>
-          </Animated.View>
+          </View>
         </View>
 
         <View style={styles.buttonContainer}>

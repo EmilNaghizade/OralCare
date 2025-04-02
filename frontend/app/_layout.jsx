@@ -22,6 +22,7 @@ function AuthProvider({ children }) {
   const [authToken, setAuthToken] = useState(null);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Başlangıçta yükleniyor
+  const [userPoints, setUserPoints] = useState(0); // <<< YENİ: Quiz Puanları State'i
   const router = useRouter();
 
   useEffect(() => {
@@ -43,7 +44,16 @@ function AuthProvider({ children }) {
         SplashScreen.hideAsync().catch(e => console.warn("SplashScreen error:", e)); // Splash screen'i gizle
       }
     };
+    const loadInitialPoints = async () => {
+      try {
+          const storedPoints = await SecureStore.getItem('userTotalPoints');
+          setUserPoints(parseInt(storedPoints || '0', 10));
+      } catch (e) {
+          console.error("Failed to load points from AsyncStorage", e);
+      }
+  };
     loadInitialState();
+    loadInitialPoints()
   }, []); // Sadece component mount edildiğinde çalışır
 
   // Login fonksiyonu: token ve user objesini alır (API response'dan)
@@ -52,6 +62,7 @@ function AuthProvider({ children }) {
     try {
       await SecureStore.setItemAsync('authToken', token);
       setAuthToken(token);
+      setUserPoints(userData?.points || 0); // Eğer API user objesinde puan döndürüyorsa
       setUser(loggedInUser);
       router.replace("/(tabs)/home");
     } catch (e) {
@@ -73,10 +84,22 @@ function AuthProvider({ children }) {
     }
   };
 
+  const updateUserPoints = async (pointsToAdd) => {
+    const newTotalPoints = userPoints + pointsToAdd;
+    setUserPoints(newTotalPoints);
+    // Puanları kalıcı hale getir (örn: AsyncStorage)
+    try {
+        await SecureStore.setItem('userTotalPoints', newTotalPoints.toString());
+    } catch (e) {
+    }
+    // !!! Backend olsaydı burada API'ye de gönderilebilirdi !!!
+  };
+
   const value = {
     authToken,
     user,
     isLoading,
+    userPoints,
     login,
     logout,
   };

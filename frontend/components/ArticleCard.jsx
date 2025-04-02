@@ -1,6 +1,7 @@
 import { Image, Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import Typo from "../components/Typo";
+import Badge from "./Badge";
 
 export const ArticleCard = ({ item }) => (
   <TouchableOpacity
@@ -9,14 +10,12 @@ export const ArticleCard = ({ item }) => (
   >
     <Image source={item.image} style={styles.image} />
     <View style={styles.content}>
-      <View style={styles.badgeContainer}>
-        <Text style={styles.badgeText}>{item.readTime}</Text>
-      </View>
+      
       {/* Başlık */}
       <Typo style={styles.title} numberOfLines={3}>
         {item.title}
       </Typo>
-
+      <Badge >{item.readTime}</Badge>
 
       {/* Yayın Tarihi */}
       <Typo style={styles.date}>{item.createdAt}</Typo>
@@ -58,23 +57,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     
   },
-  badgeContainer: {
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: "#DFEAEF",
-    // --- DEĞİŞİKLİK ---
-    borderRadius: 24,          // Yuvarlak köşeler 24 olarak güncellendi
-    // --- DEĞİŞİKLİK ---
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    alignSelf: 'flex-start',
-    marginBottom: 12,
-  },
-  badgeText: {
-    color: '#4a4a4a',
-    fontSize: 11,
-    fontWeight: '500',
-  },
+
   title: {
     color: '#1c1c1c',
     fontSize: 17,
