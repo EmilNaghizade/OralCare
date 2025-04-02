@@ -25,7 +25,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: activeTabColor, // Color for the active tab icon and label
         tabBarInactiveTintColor: "gray", // Color for inactive tabs
         // You can add other options like tabBarShowLabel: false, etc.
-        // headerShown: false, // Usually hide the default header in tabs layout
+        headerShown: false, // Usually hide the default header in tabs layout
       }}
     >
       <Tabs.Screen
@@ -48,7 +48,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             // Choose an appropriate icon name
             <TabBarIcon
-              name={focused ? "school" : "school-outline"}
+              name={focused ? "book" : "book-outline"}
               color={color}
             />
           ),
@@ -61,7 +61,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             // Choose an appropriate icon name
             <TabBarIcon
-              name={focused ? "mail" : "mail-outline"}
+              name={focused ? "call" : "call-outline"}
               color={color}
             />
           ),
@@ -74,7 +74,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             // Choose an appropriate icon name
             <TabBarIcon
-              name={focused ? "cart" : "cart-outline"}
+              name={focused ? "briefcase" : "briefcase-outline"}
               color={color}
             />
           ),

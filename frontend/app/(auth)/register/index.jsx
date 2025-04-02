@@ -37,14 +37,7 @@ export default function register() {
 
   // Interpolate animation value for styles
   const animatedWrapperStyle = {
-    borderBottomColor: focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ["#ccc", "#4CAF50"], // Gray to Green
-    }),
-    borderBottomWidth: focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [1, 2], // Thickness 1 to 2
-    }),
+
     // Ensure the wrapper takes the necessary width
     width: "100%",
   };
@@ -142,7 +135,7 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    fontSize: 18,
+    fontSize: 28,
     paddingVertical: 10, // Vertical padding inside input
     textAlign: "center", // Center the text input itself
     color: "#333", // Input text color

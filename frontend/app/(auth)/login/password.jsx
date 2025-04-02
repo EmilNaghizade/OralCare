@@ -82,27 +82,12 @@ const PasswordScreen = () => {
   const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const focusAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    // Input focus animation
-    Animated.timing(focusAnim, {
-      toValue: isFocused ? 1 : 0,
-      duration: 200,
-      easing: Easing.bezier(0.4, 0, 0.2, 1),
-      useNativeDriver: false,
-    }).start();
-  }, [isFocused, focusAnim]);
+  
 
   const animatedWrapperStyle = {
-    borderBottomColor: focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: ["#ccc", "#038565"], // Use theme color
-    }),
-    borderBottomWidth: focusAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [1, 2],
-    }),
+
+
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
@@ -129,15 +114,10 @@ const PasswordScreen = () => {
       // --- Handle Success ---
       console.log("API Registration Result:", result);
 
-      // Check if the backend automatically logs the user in and sends a token
       if (result.token) {
-        // --- Call context login function ---
         await login(result.token);
-        // *** REMOVE navigation from here - handled by _layout ***
-        // router.replace(HOME_ROUTE);
-        console.log("Login success: Context login called.");
+
       } else {
-        // Should be caught by loginUserApi error handling, but as fallback:
         throw new Error("Login successful, but no token received.");
       }
     } catch (error) {
@@ -154,7 +134,6 @@ const PasswordScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Back button was missing in the provided code, added it back */}
       <View style={styles.headerContainer}>
         <BackButton />
       </View>
@@ -170,7 +149,7 @@ const PasswordScreen = () => {
             Enter password
           </Typo>
 
-          <Animated.View style={animatedWrapperStyle}>
+          <View style={animatedWrapperStyle}>
             <TextInput
               style={styles.input}
               placeholder="Password"
@@ -196,7 +175,7 @@ const PasswordScreen = () => {
                 color="#888"
               />
             </TouchableOpacity>
-          </Animated.View>
+          </View>
         </View>
 
         <View style={styles.buttonContainer}>

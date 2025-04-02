@@ -1,5 +1,8 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
+import Video from "../models/Video.js";
+import Blog from "../models/Blog.js";
+
 
 const userSchema = new mongoose.Schema(
   {
@@ -29,6 +32,43 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
+    watchedVideos: [
+      {
+        video: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Video",
+        },
+        watchedAt: {
+          type: Date,
+          default: Date.now,
+        },
+        watchDuration: {
+          type: Number, // Duration in seconds
+          default: 0,
+        },
+      },
+    ],
+    readArticles: [
+      {
+        article: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Blog",
+        },
+        readAt: {
+          type: Date,
+          default: Date.now,
+        },
+        readDuration: {
+          type: Number, // Duration in seconds
+          default: 0,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
@@ -45,6 +85,24 @@ userSchema.pre("save", async function (next) {
 //compare password
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Get user statistics
+userSchema.methods.getStats = function () {
+  return {
+    totalWatchedVideos: this.watchedVideos.length,
+    totalReadArticles: this.readArticles.length,
+    totalWatchTime: this.watchedVideos.reduce(
+      (acc, curr) => acc + (curr.watchDuration || 0),
+      0
+    ),
+    totalReadTime: this.readArticles.reduce(
+      (acc, curr) => acc + (curr.readDuration || 0),
+      0
+    ),
+    lastActive: this.lastLogin,
+    memberSince: this.createdAt,
+  };
 };
 
 const User = mongoose.model("User", userSchema);
