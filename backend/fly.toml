@@ -9,10 +9,8 @@ primary_region = 'fra'
 [build]
 
 [processes]
-  app = "node src/index.js" # Ana dosyanızın doğru yolunu yazın
-
+  app = "node src/index.js"
 [http_service]
-  processes= ["app"]
   internal_port = 8080
   force_https = true
   auto_stop_machines = 'stop'
