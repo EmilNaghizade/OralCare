@@ -13,81 +13,28 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
+import { useRouter, useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // For storing token if backend logs in
 import * as SecureStore from "expo-secure-store";
 import BackButton from "../../../components/BackButton"; // Adjust path
 import Button from "../../../components/Button"; // Adjust path
 import Typo from "../../../components/Typo"; // Adjust path
 import { useAuth } from "../../_layout"; // Import your Auth context
+import { authApi } from "../../../services/api";
 
 // UPDATE PATH if needed
 const passwordIcon = require("../../../assets/images/Password.png");
 
-// --- Configuration ---
-// Read from environment variables
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-// Define endpoint directly or read from .env (e.g., process.env.EXPO_PUBLIC_REGISTER_ENDPOINT)
-const REGISTER_ENDPOINT = process.env.EXPO_PUBLIC_LOGIN_ENDPOINT;
-const HOME_ROUTE = "/(tabs)/home"; // Adjust route
-
-// --- Check if Base URL is set ---
-if (!API_BASE_URL) {
-  console.error("ERROR: EXPO_PUBLIC_API_BASE_URL is not set in .env file");
-  // Alert.alert("Configuration Error", "API Base URL is not configured."); // Optional alert
-}
-
-// --- API Registration Function ---
-const registerUserApi = async (loginData) => {
-  if (!API_BASE_URL) {
-    throw new Error("API Base URL is not configured.");
-  }
-
-  console.log(loginData, "LOGIN DATA");
-  try {
-    const response = await fetch(`${API_BASE_URL}${REGISTER_ENDPOINT}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(loginData), // Send all collected user data
-    });
-
-    const data = await response.json();
-    console.log(data, "DATA");
-
-    if (!response.ok) {
-      // Throw error with backend message
-      throw new Error(data.message || `HTTP error! status: ${response.status}`);
-    }
-
-    console.log("Registration successful:", data);
-    // Return data from backend (might include user info, maybe a token)
-    return data;
-  } catch (error) {
-    console.error("API Registration Error:", error);
-    throw error; // Re-throw to be caught in handleSignUp
-  }
-};
-
 const PasswordScreen = () => {
-  const router = useRouter();
   const params = useLocalSearchParams();
   const { email } = params; // Get previous data
   const { login } = useAuth(); // Get login function from context
 
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-
-  
-
   const animatedWrapperStyle = {
-
-
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
@@ -107,24 +54,16 @@ const PasswordScreen = () => {
     setIsLoading(true);
 
     try {
-      const loginData = { email, password };
-      // --- Call the actual backend API function ---
-      const result = await registerUserApi(loginData);
-
+      // --- Call context login function ---
+      await login(email, password);
+      router.push("/(tabs)/home")
       // --- Handle Success ---
-      console.log("API Registration Result:", result);
-
-      if (result.token) {
-        await login(result.token);
-
-      } else {
-        throw new Error("Login successful, but no token received.");
-      }
+      console.log("Login successful");
     } catch (error) {
       // --- Handle Error ---
-      console.error("Registration Error: 144", error);
+      console.error("Login Error:", error);
       Alert.alert(
-        "Registration Failed",
+        "Login Failed",
         error.message || "An unexpected error occurred."
       );
     } finally {
@@ -162,8 +101,6 @@ const PasswordScreen = () => {
               textContentType="password"
               returnKeyType="done"
               onSubmitEditing={handleLogin}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => setIsFocused(false)}
             />
             <TouchableOpacity
               onPress={() => setIsPasswordVisible(!isPasswordVisible)}
@@ -188,7 +125,6 @@ const PasswordScreen = () => {
               fontWeight="600"
               size={16}
               color={"#fff"}
-              // style={styles.buttonText} // Typo handles styling
             >
               {isLoading ? "Signing Up..." : "Complete sign in"}
             </Typo>

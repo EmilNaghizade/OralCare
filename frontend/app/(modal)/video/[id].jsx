@@ -1,5 +1,5 @@
 // app/(modal)/video/[id].jsx
-import React, { useRef } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
   Share,
   Platform,
 } from "react-native";
-import { useLocalSearchParams, useRouter, Stack } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video"; // Use ex// po-video
 import BackButton from "../../../components/BackButton";
 import Typo from "../../../components/Typo";

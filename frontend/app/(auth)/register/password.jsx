@@ -17,66 +17,23 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons"; // For the eye icon
 import BackButton from "../../../components/BackButton"; // Adjust path
 import Button from "../../../components/Button"; // Adjust path
-import AsyncStorage from "@react-native-async-storage/async-storage"; // For storing token if backend logs in,
 import * as SecureStore from "expo-secure-store";
 import { useAuth } from "../../_layout"; // Import your Auth context
-// import PasswordIcon from '../../../assets/icons/password-icon.svg'; // Example if using SVG
 import Typo from "../../../components/Typo";
+import { authApi } from "../../../services/api";
 
 // Placeholder for PNG icon - UPDATE PATH
 const passwordIcon = require("../../../assets/images/Password.png");
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-// Define endpoint directly or read from .env (e.g., process.env.EXPO_PUBLIC_REGISTER_ENDPOINT)
-const REGISTER_ENDPOINT = process.env.EXPO_PUBLIC_REGISTER_ENDPOINT;
-const HOME_ROUTE = "/(tabs)/home"; // Adjust route
-
-// --- Check if Base URL is set ---
-if (!API_BASE_URL) {
-  console.error("ERROR: EXPO_PUBLIC_API_BASE_URL is not set in .env file");
-  // Alert.alert("Configuration Error", "API Base URL is not configured."); // Optional alert
-}
-
-// --- API Registration Function ---
-const registerUserApi = async (userData) => {
-  if (!API_BASE_URL) {
-    throw new Error("API Base URL is not configured.");
-  }
-  console.log("Registering user:", userData);
-  try {
-    const response = await fetch(`${API_BASE_URL}${REGISTER_ENDPOINT}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(userData), // Send all collected user data
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      // Throw error with backend message
-      throw new Error(data.message || `HTTP error! status: ${response.status}`);
-    }
-
-    console.log("Registration successful:", data);
-    // Return data from backend (might include user info, maybe a token)
-    return data;
-  } catch (error) {
-    console.error("API Registration Error:", error);
-    throw error; // Re-throw to be caught in handleSignUp
-  }
-};
-
 const PasswordScreen = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
+
   const { name, gender, email } = params; // Get all previous data
   const { login } = useAuth(); // Get login function from context
-
+  const [isFocused, setIsFocused] = useState(null)
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false); // State for visibility
-  const [isFocused, setIsFocused] = useState(false); // State for animation
   const [isLoading, setIsLoading] = useState(false); // State for loading indicator on button
 
   const focusAnim = useRef(new Animated.Value(0)).current;
@@ -89,9 +46,9 @@ const PasswordScreen = () => {
       easing: Easing.bezier(0.4, 0, 0.2, 1),
       useNativeDriver: false,
     }).start();
-  }, [isFocused, focusAnim]);
+  }, []);
 
-  // Animated styles for the input wrapper view (containing input and icon)
+  // Animated styles for the input wrapper view (containing input and eye icon)
   const animatedWrapperStyle = {
     width: "100%",
     flexDirection: "row", // Arrange input and eye icon horizontally
@@ -113,17 +70,15 @@ const PasswordScreen = () => {
 
     try {
       const userData = { name, gender, email, password };
-      console.log(userData);
-      // --- Call the actual backend API function ---
-      const result = await registerUserApi(userData);
-
+      const response = await authApi.register(userData);
       // --- Handle Success ---
-      console.log("API Registration Result:", result);
+      console.log("API Registration Result:", response);
 
       // Check if the backend automatically logs the user in and sends a token
-      if (result && result.token) {
+      if (response && response.token) {
         // --- Call context login function ---
-        await login(result.token, result.name, result.profileImage);
+        await login(email, password);
+        router.push("(tabs)/home")
         // *** REMOVE navigation from here - handled by _layout ***
         // router.replace(HOME_ROUTE);
         console.log("Register success: Context login called.");
@@ -173,8 +128,8 @@ const PasswordScreen = () => {
               autoComplete="password" // Help suggest strong passwords
               textContentType="password" // Semantic meaning (iOS)
               returnKeyType="done" // Keyboard return key says "Done"
+              focusable={isFocused}
               onSubmitEditing={handleSignUp} // Allow submitting via keyboard
-
             />
             {/* Eye Icon Button */}
             <TouchableOpacity

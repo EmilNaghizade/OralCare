@@ -1,18 +1,23 @@
-// Helper function to handle API responses
 const handleResponse = async (response) => {
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || "Something went wrong");
+    const error = await response.text();
+    console.error("API Error:", error);
+    throw new Error(error || `HTTP error! status: ${response.status}`);
   }
-  return response.json();
+  try {
+    return await response.json();
+  } catch (e) {
+    console.error("JSON Parse Error:", e);
+    throw new Error("Invalid JSON response");
+  }
 };
 
-const API_URL = process.env.EXPO_PUBLIC_API_BASE_URL || "http://localhost:3000";
+const API_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 // Auth API functions
 export const authApi = {
   login: async (email, password) => {
-    const response = await fetch(`${API_URL}/auth/login`, {
+    const response = await fetch(`${API_URL}/api/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -23,7 +28,9 @@ export const authApi = {
   },
 
   register: async (userData) => {
-    const response = await fetch(`${API_URL}/auth/register`, {
+    console.log("Register API URL:", `${API_URL}/api/auth/register`); // Kayıt URL'sini konsola yazdır
+    console.log("Register User Data:", userData); // Kullanıcı verilerini konsola yazdır
+    const response = await fetch(`${API_URL}/api/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -34,7 +41,7 @@ export const authApi = {
   },
 
   logout: async (token) => {
-    const response = await fetch(`${API_URL}/auth/logout`, {
+    const response = await fetch(`${API_URL}/api/auth/logout`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -45,7 +52,7 @@ export const authApi = {
   },
 
   getProfile: async (token) => {
-    const response = await fetch(`${API_URL}/auth/profile`, {
+    const response = await fetch(`${API_URL}/api/auth/profile`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -56,7 +63,7 @@ export const authApi = {
   },
 
   updateProfile: async (token, userData) => {
-    const response = await fetch(`${API_URL}/auth/profile`, {
+    const response = await fetch(`${API_URL}/api/auth/profile`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -68,13 +75,16 @@ export const authApi = {
   },
 
   checkEmail: async (email) => {
-    console.log(API_URL)
-    const response = await fetch(`${API_URL}/api/auth/check-email?email=${email}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    console.log("API URL:", API_URL); // API URL'sini konsola yazdır
+    const response = await fetch(
+      `${API_URL}/api/auth/check-email?email=${email}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     return handleResponse(response);
   },
 };

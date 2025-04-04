@@ -1,11 +1,10 @@
 // app/_layout.jsx
 import React, { useState, useEffect, createContext, useContext } from "react";
-import { Slot, useRouter} from "expo-router";
+import { Slot, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
-
-// --- Splash Screen'i başta görünür tut ---
-SplashScreen.preventAutoHideAsync();
+import { ActivityIndicator, View } from "react-native";
+import { authApi } from "../services/api";
 
 // --- Authentication Context ---
 const AuthContext = createContext(null);
@@ -30,57 +29,82 @@ function AuthProvider({ children }) {
       let token = null;
       try {
         token = await SecureStore.getItemAsync("authToken");
-
         if (token) {
           setAuthToken(token);
-          router.replace("/(tabs)/home");
-        } else {
-          router.replace("/onboarding");
         }
       } catch (e) {
         console.error("[AuthProvider] Başlangıç state yükleme hatası:", e);
-      } finally {
-        setIsLoading(false); // Yükleme tamamlandı
-        SplashScreen.hideAsync().catch(e => console.warn("SplashScreen error:", e)); // Splash screen'i gizle
       }
     };
     const loadInitialPoints = async () => {
       try {
-          const storedPoints = await SecureStore.getItem('userTotalPoints');
-          setUserPoints(parseInt(storedPoints || '0', 10));
+        const storedPoints = await SecureStore.getItemAsync("userTotalPoints");
+        setUserPoints(parseInt(storedPoints || "0", 10));
       } catch (e) {
-          console.error("Failed to load points from AsyncStorage", e);
+        console.error("Failed to load points from AsyncStorage", e);
       }
-  };
+    };
+    const getProfile = async () => {
+      try {
+        const storedToken = await SecureStore.getItemAsync("authToken");
+        if (storedToken) {
+          setAuthToken(storedToken);
+          const storedUser = await SecureStore.getItemAsync("user");
+          if (storedUser) {
+            setUser(JSON.parse(storedUser));
+          }
+          const response = await authApi.getProfile(storedToken);
+          setUser(response);
+          await SecureStore.setItemAsync("user", JSON.stringify(response));
+        }
+      } catch (error) {
+        console.error("[AuthProvider getProfile] HATA:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
     loadInitialState();
-    loadInitialPoints()
+    loadInitialPoints();
+    getProfile();
   }, []); // Sadece component mount edildiğinde çalışır
 
+  useEffect(() => {
+    if (!isLoading) {
+      if (authToken) {
+        router.replace("/(tabs)/home");
+      } else {
+        router.replace("/onboarding");
+      }
+    }
+  }, [isLoading]);
+
   // Login fonksiyonu: token ve user objesini alır (API response'dan)
-  const login = async (token, loggedInUser) => {
-    if (!token) { return; }
+  const login = async (email, password) => {
     try {
-      await SecureStore.setItemAsync('authToken', token);
+      const response = await authApi.login(email, password);
+      const { token, user } = response;
       setAuthToken(token);
-      setUserPoints(userData?.points || 0); // Eğer API user objesinde puan döndürüyorsa
-      setUser(loggedInUser);
-      router.replace("/(tabs)/home");
-    } catch (e) {
-      console.error("[AuthProvider login] HATA:", e);
+      setUser(user);
+      await SecureStore.setItemAsync("authToken", token);
+      await SecureStore.setItemAsync("user", JSON.stringify(user));
+      return user;
+    } catch (error) {
+      console.error("[AuthProvider login] HATA:", error);
+      throw error;
     }
   };
 
   // Logout fonksiyonu
   const logout = async () => {
     try {
-      await SecureStore.deleteItemAsync('authToken');
-    } catch (e) {
-      console.error("[AuthProvider logout] Depolama temizleme hatası:", e);
-    } finally {
-      // State'leri sıfırla
+      await authApi.logout(authToken);
       setAuthToken(null);
       setUser(null);
-      router.replace("/onboarding");
+      await SecureStore.deleteItemAsync("authToken");
+      await SecureStore.deleteItemAsync("user");
+      router.push("/onboarding")
+    } catch (error) {
+      console.error("[AuthProvider logout] HATA:", error);
     }
   };
 
@@ -89,9 +113,11 @@ function AuthProvider({ children }) {
     setUserPoints(newTotalPoints);
     // Puanları kalıcı hale getir (örn: AsyncStorage)
     try {
-        await SecureStore.setItem('userTotalPoints', newTotalPoints.toString());
-    } catch (e) {
-    }
+      await SecureStore.setItemAsync(
+        "userTotalPoints",
+        newTotalPoints.toString()
+      );
+    } catch (e) {}
     // !!! Backend olsaydı burada API'ye de gönderilebilirdi !!!
   };
 
@@ -104,12 +130,23 @@ function AuthProvider({ children }) {
     logout,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {isLoading ? (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      ) : (
+        children
+      )}
+    </AuthContext.Provider>
+  );
 }
 // --- End Auth Context ---
 
 // --- Kök Layout Component ---
 export default function RootLayout() {
+  SplashScreen.preventAutoHideAsync();
   return (
     <AuthProvider>
       {/* Yüklenirken hiçbir şey gösterme (Splash screen görünür) */}

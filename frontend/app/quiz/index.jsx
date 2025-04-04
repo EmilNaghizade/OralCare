@@ -1,12 +1,11 @@
 import React from "react";
 import {
   View,
-  Text,
+
   StyleSheet,
   SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  StatusBar,
   Platform, // Platform kontrolü için
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";

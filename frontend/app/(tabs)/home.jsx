@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -18,22 +18,16 @@ import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
 import { LinearGradient } from "expo-linear-gradient";
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 const getProfile = (token) => fetchWithAuth("/api/auth/profile", token);
 
-// --- Placeholder Card Components --- (Keep definitions from previous step)
-
-// --- Main Home Screen Component ---
 export default function HomeScreen() {
   const { authToken } = useAuth();
   const router = useRouter();
-
   const [firstName, setFirstName] = useState("");
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true); // Loading state only for profile
-  const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles"); // 'Articles' or 'News'
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles"); 
 
-  // Fetch profile data on mount or when token changes
   useEffect(() => {
     const loadProfile = async () => {
       if (!authToken) {
@@ -41,47 +35,32 @@ export default function HomeScreen() {
         setIsLoadingProfile(false);
         return;
       }
-      console.log("Home: Auth token found, attempting to fetch profile..."); // Ekstra log
       setIsLoadingProfile(true);
       try {
         const profileData = await getProfile(authToken);
-        // Gelen veriyi loglayarak yapıyı kontrol edebilirsiniz:
-        // console.log("Home: Received profile data:", JSON.stringify(profileData, null, 2));
-
-        // ---- DÜZELTME BURADA ----
-        // profileData.name yerine profileData.user.name kontrolü yapın
-        if (profileData?.user?.name) {
-          // İsmi boşluktan ayırıp ilk kısmı alın
+        if (profileData?.user) {
           setFirstName(profileData.user.name.split(" ")[0]);
-          console.log(
-            "Home: First name set to:",
-            profileData.user.name.split(" ")[0]
-          ); // Ekstra log
         } else {
-          // İsim alanı gelmediyse veya yapı farklıysa loglayın
           console.warn(
             "Home: Profile data received, but user.name is missing or structure unexpected:",
             profileData
           );
-          setFirstName(""); // İsim yoksa boş kalsın
+          setFirstName(""); 
         }
-        // ---- DÜZELTME SONU ----
       } catch (error) {
-        console.error("Home: Failed to fetch profile:", error); // Hatayı detaylı loglayın
-        setFirstName(""); // Hata durumunda ismi boşalt
+        console.error("Home: Failed to fetch profile:", error); 
+        setFirstName(""); 
       } finally {
         setIsLoadingProfile(false);
       }
     };
 
     loadProfile();
-  }, [authToken]); // Depend only on authToken
+  }, [authToken]); 
 
-  // Determine which knowledge items to display based on the active tab
   const knowledgeItemsToShow =
     activeKnowledgeTab === "Articles" ? dummyArticles : dummyNews;
 
-  // Section Header Component (Keep as before)
   const SectionHeader = ({ title, onSeeAllPress, isOnSeeAll }) => (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -94,14 +73,11 @@ export default function HomeScreen() {
   );
 
   const QuizCard = ({ item }) => {
-    // Define gradient colors based on item or index (customize these colors)
-    const isPurple = item._id === "q1"; // Example condition from previous code
+    const isPurple = item._id === "q1"; 
     const gradientColors = isPurple
-      ? ["#8A2BE2", "#fff"] // Purple to lighter purple/lilac
-      : ["#2E8B57", "#fff"]; // SeaGreen to LightGreen
-    // Adjust end colors for a more "whitish" look if needed: e.g., '#E9D8FD' or '#D4EFDF'
+      ? ["#8A2BE2", "#fff"] 
+      : ["#2E8B57", "#fff"]; 
 
-    // Choose a faint center icon
     const centerIconName = isPurple
       ? "git-network-outline"
       : "share-social-outline";
@@ -112,24 +88,21 @@ export default function HomeScreen() {
         onPress={() =>
           router.push({ pathname: "/quiz", params: { id: item._id } })
         } // YENİ
-        activeOpacity={0.8} // Dokunma efekti
+        activeOpacity={0.8} 
       >
-        {/* Use LinearGradient for the background */}
         <LinearGradient
           colors={gradientColors}
-          style={styles.quizGradient} // Apply styles to the gradient itself
-          start={{ x: 0.5, y: 0 }} // Gradient starts at top center
-          end={{ x: 0.5, y: 1 }} // Gradient ends at bottom center
+          style={styles.quizGradient} 
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }} 
         >
-          {/* Faint Center Icon (inside Gradient) */}
           <Ionicons
             name={centerIconName}
             size={80}
-            color="#fff" // White icon
-            style={styles.quizCenterIcon} // Use existing style
+            color="#fff" 
+            style={styles.quizCenterIcon} 
           />
 
-          {/* Content Container (inside Gradient, on top of center icon) */}
           <View style={styles.quizContentContainer}>
             {/* Top Tag */}
             <View style={styles.quizTagContainer}>
@@ -143,7 +116,6 @@ export default function HomeScreen() {
               </Typo>
             </View>
 
-            {/* Bottom Title */}
             <Typo
               fontWeight={"600"}
               size={15}
@@ -162,9 +134,7 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
-        // RefreshControl removed as data is static for now
       >
-        {/* Welcome Header */}
         <View style={styles.welcomeHeader}>
           <Typo size={24} fontWeight="600">
             👋 Welcome,{" "}
@@ -173,7 +143,6 @@ export default function HomeScreen() {
             </Typo>
           </Typo>
           <TouchableOpacity onPress={() => router.push("/notifications")}>
-            {/* Bildirim sayısı varsa buraya bir badge eklenebilir */}
             <Ionicons name="notifications-outline" size={28} color="#333" />
           </TouchableOpacity>
         </View>
@@ -198,7 +167,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* Test your knowledge Section */}
         <View style={styles.sectionCard}>
           <SectionHeader title="Test your knowledge" isOnSeeAll={false} />
           <Text style={styles.sectionSubtitle}>
@@ -214,7 +182,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* Knowledge Hub Section */}
         <View style={styles.sectionCard}>
           <SectionHeader
             title="Knowledge Hub"
@@ -225,7 +192,6 @@ export default function HomeScreen() {
             Articles and news on our industry.
           </Text>
 
-          {/* Tabs for Articles/News */}
           <View style={styles.knowledgeTabs}>
             <TouchableOpacity
               style={[
