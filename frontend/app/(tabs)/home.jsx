@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -18,22 +18,18 @@ import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
 import { LinearGradient } from "expo-linear-gradient";
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 const getProfile = (token) => fetchWithAuth("/api/auth/profile", token);
 
-// --- Placeholder Card Components --- (Keep definitions from previous step)
 
-// --- Main Home Screen Component ---
 export default function HomeScreen() {
   const { authToken } = useAuth();
   const router = useRouter();
 
   const [firstName, setFirstName] = useState("");
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true); // Loading state only for profile
-  const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles"); // 'Articles' or 'News'
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles"); 
 
-  // Fetch profile data on mount or when token changes
   useEffect(() => {
     const loadProfile = async () => {
       if (!authToken) {
@@ -41,17 +37,12 @@ export default function HomeScreen() {
         setIsLoadingProfile(false);
         return;
       }
-      console.log("Home: Auth token found, attempting to fetch profile..."); // Ekstra log
+      console.log("Home: Auth token found, attempting to fetch profile...");g
       setIsLoadingProfile(true);
       try {
         const profileData = await getProfile(authToken);
-        // Gelen veriyi loglayarak yapıyı kontrol edebilirsiniz:
-        // console.log("Home: Received profile data:", JSON.stringify(profileData, null, 2));
-
-        // ---- DÜZELTME BURADA ----
-        // profileData.name yerine profileData.user.name kontrolü yapın
+      
         if (profileData?.user?.name) {
-          // İsmi boşluktan ayırıp ilk kısmı alın
           setFirstName(profileData.user.name.split(" ")[0]);
           console.log(
             "Home: First name set to:",
@@ -63,12 +54,11 @@ export default function HomeScreen() {
             "Home: Profile data received, but user.name is missing or structure unexpected:",
             profileData
           );
-          setFirstName(""); // İsim yoksa boş kalsın
+          setFirstName(""); 
         }
-        // ---- DÜZELTME SONU ----
       } catch (error) {
-        console.error("Home: Failed to fetch profile:", error); // Hatayı detaylı loglayın
-        setFirstName(""); // Hata durumunda ismi boşalt
+        console.error("Home: Failed to fetch profile:", error); 
+        setFirstName(""); 
       } finally {
         setIsLoadingProfile(false);
       }
