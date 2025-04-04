@@ -1,71 +1,42 @@
 // app/(tabs)/contact.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
-  FlatList, // Kişi listesi için FlatList kullanacağız
+  FlatList,
   Image,
   TouchableOpacity,
   Platform,
   StatusBar,
+  Modal,
+  Pressable,
+  Dimensions,
 } from "react-native";
-import { Stack } from "expo-router"; // Header'ı layout üzerinden yönetmek için (opsiyonel)
 import { Ionicons } from "@expo/vector-icons";
-import Typo from "../../components/Typo"; // Kendi Typo bileşeniniz (varsa)
+import Typo from "../../components/Typo";
+import { dummyContacts } from "../data";
+import { useRouter } from "expo-router";
 
-// --- Varsayılan Profil Fotoğrafı ---
-// Projenizdeki assets klasörüne uygun bir varsayılan fotoğraf ekleyin
-const defaultProfilePic = require("../../assets/images/pp.png"); // Örnek yol, kendinize göre değiştirin
+// Ekran boyutlarını al
+const { height: SCREEN_HEIGHT } = Dimensions.get("screen");
 
-// --- Örnek Kişi Verileri ---
-const dummyContacts = [
-  {
-    id: "1",
-    name: "Vuqar Mammadov",
-    title: "Manager, Azerbaijan",
-    image: defaultProfilePic,
-  },
-  {
-    id: "2",
-    name: "Alice Johnson",
-    title: "Manager, United States",
-    image: defaultProfilePic,
-  },
-  {
-    id: "3",
-    name: "Satoshi Nakamoto",
-    title: "Manager, Japan",
-    image: defaultProfilePic,
-  },
-  {
-    id: "4",
-    name: "Maria Garcia",
-    title: "Manager, Spain",
-    image: defaultProfilePic,
-  },
-  {
-    id: "5",
-    name: "Liam Patel",
-    title: "Manager, Canada",
-    image: defaultProfilePic,
-  },
-  {
-    id: "6",
-    name: "Anastasia Ivanova",
-    title: "Manager, Russia",
-    image: defaultProfilePic,
-  },
-  // İhtiyaç halinde daha fazla kişi eklenebilir
+const countries = [
+  { code: "AZ", name: "Azerbaijan", flag: "🇦🇿" },
+  { code: "RU", name: "Russia", flag: "🇷🇺" },
+  { code: "GB", name: "England", flag: "🇬🇧" },
 ];
 
-// --- Kişi Listesi Öğesi Bileşeni ---
+const filterContactsByCountry = (contacts, countryCode) => {
+  return contacts.filter((contact) => contact.countryCode === countryCode);
+};
+
 const ContactListItem = ({ item }) => {
-  // Her bir satır için tıklama olayı (opsiyonel)
+  const router = useRouter();
   const handlePress = () => {
     console.log("Kişiye tıklandı:", item.name);
-    // Detay sayfasına yönlendirme vb. eklenebilir
+    router.push(`/contact/${item.id}`);
   };
 
   return (
@@ -74,36 +45,49 @@ const ContactListItem = ({ item }) => {
       onPress={handlePress}
       activeOpacity={0.7}
     >
-      {/* Profil Fotoğrafı */}
       <Image source={item.image} style={styles.profilePic} />
-      {/* İsim ve Ünvan */}
       <View style={styles.contactInfo}>
         <Typo style={styles.contactName} fontWeight="600">
           {item.name}
         </Typo>
         <Typo style={styles.contactTitle}>{item.title}</Typo>
       </View>
-      {/* Sağdaki Ok İkonu */}
       <Ionicons name="chevron-forward-outline" size={22} color="#cccccc" />
     </TouchableOpacity>
   );
 };
 
-// --- Ana İletişim Ekranı Bileşeni ---
 export default function ContactScreen() {
-  // Ülke seçici için placeholder fonksiyon
-  const handleSelectCountry = () => {
-    console.log("Ülke Seçici Tıklandı");
-    // Dropdown açma/kapama mantığı buraya eklenebilir
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [filteredContacts, setFilteredContacts] = useState(dummyContacts); // Filtrelenmiş kişiler
+
+  const openModal = () => setIsModalVisible(true);
+  const closeModal = () => setIsModalVisible(false);
+
+  const handleCountrySelect = (country) => {
+    setSelectedCountry(country);
+    console.log("Seçilen Ülke:", country.name);
+    closeModal();
   };
+  const clearSelectedCountry = () => {
+    setSelectedCountry(null);
+  };
+  useEffect(() => {
+    if (selectedCountry) {
+      const newFilteredContacts = filterContactsByCountry(
+        dummyContacts,
+        selectedCountry.code
+      );
+      setFilteredContacts(newFilteredContacts);
+    } else {
+      setFilteredContacts(dummyContacts); // Ülke seçilmediyse tüm kişileri göster
+    }
+  }, [selectedCountry]);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      {/* Eğer header'ı layout'tan yönetiyorsanız bu satırı kullanın: */}
-      {/* <Stack.Screen options={{ title: 'Contact Us' }} /> */}
-
-      {/* Başlık Alanı */}
       <View style={styles.headerContainer}>
         <Ionicons
           name="call-outline"
@@ -121,112 +105,238 @@ export default function ContactScreen() {
         </View>
       </View>
 
-      {/* Ülke Seçici */}
+      {/* Ülke Seçici ve Çarpı */}
+
       <TouchableOpacity
         style={styles.selectorButton}
-        onPress={handleSelectCountry}
+        onPress={openModal}
       >
-        <Typo style={styles.selectorText}>Select Country</Typo>
-        <Ionicons name="chevron-down-outline" size={20} color="#666" />
+        <Typo style={styles.selectorText}>
+          {selectedCountry ? selectedCountry.name : "Select Country"}
+        </Typo>
+        <View style={styles.selectorIcons}>
+          {selectedCountry && (
+            <TouchableOpacity
+              style={styles.clearButton}
+              onPress={clearSelectedCountry}
+            >
+              <Ionicons name="close-circle" size={24} color="#666" />
+            </TouchableOpacity>
+          )}
+          <Ionicons name="chevron-down-outline" size={20} color="#666" />
+        </View>
       </TouchableOpacity>
 
       {/* Kişi Listesi */}
-      <FlatList
-        data={dummyContacts}
-        renderItem={({ item }) => <ContactListItem item={item} />}
-        keyExtractor={(item) => item.id}
-        style={styles.list} // Listeye flex: 1 vermek için
-        contentContainerStyle={styles.listContainer} // Liste içeriği için padding
-        ItemSeparatorComponent={() => <View style={styles.separator} />} // Ayırıcı çizgi
-      />
+      {filteredContacts.length > 0 ? (
+        <FlatList
+          data={filteredContacts}
+          renderItem={({ item }) => <ContactListItem item={item} />}
+          keyExtractor={(item) => item.id}
+          style={styles.list}
+          contentContainerStyle={styles.listContainer}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+        />
+      ) : (
+        <View style={styles.noContactsContainer}>
+          <Typo style={styles.noContactsText}>
+            No managers found in this region.
+          </Typo>
+        </View>
+      )}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={closeModal}
+      >
+        <Pressable style={styles.modalOverlay} onPress={closeModal}>
+          <Pressable
+            onPress={(e) => e.stopPropagation()}
+            style={styles.modalContentContainer}
+          >
+            <View style={styles.modalContent}>
+              <FlatList
+                style={styles.modalList}
+                data={countries}
+                keyExtractor={(item) => item.code}
+                renderItem={({ item }) => (
+                  <TouchableOpacity
+                    style={styles.countryItem}
+                    onPress={() => handleCountrySelect(item)}
+                  >
+                    <Text style={styles.flagIcon}>{item.flag}</Text>
+                    <Typo style={styles.countryName}>{item.name}</Typo>
+                  </TouchableOpacity>
+                )}
+                ItemSeparatorComponent={() => (
+                  <View style={styles.modalSeparator} />
+                )}
+              />
+            </View>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
 
-// --- Stiller ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#ffffff", // Beyaz arka plan
+    backgroundColor: "#ffffff",
   },
   headerContainer: {
     flexDirection: "row",
-    alignItems: "flex-start", // İkon ve metin bloğunu yukarı hizala
+    alignItems: "flex-start",
     paddingHorizontal: 20,
-    paddingTop: 25, // Üst boşluk
-    paddingBottom: 20, // Alt boşluk
+    paddingTop: 25,
+    paddingBottom: 20,
     backgroundColor: "#ffffff",
   },
   headerIcon: {
     marginRight: 15,
-    marginTop: 5, // İkonu metinle hizalamak için hafif boşluk
+    marginTop: 5,
   },
   headerTextContainer: {
-    flex: 1, // Metin alanının kalan genişliği almasını sağla
+    flex: 1,
   },
   title: {
     color: "#1c1c1c",
-    marginBottom: 6, // Başlık altı boşluk
+    marginBottom: 6,
   },
   subtitle: {
-    color: "#6c757d", // Gri alt başlık
+    color: "#6c757d",
     fontSize: 14,
-    lineHeight: 20, // Satır yüksekliği
+    lineHeight: 20,
   },
   selectorButton: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#f8f9fa", // Çok açık gri buton arka planı
-    marginHorizontal: 20, // Yanlardan boşluk
-    paddingVertical: 16, // Dikey iç boşluk
-    paddingHorizontal: 15, // Yatay iç boşluk
-    borderRadius: 14, // Yuvarlak köşeler
-    marginBottom: 20, // Listenin üstündeki boşluk
-    // Hafif border
+    backgroundColor: "#f8f9fa",
+    marginHorizontal: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 15,
+    borderRadius: 14,
+    marginBottom: 20,
     borderWidth: 1,
     borderColor: "#eee",
   },
   selectorText: {
     fontSize: 16,
-    color: "#495057", // Seçici metin rengi
+    color: "#495057",
     fontWeight: "500",
   },
+  selectorIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  clearButton: {
+    marginRight: 5,
+    padding: 5,
+  },
   list: {
-    flex: 1, // Listenin kalan alanı kaplaması için
+    flex: 1,
   },
   listContainer: {
-    paddingBottom: 20, // Listenin en altında boşluk
+    paddingBottom: 20,
   },
   contactItem: {
-    flexDirection: "row", // Fotoğraf, metin ve oku yan yana diz
-    alignItems: "center", // Öğeleri dikeyde ortala
-    paddingHorizontal: 20, // Satırın yan boşlukları
-    paddingVertical: 15, // Satırın dikey boşlukları
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
     backgroundColor: "#ffffff",
   },
   profilePic: {
-    width: 50, // Profil fotoğrafı boyutu
+    width: 50,
     height: 50,
-    borderRadius: 25, // Tam daire
-    backgroundColor: "#e0e0e0", // Resim yüklenemezse görünen arka plan
-    marginRight: 15, // Fotoğraf ile metin arası boşluk
+    borderRadius: 25,
+    backgroundColor: "#e0e0e0",
+    marginRight: 15,
   },
   contactInfo: {
-    flex: 1, // Metin alanının kalan genişliği almasını sağla
+    flex: 1,
   },
   contactName: {
     fontSize: 16,
-    color: "#212529", // Koyu isim rengi
-    marginBottom: 4, // İsim ile ünvan arası boşluk
+    color: "#212529",
+    marginBottom: 4,
   },
   contactTitle: {
     fontSize: 14,
-    color: "#6c757d", // Gri ünvan rengi
+    color: "#6c757d",
   },
   separator: {
     height: 1,
-    backgroundColor: "#f0f2f5", // Çok açık gri ayırıcı çizgi
-    marginLeft: 85, // Profil fotoğrafı + boşluk kadar içeriden başla
+    backgroundColor: "#f0f2f5",
+    marginLeft: 85,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+  },
+  modalContentContainer: {
+    backgroundColor: "#ffffff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 10,
+    height: 250,
+    maxHeight: "70%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 10,
+  },
+  modalContent: {
+    backgroundColor: "#ffffff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  modalTitle: {
+    color: "#333",
+  },
+  countryItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+  },
+  flagIcon: {
+    fontSize: 26,
+    marginRight: 15,
+  },
+  countryName: {
+    fontSize: 16,
+    color: "#333",
+  },
+  modalSeparator: {
+    height: 1,
+    backgroundColor: "#f0f2f5",
+    marginLeft: 20,
+  },
+  noContactsContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  noContactsText: {
+    fontSize: 16,
+    color: "#6c757d",
+    textAlign: "center",
   },
 });
