@@ -51,7 +51,6 @@
       "reactNativeDirectoryCheck": {
         "exclude": [
           "react-native-confetti-cannon",
-          "react-native-snap-carousel",
           "patch-package",
           "postinstall-postinstall",
           "phosphor-react-native"

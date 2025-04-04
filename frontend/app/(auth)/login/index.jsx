@@ -1,39 +1,29 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
   SafeAreaView,
   Alert,
   Platform,
-  KeyboardAvoidingView,
-  Animated,
-  Easing,
-  Image, // Or import your SVG icon component
+  Image, 
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import BackButton from "../../../components/BackButton"; // Adjust path
-import Button from "../../../components/Button"; // Adjust path
+import BackButton from "../../../components/BackButton";
+import Button from "../../../components/Button"; 
 import Typo from "../../../components/Typo";
 import { authApi } from "../../../services/api";
-import { useAuth } from "../../_layout";
-// import EmailIcon from '../../../assets/icons/email-icon.svg'; // Example if using SVG
 
-// Placeholder for PNG icon - UPDATE PATH
+
 const emailIcon = require("../../../assets/images/Email.png");
 
-const NEXT_SCREEN_ROUTE = "/(auth)/login/password"; // <-- UPDATE if needed
+const NEXT_SCREEN_ROUTE = "/(auth)/login/password"; 
 
-// Simple email validation regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Login = () => {
   const router = useRouter();
-  const params = useLocalSearchParams(); // Get params passed from previous screen
-  const { name, gender } = params; // Extract previous data
-  const [isLoading, setIsLoading] = useState(false); // <-- Add loading state
-
+  const params = useLocalSearchParams(); 
   const [email, setEmail] = useState("");
 
   const validateEmail = (emailToValidate) => {
@@ -52,9 +42,7 @@ const Login = () => {
       return;
     }
 
-    //check is email have in the database
     try {
-      // API'ye e-posta kontrol isteği gönder
       const response = await authApi.checkEmail(trimmedEmail);
       console.log(response.exists, "RESPONSE HEYYY");
       if (response.exists) {
@@ -78,8 +66,7 @@ const Login = () => {
           "Error",
           "An error occurred during login. Please try again."
         );
-        // VEYA spesifik backend mesajını göster:
-        // Alert.alert("Error", error.response.data?.error || "An unexpected error occurred.");
+       
       }
     }
   };
@@ -89,15 +76,12 @@ const Login = () => {
       <BackButton />
       <View style={styles.container}>
         <View style={styles.content}>
-          {/* Replace with SVG if using SVG */}
           <Image source={emailIcon} style={styles.icon} />
-          {/* <EmailIcon width={60} height={60} fill="#4CAF50" style={styles.iconSvg} /> */}
 
           <Typo fontWeight="600" size={36} style={styles.title}>
             Enter your email
           </Typo>
 
-          {/* Animated Wrapper + TextInput */}
           <View
             style={{
               width: "100%",
