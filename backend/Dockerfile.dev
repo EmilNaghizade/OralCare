@@ -1,0 +1,26 @@
+# 1. Temel Node.js imajını seçin (LTS sürümü veya projenize uygun olan)
+# Alpine sürümü genellikle daha küçüktür
+FROM node:20-slim AS development
+
+# 2. Uygulama kodları için çalışma dizini oluşturun
+WORKDIR /app
+
+# 3. package.json ve package-lock.json'ı kopyalayın
+# Bu adımı ayrı yapmak, bağımlılıklar değişmediğinde katman önbelleğini kullanır
+COPY package*.json ./
+
+
+# 4. Sadece production bağımlılıklarını yükleyin
+# npm ci, package-lock.json'a göre temiz kurulum yapar, daha güvenilirdir
+RUN npm ci --include=dev
+
+# 5. Uygulama kodlarının geri kalanını kopyalayın
+COPY . .
+
+# 6. Uygulamanızın dinleyeceği portu belirtin (Fly.io bunu ENV ile ayarlayacak)
+CMD [ "node","src/index.js"  ]
+# Genellikle 8080 portu kullanılır container içinde. Kodunuz process.env.PORT'u dinlemeli.
+EXPOSE 8080  
+
+# 7. Uygulamayı başlatma komutu
+# veya CMD [ "node", "server.js" ] (ana dosyanız neyse)
