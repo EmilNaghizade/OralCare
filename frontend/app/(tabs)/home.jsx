@@ -21,11 +21,9 @@ import { LinearGradient } from "expo-linear-gradient";
 
 const getProfile = (token) => fetchWithAuth("/api/auth/profile", token);
 
-
 export default function HomeScreen() {
   const { authToken } = useAuth();
   const router = useRouter();
-
   const [firstName, setFirstName] = useState("");
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles"); 
@@ -37,19 +35,12 @@ export default function HomeScreen() {
         setIsLoadingProfile(false);
         return;
       }
-      console.log("Home: Auth token found, attempting to fetch profile...");g
       setIsLoadingProfile(true);
       try {
         const profileData = await getProfile(authToken);
-      
-        if (profileData?.user?.name) {
+        if (profileData?.user) {
           setFirstName(profileData.user.name.split(" ")[0]);
-          console.log(
-            "Home: First name set to:",
-            profileData.user.name.split(" ")[0]
-          ); // Ekstra log
         } else {
-          // İsim alanı gelmediyse veya yapı farklıysa loglayın
           console.warn(
             "Home: Profile data received, but user.name is missing or structure unexpected:",
             profileData
@@ -65,13 +56,11 @@ export default function HomeScreen() {
     };
 
     loadProfile();
-  }, [authToken]); // Depend only on authToken
+  }, [authToken]); 
 
-  // Determine which knowledge items to display based on the active tab
   const knowledgeItemsToShow =
     activeKnowledgeTab === "Articles" ? dummyArticles : dummyNews;
 
-  // Section Header Component (Keep as before)
   const SectionHeader = ({ title, onSeeAllPress, isOnSeeAll }) => (
     <View style={styles.sectionHeader}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -84,14 +73,11 @@ export default function HomeScreen() {
   );
 
   const QuizCard = ({ item }) => {
-    // Define gradient colors based on item or index (customize these colors)
-    const isPurple = item._id === "q1"; // Example condition from previous code
+    const isPurple = item._id === "q1"; 
     const gradientColors = isPurple
-      ? ["#8A2BE2", "#fff"] // Purple to lighter purple/lilac
-      : ["#2E8B57", "#fff"]; // SeaGreen to LightGreen
-    // Adjust end colors for a more "whitish" look if needed: e.g., '#E9D8FD' or '#D4EFDF'
+      ? ["#8A2BE2", "#fff"] 
+      : ["#2E8B57", "#fff"]; 
 
-    // Choose a faint center icon
     const centerIconName = isPurple
       ? "git-network-outline"
       : "share-social-outline";
@@ -102,24 +88,21 @@ export default function HomeScreen() {
         onPress={() =>
           router.push({ pathname: "/quiz", params: { id: item._id } })
         } // YENİ
-        activeOpacity={0.8} // Dokunma efekti
+        activeOpacity={0.8} 
       >
-        {/* Use LinearGradient for the background */}
         <LinearGradient
           colors={gradientColors}
-          style={styles.quizGradient} // Apply styles to the gradient itself
-          start={{ x: 0.5, y: 0 }} // Gradient starts at top center
-          end={{ x: 0.5, y: 1 }} // Gradient ends at bottom center
+          style={styles.quizGradient} 
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }} 
         >
-          {/* Faint Center Icon (inside Gradient) */}
           <Ionicons
             name={centerIconName}
             size={80}
-            color="#fff" // White icon
-            style={styles.quizCenterIcon} // Use existing style
+            color="#fff" 
+            style={styles.quizCenterIcon} 
           />
 
-          {/* Content Container (inside Gradient, on top of center icon) */}
           <View style={styles.quizContentContainer}>
             {/* Top Tag */}
             <View style={styles.quizTagContainer}>
@@ -133,7 +116,6 @@ export default function HomeScreen() {
               </Typo>
             </View>
 
-            {/* Bottom Title */}
             <Typo
               fontWeight={"600"}
               size={15}
@@ -152,9 +134,7 @@ export default function HomeScreen() {
       <ScrollView
         contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
-        // RefreshControl removed as data is static for now
       >
-        {/* Welcome Header */}
         <View style={styles.welcomeHeader}>
           <Typo size={24} fontWeight="600">
             👋 Welcome,{" "}
@@ -163,7 +143,6 @@ export default function HomeScreen() {
             </Typo>
           </Typo>
           <TouchableOpacity onPress={() => router.push("/notifications")}>
-            {/* Bildirim sayısı varsa buraya bir badge eklenebilir */}
             <Ionicons name="notifications-outline" size={28} color="#333" />
           </TouchableOpacity>
         </View>
@@ -188,7 +167,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* Test your knowledge Section */}
         <View style={styles.sectionCard}>
           <SectionHeader title="Test your knowledge" isOnSeeAll={false} />
           <Text style={styles.sectionSubtitle}>
@@ -204,7 +182,6 @@ export default function HomeScreen() {
           />
         </View>
 
-        {/* Knowledge Hub Section */}
         <View style={styles.sectionCard}>
           <SectionHeader
             title="Knowledge Hub"
@@ -215,7 +192,6 @@ export default function HomeScreen() {
             Articles and news on our industry.
           </Text>
 
-          {/* Tabs for Articles/News */}
           <View style={styles.knowledgeTabs}>
             <TouchableOpacity
               style={[

@@ -8,19 +8,13 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  Platform,
 } from "react-native";
-import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../_layout"; // Adjust path if needed
+import { useAuth } from "../_layout";
 import { fetchWithAuth } from "../../services/fetchWithAuth";
-import { authApi } from "../../services/api";
 
 const getProfile = (token) => fetchWithAuth("/api/auth/profile", token);
 
-
-
-// Reusable List Item Component
 const ProfileListItem = ({ iconName, label, onPress, isLogout = false }) => (
   <TouchableOpacity style={styles.listItem} onPress={onPress}>
     <Ionicons
@@ -36,59 +30,50 @@ const ProfileListItem = ({ iconName, label, onPress, isLogout = false }) => (
 );
 
 export default function ProfileScreen() {
-  const { authToken, userPoints } = useAuth();
-  const { logout } = useAuth(); // Get logout function and maybe user data
+  const { authToken } = useAuth();
+  const { logout } = useAuth();
   const [user, setUser] = useState(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true); // Loading state only for profile]
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
-// Fetch profile data on mount or when token changes
-// Fetch profile data on mount or when token changes
-useEffect(() => {
-  const loadProfile = async () => {
-    if (!authToken) {
-      console.log("Home: No auth token, cannot fetch profile.");
-      setIsLoadingProfile(false);
-      return;
-    }
-    console.log("Home: Auth token found, attempting to fetch profile..."); // Ekstra log
-    setIsLoadingProfile(true);
-    try {
-      const profileData = await getProfile(authToken);
-      // Gelen veriyi loglayarak yapıyı kontrol edebilirsiniz:
-      // console.log("Home: Received profile data:", JSON.stringify(profileData, null, 2));
-
-      // ---- DÜZELTME BURADA ----
-      // profileData.name yerine profileData.user.name kontrolü yapın
-      if (profileData?.user) {
-        // İsmi boşluktan ayırıp ilk kısmı alın
-        setUser(profileData.user);
-        console.log("Home: First name set to:", profileData.user.name.split(" ")[0]); // Ekstra log
-      } else {
-        // İsim alanı gelmediyse veya yapı farklıysa loglayın
-        console.warn("Home: Profile data received, but user.name is missing or structure unexpected:", profileData);
-        setFirstName(""); // İsim yoksa boş kalsın
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!authToken) {
+        console.log("Home: No auth token, cannot fetch profile.");
+        setIsLoadingProfile(false);
+        return;
       }
-      // ---- DÜZELTME SONU ----
+      setIsLoadingProfile(true);
+      try {
+        const profileData = await getProfile(authToken);
+        if (profileData?.user) {
+          setUser(profileData.user);
+        } else {
+          // İsim alanı gelmediyse veya yapı farklıysa loglayın
+          console.warn(
+            "Home: Profile data received, but user.name is missing or structure unexpected:",
+            profileData
+          );
+          setFirstName(""); // İsim yoksa boş kalsın
+        }
+        // ---- DÜZELTME SONU ----
+      } catch (error) {
+        console.error("Home: Failed to fetch profile:", error); // Hatayı detaylı loglayın
+        setUser(null); // Hata durumunda ismi boşalt
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
 
-    } catch (error) {
-      console.error("Home: Failed to fetch profile:", error); // Hatayı detaylı loglayın
-      setUser(null); // Hata durumunda ismi boşalt
-    } finally {
-      setIsLoadingProfile(false);
-    }
-  };
-
-  loadProfile();
-}, [authToken]); // Depend only on authToken
-
+    loadProfile();
+  }, [authToken]); // Depend only on authToken
 
   // --- Placeholder Data (Replace with actual data later) ---
   const profileData = {
     // Attempt to get name from context, fallback to placeholder
-    name: user?.name ,
+    name: user?.name,
     // Use user profile image from context/API if available, otherwise placeholder
     profilePicUrl: require("../../assets/images/pp.png"),
-    videoCount:  12, // Fetch from profile API later
+    videoCount: 12, // Fetch from profile API later
     quizCount: 8, // Fetch from profile API later (assuming quizzes = articles for now)
   };
   // --- End Placeholder Data ---
@@ -283,7 +268,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 4,
-    
   },
   rewardTextContainer: {
     flex: 1, // Allow text container to take available width
