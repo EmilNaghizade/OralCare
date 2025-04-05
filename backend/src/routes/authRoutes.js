@@ -5,9 +5,7 @@ import protectRoute from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
-// Helper function to generate JWT token
 const generateToken = (userId) => {
-  // Ensure JWT_SECRET is loaded
   if (!process.env.JWT_SECRET) {
     console.error("FATAL ERROR: JWT_SECRET is not defined.");
     process.exit(1); // Exit if secret is missing
@@ -117,8 +115,6 @@ router.post("/login", async (req, res) => {
 
 // Logout user (Stateless - Client Responsibility)
 router.post("/logout", protectRoute, async (req, res) => {
-  // In a stateless JWT setup, logout is typically handled client-side by removing the token.
-  // This endpoint could be used for server-side cleanup if necessary (e.g., invalidating refresh tokens).
   try {
     console.log(`User ${req.user._id} logging out.`); // Optional logging
     res.json({ message: "Logged out successfully" });
@@ -131,10 +127,8 @@ router.post("/logout", protectRoute, async (req, res) => {
 // Get user profile
 router.get("/profile", protectRoute, async (req, res) => {
   try {
-    // Fetch user profile, excluding password
-    // Populate related data if needed (example shown)
     const userProfile = await User.findById(req.user._id)
-      .select("-password") // Exclude password field
+      .select("-password") 
       .populate("watchedVideos.video", "title thumbnailUrl duration") // Example population
       .populate("readArticles.article", "title image readLengthMinute"); // Example population
 
@@ -142,13 +136,7 @@ router.get("/profile", protectRoute, async (req, res) => {
       // This case should be rare if protectRoute middleware works correctly
       return res.status(404).json({ error: "User not found" });
     }
-
-    // Optionally get derived stats if method exists
-    // const stats = userProfile.getStats ? userProfile.getStats() : {};
-
-    // Send user profile data
     res.json({
-      // stats, // Include stats if calculated
       user: {
         id: userProfile._id,
         name: userProfile.name,
@@ -156,8 +144,7 @@ router.get("/profile", protectRoute, async (req, res) => {
         gender: userProfile.gender,
         profileImage: userProfile.profileImage,
         role: userProfile.role,
-        preferences: userProfile.preferences, // Include preferences if they exist
-        // Include populated fields if needed
+        preferences: userProfile.preferences, 
         watchedVideos: userProfile.watchedVideos,
         readArticles: userProfile.readArticles,
       },
@@ -219,7 +206,6 @@ router.get("/check-email", async (req, res) => {
   try {
     const { email } = req.query;
 
-    // Validate email query parameter
     if (!email) {
       return res
         .status(400)

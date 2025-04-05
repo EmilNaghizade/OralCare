@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
   SafeAreaView,
   Alert,
   Platform,
-  KeyboardAvoidingView,
   Animated,
   Easing,
   Image, // Or import your SVG icon component
@@ -16,12 +14,12 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import BackButton from "../../../components/BackButton"; // Adjust path
 import Button from "../../../components/Button"; // Adjust path
 import Typo from "../../../components/Typo";
-// import EmailIcon from '../../../assets/icons/email-icon.svg'; // Example if using SVG
 
 // Placeholder for PNG icon - UPDATE PATH
 const emailIcon = require("../../../assets/images/Email.png");
 
 const NEXT_SCREEN_ROUTE = "/(auth)/register/password"; // <-- UPDATE if needed
+const BACKEND_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
 // Simple email validation regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -47,7 +45,6 @@ const EmailScreen = () => {
 
   // Animated styles for the input wrapper
   const animatedWrapperStyle = {
-
     width: "100%",
   };
 
@@ -55,7 +52,7 @@ const EmailScreen = () => {
     return emailRegex.test(emailToValidate);
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
       Alert.alert("Email Required", "Please enter your email address.");
@@ -66,11 +63,41 @@ const EmailScreen = () => {
       return;
     }
 
-    // Navigate to the next screen, passing all collected data
-    router.push({
-      pathname: NEXT_SCREEN_ROUTE,
-      params: { name, gender, email: trimmedEmail }, // Pass name, gender, and email
-    });
+    try {
+      // Backend'e e-posta kontrolü için istek gönder
+      const response = await fetch(
+        `${BACKEND_URL}/api/auth/check-email?email=${trimmedEmail}`,
+        {
+          // YOUR_BACKEND_API_ENDPOINT yerine backend adresinizi yazın
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.exists) {
+        // E-posta veritabanında varsa uyarı göster
+        Alert.alert(
+          "Email Already Exists",
+          "This email is already registered. Please use a different email address."
+        );
+      } else {
+        // E-posta veritabanında yoksa bir sonraki ekrana geç
+        router.push({
+          pathname: NEXT_SCREEN_ROUTE,
+          params: { name, gender, email: trimmedEmail },
+        });
+      }
+    } catch (error) {
+      console.error("Error checking email:", error);
+      Alert.alert(
+        "Error",
+        "An error occurred while checking the email. Please try again later."
+      );
+    }
   };
 
   return (

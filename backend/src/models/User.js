@@ -1,8 +1,5 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import Video from "../models/Video.js";
-import Blog from "../models/Blog.js";
-
 
 const userSchema = new mongoose.Schema(
   {
