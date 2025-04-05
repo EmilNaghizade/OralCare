@@ -1,7 +1,6 @@
 import React from "react";
 import {
   View,
-
   StyleSheet,
   SafeAreaView,
   ScrollView,
@@ -19,14 +18,15 @@ import { dummyVideos } from "../data"; // Örnek videoları alalım
 // Örnek Quiz Verisi (Normalde ID'ye göre API'den veya önceki ekrandan gelir)
 const getQuizDetails = (quizId) => {
   // ID'ye göre farklı veri döndürmek için genişletilebilir
-  
+
   return {
     id: quizId || "q1",
     title: "Oral Health with OroCare",
     subtitle:
       "How often should you brush your teeth to maintain good oral hygiene?",
     questionCount: 12,
-    gradientColors: ["#663399", "#8A2BE2"], // Mor tonları (ayarlayabilirsiniz)
+    gradientColors:
+      quizId === "q1" ? ["#663399", "#8A2BE2"] : ["#2E8B57", "#69b58a"], // Mor tonları (ayarlayabilirsiniz)
     relatedVideos: dummyVideos.slice(0, 2), // İlgili videolar (ilk 2'sini alalım)
   };
 };

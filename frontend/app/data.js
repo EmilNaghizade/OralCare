@@ -85,6 +85,134 @@ const quizzes = {
       },
     ],
   },
+  // --- YENİ QUIZ: q2 ---
+  q2: {
+    id: "q2", // Quiz ID'si
+    title: "Advanced Oral Care Knowledge", // Quiz başlığı
+    questions: [
+      // 1. Soru
+      {
+        id: "q2_1", // Soru ID'si (Quiz ID'si + Soru No)
+        text: "What is the earliest stage of gum disease, characterized by red, swollen gums that may bleed easily?",
+        options: [
+          "Periodontitis", // İleri diş eti hastalığı
+          "Gingivitis", // Diş eti iltihabı (Erken evre)
+          "Cavity", // Çürük
+          "Halitosis", // Ağız kokusu
+        ],
+        correctAnswer: "Gingivitis",
+      },
+      // 2. Soru
+      {
+        id: "q2_2",
+        text: "How do sugary and acidic drinks primarily contribute to tooth decay?",
+        options: [
+          "By staining the teeth brown", // Dişleri kahverengiye boyayarak
+          "By directly dissolving the tooth enamel", // Doğrudan diş minesini çözerek
+          "By strengthening the gums", // Diş etlerini güçlendirerek
+          "By promoting saliva production", // Tükürük üretimini artırarak
+        ],
+        correctAnswer: "By directly dissolving the tooth enamel",
+      },
+      // 3. Soru
+      {
+        id: "q2_3",
+        text: "Besides food particles, what is a common cause of persistent bad breath (halitosis)?",
+        options: [
+          "Drinking too much water", // Çok fazla su içmek
+          "Poor tongue hygiene (bacteria buildup)", // Kötü dil hijyeni (bakteri birikimi)
+          "Brushing too hard", // Çok sert fırçalamak
+          "Using fluoride toothpaste", // Florürlü diş macunu kullanmak
+        ],
+        correctAnswer: "Poor tongue hygiene (bacteria buildup)",
+      },
+      // 4. Soru
+      {
+        id: "q2_4",
+        text: "What is a primary function of saliva in maintaining oral health?",
+        options: [
+          "Staining teeth", // Dişleri lekelemek
+          "Hardening plaque", // Plağı sertleştirmek
+          "Neutralizing acids and washing away food particles", // Asitleri nötralize etmek ve yiyecek artıklarını yıkamak
+          "Causing gum inflammation", // Diş eti iltihabına neden olmak
+        ],
+        correctAnswer: "Neutralizing acids and washing away food particles",
+      },
+      // 5. Soru
+      {
+        id: "q2_5",
+        text: "Tooth sensitivity (a sharp pain when consuming hot, cold, or sweet items) is often caused by:",
+        options: [
+          "Exposed dentin", // Açığa çıkmış dentin tabakası
+          "Strong enamel", // Güçlü diş minesi
+          "Healthy gums", // Sağlıklı diş etleri
+          "Regular flossing", // Düzenli diş ipi kullanımı
+        ],
+        correctAnswer: "Exposed dentin",
+      },
+      // 6. Soru
+      {
+        id: "q2_6",
+        text: "Which is a significant risk associated with smoking regarding oral health?",
+        options: [
+          "Whiter teeth", // Daha beyaz dişler
+          "Fresher breath", // Daha ferah nefes
+          "Increased risk of gum disease and oral cancer", // Diş eti hastalığı ve ağız kanseri riskinde artış
+          "Stronger tooth enamel", // Daha güçlü diş minesi
+        ],
+        correctAnswer: "Increased risk of gum disease and oral cancer",
+      },
+      // 7. Soru
+      {
+        id: "q2_7",
+        text: "Why is it important to take care of baby (primary) teeth even though they will eventually fall out?",
+        options: [
+          "They determine the adult tooth color", // Kalıcı diş rengini belirlerler
+          "They have no impact on adult teeth", // Kalıcı dişler üzerinde etkileri yoktur
+          "They hold space for permanent teeth and guide them into position", // Kalıcı dişler için yer tutar ve onlara rehberlik ederler
+          "They are more resistant to cavities than adult teeth", // Kalıcı dişlere göre çürüğe daha dayanıklıdırlar
+        ],
+        correctAnswer:
+          "They hold space for permanent teeth and guide them into position",
+      },
+      // 8. Soru
+      {
+        id: "q2_8",
+        text: "Which dental professional primarily focuses on cleaning teeth, examining for signs of oral disease, and providing preventative care education?",
+        options: [
+          "Orthodontist", // Ortodontist (Diş teli uzmanı)
+          "Oral Surgeon", // Ağız Cerrahı
+          "Dental Hygienist", // Diş Hijyenisti
+          "Endodontist", // Endodontist (Kanal tedavisi uzmanı)
+        ],
+        correctAnswer: "Dental Hygienist",
+      },
+      // 9. Soru
+      {
+        id: "q2_9",
+        text: "What is the term for clenching or grinding your teeth, often during sleep?",
+        options: [
+          "Flossing", // Diş ipi kullanma
+          "Gingivitis", // Diş eti iltihabı
+          "Bruxism", // Bruksizm (Diş gıcırdatma)
+          "Scaling", // Diş taşı temizliği
+        ],
+        correctAnswer: "Bruxism",
+      },
+      // 10. Soru
+      {
+        id: "q2_10",
+        text: "What substance is produced by bacteria in the mouth when they consume sugars, leading to the breakdown of tooth enamel?",
+        options: [
+          "Saliva", // Tükürük
+          "Acid", // Asit
+          "Fluoride", // Florür
+          "Plaque", // Plak
+        ],
+        correctAnswer: "Acid",
+      },
+    ],
+  },
   // Başka quizler de buraya eklenebilir:
   // 'another_quiz_id': { ... }
 };
@@ -142,8 +270,8 @@ export const dummyNews = [
   },
 ];
 
- const defaultProfilePic = require("../assets/images/pp.png");
- 
+const defaultProfilePic = require("../assets/images/pp.png");
+
 // --- Örnek Kişi Verileri ---
 export const dummyContacts = [
   {
@@ -153,45 +281,42 @@ export const dummyContacts = [
     image: defaultProfilePic,
     countryCode: "AZ",
     phone: "+9940517638223",
-    facebookUrl: "https://www.facebook.com/profile.php?id=100009325839474"
+    facebookUrl: "https://www.facebook.com/profile.php?id=100009325839474",
   },
   {
     id: "2",
     name: "Alice Johnson",
     title: "Manager, United States",
     image: defaultProfilePic,
-    countryCode: "USA"
+    countryCode: "USA",
   },
   {
     id: "3",
     name: "Satoshi Nakamoto",
     title: "Manager, Japan",
     image: defaultProfilePic,
-    countryCode: "JP"
-
+    countryCode: "JP",
   },
   {
     id: "4",
     name: "Maria Garcia",
     title: "Manager, Spain",
     image: defaultProfilePic,
-    countryCode: "SP"
-
+    countryCode: "SP",
   },
   {
     id: "5",
     name: "Liam Patel",
     title: "Manager, Canada",
     image: defaultProfilePic,
-    countryCode: "CA"
-
+    countryCode: "CA",
   },
   {
     id: "6",
     name: "Anastasia Ivanova",
     title: "Manager, Russia",
     image: defaultProfilePic,
-    countryCode: "RU"
+    countryCode: "RU",
   },
   // İhtiyaç halinde daha fazla kişi eklenebilir
 ];

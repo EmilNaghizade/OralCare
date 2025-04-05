@@ -129,8 +129,6 @@ router.get("/profile", protectRoute, async (req, res) => {
   try {
     const userProfile = await User.findById(req.user._id)
       .select("-password") 
-      .populate("watchedVideos.video", "title thumbnailUrl duration") // Example population
-      .populate("readArticles.article", "title image readLengthMinute"); // Example population
 
     if (!userProfile) {
       // This case should be rare if protectRoute middleware works correctly
@@ -144,9 +142,6 @@ router.get("/profile", protectRoute, async (req, res) => {
         gender: userProfile.gender,
         profileImage: userProfile.profileImage,
         role: userProfile.role,
-        preferences: userProfile.preferences, 
-        watchedVideos: userProfile.watchedVideos,
-        readArticles: userProfile.readArticles,
       },
     });
   } catch (error) {

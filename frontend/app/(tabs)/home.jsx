@@ -18,7 +18,6 @@ import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
 import { LinearGradient } from "expo-linear-gradient";
 
-
 const getProfile = (token) => fetchWithAuth("/api/auth/profile", token);
 
 export default function HomeScreen() {
@@ -26,10 +25,11 @@ export default function HomeScreen() {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-  const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles"); 
+  const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles");
 
   useEffect(() => {
     const loadProfile = async () => {
+      console.log(authToken,"token")
       if (!authToken) {
         console.log("Home: No auth token, cannot fetch profile.");
         setIsLoadingProfile(false);
@@ -45,18 +45,18 @@ export default function HomeScreen() {
             "Home: Profile data received, but user.name is missing or structure unexpected:",
             profileData
           );
-          setFirstName(""); 
+          setFirstName("");
         }
       } catch (error) {
-        console.error("Home: Failed to fetch profile:", error); 
-        setFirstName(""); 
+        console.error("Home: Failed to fetch profile:", error);
+        setFirstName("");
       } finally {
         setIsLoadingProfile(false);
       }
     };
 
     loadProfile();
-  }, [authToken]); 
+  }, [authToken]);
 
   const knowledgeItemsToShow =
     activeKnowledgeTab === "Articles" ? dummyArticles : dummyNews;
@@ -73,10 +73,8 @@ export default function HomeScreen() {
   );
 
   const QuizCard = ({ item }) => {
-    const isPurple = item._id === "q1"; 
-    const gradientColors = isPurple
-      ? ["#8A2BE2", "#fff"] 
-      : ["#2E8B57", "#fff"]; 
+    const isPurple = item._id === "q1";
+    const gradientColors = isPurple ? ["#8A2BE2", "#fff"] : ["#2E8B57", "#fff"];
 
     const centerIconName = isPurple
       ? "git-network-outline"
@@ -88,19 +86,19 @@ export default function HomeScreen() {
         onPress={() =>
           router.push({ pathname: "/quiz", params: { id: item._id } })
         } // YENİ
-        activeOpacity={0.8} 
+        activeOpacity={0.8}
       >
         <LinearGradient
           colors={gradientColors}
-          style={styles.quizGradient} 
+          style={styles.quizGradient}
           start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }} 
+          end={{ x: 0.5, y: 1 }}
         >
           <Ionicons
             name={centerIconName}
             size={80}
-            color="#fff" 
-            style={styles.quizCenterIcon} 
+            color="#fff"
+            style={styles.quizCenterIcon}
           />
 
           <View style={styles.quizContentContainer}>
