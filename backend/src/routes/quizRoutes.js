@@ -57,4 +57,4 @@ router.post('/:quizId/finish', auth, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router

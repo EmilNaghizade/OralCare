@@ -95,7 +95,7 @@ export const quizApi = {
   markQuizCompleted: async (token, quizId) => {
     try {
       const response = await axios.post(
-        `${API_URL}/api/quizzes/${quizId}/complete`,
+        `${API_URL}/api/quizzes/${quizId}/finish`,
         {},
         {
           headers: {
@@ -113,7 +113,7 @@ export const quizApi = {
 
   getCompletedQuizzes: async (token) => {
     try {
-      const response = await axios.get(`${API_URL}/api/quizzes/completed`, {
+      const response = await axios.get(`${API_URL}/api/quizzes/finished`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
