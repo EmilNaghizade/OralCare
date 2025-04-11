@@ -1,12 +1,13 @@
 // routes/quizzes.js - Express route handler for quiz-related endpoints
-const express = require('express');
+import express from "express";
+import User from "../models/User.js";
+import Quiz from "../models/Quiz.js";
+import protectRoute from "../middleware/auth.middleware.js";
+
 const router = express.Router();
-const User = require('../models/User');
-const Quiz = require('../models/Quiz');
-const auth = require('../middleware/auth');
 
 // GET endpoint to retrieve all finished quizzes for the authenticated user
-router.get('/finished', auth, async (req, res) => {
+router.get('/finished', protectRoute, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate('finishedQuizzes');
     
@@ -25,7 +26,7 @@ router.get('/finished', auth, async (req, res) => {
 });
 
 // POST endpoint to mark a quiz as finished by a user
-router.post('/:quizId/finish', auth, async (req, res) => {
+router.post('/:quizId/finish', protectRoute, async (req, res) => {
   try {
     const quizId = req.params.quizId;
     
