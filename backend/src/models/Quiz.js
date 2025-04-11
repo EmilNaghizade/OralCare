@@ -1,5 +1,5 @@
 // models/Quiz.js
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const QuizSchema = new mongoose.Schema({
   title: {
