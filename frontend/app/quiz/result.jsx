@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import ConfettiCannon from "react-native-confetti-cannon"; // <-- Konfeti kütüphanesi import edildi
 import Typo from "../../components/Typo"; // Kendi Typo bileşeniniz
 import { useAuth } from "../_layout"; // Auth context'inizi import edin
+import axios from "axios";
 
 const POINTS_PER_QUESTION = 10; // Her doğru cevap için puan
 const resultImage = require("../../assets/images/Result.png");
@@ -20,7 +21,7 @@ const resultImage = require("../../assets/images/Result.png");
 export default function QuizResultsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { updateUserPoints } = useAuth(); // Context'ten puan güncelleme fonksiyonunu alın
+  const { updateUserPoints, markQuizCompleted } = useAuth(); // Context'ten puan güncelleme fonksiyonunu alın
 
   // Parametreleri al ve number'a çevir (string gelebilirler)
   const score = parseInt(params.score?.toString() || "0", 10);
@@ -32,22 +33,27 @@ export default function QuizResultsScreen() {
 
   // Puanları context/storage üzerinden güncelle (sadece component mount olduğunda bir kere çalışır)
   useEffect(() => {
-    console.log(
-      `Quiz ${quizId} bitti. Skor: ${score}/${totalQuestions}. Kazanılan Puan: ${earnedPoints}`
-    );
-    if (updateUserPoints && earnedPoints > 0) {
-      // Context üzerinden toplam puanı güncelle
-      // Bu fonksiyonun _layout.jsx veya context dosyanızda tanımlı olması gerekir.
-      updateUserPoints(earnedPoints);
-    }
-    // Alternatif: AsyncStorage kullanılıyorsa burada güncelleme yapılabilir
-    // Konfetiyi başlatmak için manuel tetikleme (opsiyonel)
-    // Eğer autoStart={true} yetmiyorsa veya gecikme isteniyorsa:
-    // const timer = setTimeout(() => {
-    //     confettiRef.current?.start(); // start() fonksiyonunu çağır
-    // }, 300); // 300ms sonra başlat
-    // return () => clearTimeout(timer); // Cleanup
-  }, []); // Boş dependency array, sadece bir kere çalışmasını sağlar
+    const handleQuizCompletion = async () => {
+      console.log(
+        `Quiz ${quizId} bitti. Skor: ${score}/${totalQuestions}. Kazanılan Puan: ${earnedPoints}`
+      );
+      if (updateUserPoints && earnedPoints > 0) {
+        updateUserPoints(earnedPoints);
+      }
+      
+      if (quizId && markQuizCompleted) {
+        try {
+          const completedCount = await markQuizCompleted(quizId);
+          console.log(
+            `Quiz marked as completed. Total completed: ${completedCount}`
+          );
+        } catch (error) {
+          console.error("Failed to mark quiz as completed:", error);
+        }
+      }
+    };
+    handleQuizCompletion();
+  }, [quizId,score,totalQuestions]); // Boş dependency array, sadece bir kere çalışmasını sağlar
 
   const handleGoHome = () => {
     // Anasayfa tab'ına yönlendir (veya ana quiz listesine)

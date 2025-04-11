@@ -12,6 +12,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../_layout";
 import { fetchWithAuth } from "../../services/fetchWithAuth";
+import { useRouter } from "expo-router";
 
 const getProfile = (token) => fetchWithAuth("/api/auth/profile", token);
 
@@ -30,10 +31,12 @@ const ProfileListItem = ({ iconName, label, onPress, isLogout = false }) => (
 );
 
 export default function ProfileScreen() {
-  const { authToken } = useAuth();
-  const { logout } = useAuth();
+  const router = useRouter();
+  const { authToken, completedQuizzes, logout } = useAuth();
   const [user, setUser] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  const completedCount = completedQuizzes?.length || 0;
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -55,7 +58,6 @@ export default function ProfileScreen() {
           );
           setFirstName(""); // İsim yoksa boş kalsın
         }
-        // ---- DÜZELTME SONU ----
       } catch (error) {
         console.error("Home: Failed to fetch profile:", error); // Hatayı detaylı loglayın
         setUser(null); // Hata durumunda ismi boşalt
@@ -74,7 +76,7 @@ export default function ProfileScreen() {
     // Use user profile image from context/API if available, otherwise placeholder
     profilePicUrl: require("../../assets/images/pp.png"),
     videoCount: 12, // Fetch from profile API later
-    quizCount: 8, // Fetch from profile API later (assuming quizzes = articles for now)
+    quizCount: completedCount, // Fetch from profile API later (assuming quizzes = articles for now)
   };
   // --- End Placeholder Data ---
   console.log(profileData, "PROFILE DATA");
@@ -89,8 +91,7 @@ export default function ProfileScreen() {
   const navigateToEditProfile = () => console.log("Navigate to Edit Profile");
   const navigateToRewards = () => console.log("Navigate to Rewards");
   const navigateToInvite = () => console.log("Navigate to Invite");
-  const navigateToNotifications = () =>
-    console.log("Navigate to Notifications");
+  const navigateToNotifications = () => router.push("/notifications");
   const navigateToAppSettings = () => console.log("Navigate to App Settings");
   const navigateToFAQ = () => console.log("Navigate to FAQ");
   const navigateToContact = () => console.log("Navigate to Contact Support");
@@ -152,6 +153,33 @@ export default function ProfileScreen() {
               style={styles.statIcon}
             />
           </View>
+
+          {profileData.completedCount > 0 && (
+            <View style={styles.achievementContainer}>
+              <Typo style={styles.sectionTitle}>Achievements</Typo>
+
+              {profileData.completedCount >= 1 && (
+                <View style={styles.achievement}>
+                  <Ionicons name="ribbon" size={24} color="#038565" />
+                  <Typo style={styles.achievementText}>Quiz Explorer</Typo>
+                </View>
+              )}
+
+              {profileData.completedCount >= 5 && (
+                <View style={styles.achievement}>
+                  <Ionicons name="trophy" size={24} color="#038565" />
+                  <Typo style={styles.achievementText}>Quiz Enthusiast</Typo>
+                </View>
+              )}
+
+              {profileData.completedCount >= 10 && (
+                <View style={styles.achievement}>
+                  <Ionicons name="star" size={24} color="#038565" />
+                  <Typo style={styles.achievementText}>Quiz Master</Typo>
+                </View>
+              )}
+            </View>
+          )}
         </View>
 
         {/* Profile List Section */}
@@ -377,5 +405,19 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#f0f2f5", // Light gray line
     marginVertical: 0, // Remove vertical margin if padding handles spacing
+  },
+  achievement: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F5F7',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  achievementText: {
+    marginLeft: 12,
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#1c1c1c',
   },
 });

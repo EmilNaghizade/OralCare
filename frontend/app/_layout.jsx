@@ -19,6 +19,7 @@ export function useAuth() {
 
 function AuthProvider({ children }) {
   const [authToken, setAuthToken] = useState(null);
+  const [completedQuizzes, setCompletedQuizzes] = useState([]);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Başlangıçta yükleniyor
   const [userPoints, setUserPoints] = useState(0); // <<< YENİ: Quiz Puanları State'i
@@ -63,6 +64,22 @@ function AuthProvider({ children }) {
         setIsLoading(false);
       }
     };
+
+    const loadCompletedQuizzes = async () => {
+      try {
+        const storedQuizzes = await SecureStore.getItemAsync(
+          "completedQuizzes"
+        );
+        if (storedQuizzes) {
+          setCompletedQuizzes(JSON.parse(storedQuizzes));
+        }
+      } catch (e) {
+        console.error("Failed to load completed quizzes", e);
+      }
+    };
+
+    // Call this in your useEffect
+    loadCompletedQuizzes();
     loadInitialState();
     loadInitialPoints();
     getProfile();
@@ -102,7 +119,7 @@ function AuthProvider({ children }) {
       setUser(null);
       await SecureStore.deleteItemAsync("authToken");
       await SecureStore.deleteItemAsync("user");
-      router.push("/onboarding")
+      router.push("/onboarding");
     } catch (error) {
       console.error("[AuthProvider logout] HATA:", error);
     }
@@ -121,6 +138,36 @@ function AuthProvider({ children }) {
     // !!! Backend olsaydı burada API'ye de gönderilebilirdi !!!
   };
 
+  // Add this function to mark a quiz as completed
+  const markQuizCompleted = async (quizId) => {
+    try {
+      // Check if quiz is already completed
+      if (completedQuizzes.includes(quizId)) {
+        return completedQuizzes.length; // Already completed, return current count
+      }
+
+      // Call API to mark quiz as completed
+      if (authToken) {
+        await quizApi.markQuizCompleted(authToken, quizId);
+      }
+
+      // Update local state
+      const updatedQuizzes = [...completedQuizzes, quizId];
+      setCompletedQuizzes(updatedQuizzes);
+
+      // Save to secure storage for offline access
+      await SecureStore.setItemAsync(
+        "completedQuizzes",
+        JSON.stringify(updatedQuizzes)
+      );
+
+      return updatedQuizzes.length; // Return the count of completed quizzes
+    } catch (error) {
+      console.error("[markQuizCompleted] Error:", error);
+      throw error;
+    }
+  };
+
   const value = {
     authToken,
     user,
@@ -128,12 +175,16 @@ function AuthProvider({ children }) {
     userPoints,
     login,
     logout,
+    markQuizCompleted, // Add this new function
+    updateUserPoints,
   };
 
   return (
     <AuthContext.Provider value={value}>
       {isLoading ? (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color="#007AFF" />
         </View>
       ) : (

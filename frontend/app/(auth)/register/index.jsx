@@ -23,6 +23,7 @@ export default function register() {
   const [name, setName] = useState("");
   const router = useRouter();
   const [isFocused, setIsFocused] = useState(false);
+  const iconAnim = useRef(new Animated.Value(0)).current;
 
   const focusAnim = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -33,13 +34,34 @@ export default function register() {
       easing: Easing.bezier(0.4, 0, 0.2, 1), // Smooth easing curve
       useNativeDriver: false, // **IMPORTANT**: Color/border animations often don't work with native driver
     }).start();
+
+    Animated.sequence([
+      // First move down with a bounce effect
+      Animated.spring(iconAnim, {
+        toValue: 1,
+        friction: 4, // Controls "bounciness"
+        tension: 40, // Controls speed
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, [isFocused, focusAnim]);
 
   // Interpolate animation value for styles
   const animatedWrapperStyle = {
-
     // Ensure the wrapper takes the necessary width
     width: "100%",
+  };
+
+  const animatedIconStyle = {
+    opacity: iconAnim,
+    transform: [
+      {
+        translateY: iconAnim.interpolate({
+          inputRange: [0, 1],
+          outputRange: [-60, 0], // Start higher for more dramatic effect
+        }),
+      },
+    ],
   };
 
   const handleNext = () => {
@@ -63,12 +85,17 @@ export default function register() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-        <BackButton/>
+        <BackButton />
 
         <View style={styles.content}>
-          <Image source={nameIcon} style={styles.icon} />
+          <Animated.Image
+            source={nameIcon}
+            style={[styles.icon, animatedIconStyle]}
+          />
 
-          <Typo fontWeight="600" size={36} style={styles.title}>What's your name{"\n"}and surname?</Typo>
+          <Typo fontWeight="600" size={36} style={styles.title}>
+            What's your name{"\n"}and surname?
+          </Typo>
 
           <Animated.View style={animatedWrapperStyle}>
             <TextInput
@@ -124,10 +151,8 @@ const styles = StyleSheet.create({
     width: 60, // Adjust size as needed
     height: 60, // Adjust size as needed
     resizeMode: "contain",
-
   },
   title: {
-
     textAlign: "center",
     marginBottom: 40, // Space below title
     color: "#333",

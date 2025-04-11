@@ -1,3 +1,5 @@
+import axios from "axios";
+
 const handleResponse = async (response) => {
   if (!response.ok) {
     const error = await response.text();
@@ -86,6 +88,41 @@ export const authApi = {
       }
     );
     return handleResponse(response);
+  },
+};
+
+export const quizApi = {
+  markQuizCompleted: async (token, quizId) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/quizzes/${quizId}/complete`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error marking quiz as completed:", error);
+      throw error;
+    }
+  },
+
+  getCompletedQuizzes: async (token) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/quizzes/completed`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching completed quizzes:", error);
+      throw error;
+    }
   },
 };
 

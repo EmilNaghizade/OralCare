@@ -50,20 +50,10 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
-    readArticles: [
+    finishedQuizzes: [
       {
-        article: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Blog",
-        },
-        readAt: {
-          type: Date,
-          default: Date.now,
-        },
-        readDuration: {
-          type: Number, // Duration in seconds
-          default: 0,
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Quiz",
       },
     ],
   },
@@ -88,15 +78,7 @@ userSchema.methods.matchPassword = async function (enteredPassword) {
 userSchema.methods.getStats = function () {
   return {
     totalWatchedVideos: this.watchedVideos.length,
-    totalReadArticles: this.readArticles.length,
-    totalWatchTime: this.watchedVideos.reduce(
-      (acc, curr) => acc + (curr.watchDuration || 0),
-      0
-    ),
-    totalReadTime: this.readArticles.reduce(
-      (acc, curr) => acc + (curr.readDuration || 0),
-      0
-    ),
+    totalFinishedQuizes: this.finishedQuizzes.length,
     lastActive: this.lastLogin,
     memberSince: this.createdAt,
   };

@@ -3,6 +3,7 @@ import cors from "cors";
 
 import authRoutes from "./routes/authRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
+import quizRoutes from "./routes/quizRoutes.js"
 import { connectDb } from "./lib/db.js";
 
 const app = express();
@@ -31,6 +32,7 @@ app.use(cors(corsOptions));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
+api.use("/api/quizzes", quizRoutes) 
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on port 3000");
