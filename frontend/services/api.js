@@ -1,4 +1,14 @@
 import axios from "axios";
+import * as SecureStore from "expo-secure-store";
+
+const getAuthToken = async () => {
+  try {
+    return await SecureStore.getItemAsync("authToken");
+  } catch (error) {
+    console.error("Error getting auth token:", error);
+    return null;
+  }
+};
 
 const handleResponse = async (response) => {
   if (!response.ok) {
@@ -92,21 +102,36 @@ export const authApi = {
 };
 
 export const quizApi = {
-  markQuizCompleted: async (token, quizId) => {
+  // In your quizApi.js, make sure you're sending the token correctly
+  markQuizCompleted: async (quizId) => {
     try {
+      const token = await getAuthToken();
+
+      // Check if token exists before making the request
+      if (!token) {
+        console.error("No auth token available");
+        throw new Error("Authentication token is missing");
+      }
+
+      console.log("Using token:", token); // Debug logging
+
       const response = await axios.post(
         `${API_URL}/api/quizzes/${quizId}/finish`,
-        {},
+        {}, // Empty object as request body
         {
           headers: {
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
           },
         }
       );
       return response.data;
     } catch (error) {
       console.error("Error marking quiz as completed:", error);
+      // Log more details
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      }
       throw error;
     }
   },

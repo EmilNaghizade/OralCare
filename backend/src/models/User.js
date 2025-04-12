@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema(
     ],
     finishedQuizzes: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Number,
         ref: "Quiz",
       },
     ],

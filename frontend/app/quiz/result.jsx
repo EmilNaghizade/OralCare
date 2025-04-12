@@ -13,8 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import ConfettiCannon from "react-native-confetti-cannon"; // <-- Konfeti kütüphanesi import edildi
 import Typo from "../../components/Typo"; // Kendi Typo bileşeniniz
 import { useAuth } from "../_layout"; // Auth context'inizi import edin
-import axios from "axios";
-
+import { quizApi } from "../../services/api";
 const POINTS_PER_QUESTION = 10; // Her doğru cevap için puan
 const resultImage = require("../../assets/images/Result.png");
 
@@ -37,11 +36,10 @@ export default function QuizResultsScreen() {
       console.log(
         `Quiz ${quizId} bitti. Skor: ${score}/${totalQuestions}. Kazanılan Puan: ${earnedPoints}`
       );
-      if (updateUserPoints && earnedPoints > 0) {
-        updateUserPoints(earnedPoints);
-      }
-      
-      if (quizId && markQuizCompleted) {
+
+      console.log(quizId, "QUIZ ID")
+
+      if (quizId) {
         try {
           const completedCount = await markQuizCompleted(quizId);
           console.log(
@@ -53,7 +51,7 @@ export default function QuizResultsScreen() {
       }
     };
     handleQuizCompletion();
-  }, [quizId,score,totalQuestions]); // Boş dependency array, sadece bir kere çalışmasını sağlar
+  }, []); // Boş dependency array, sadece bir kere çalışmasını sağlar
 
   const handleGoHome = () => {
     // Anasayfa tab'ına yönlendir (veya ana quiz listesine)

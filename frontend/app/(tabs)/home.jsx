@@ -73,7 +73,7 @@ export default function HomeScreen() {
   );
 
   const QuizCard = ({ item }) => {
-    const isPurple = item._id === "q1";
+    const isPurple = item._id === 1;
     const gradientColors = isPurple ? ["#8A2BE2", "#fff"] : ["#2E8B57", "#fff"];
 
     const centerIconName = isPurple

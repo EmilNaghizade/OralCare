@@ -16,9 +16,9 @@ export const dummyVideos = [
   },
 ];
 const quizzes = {
-  q1: {
+  1: {
     // Bu ID'yi quiz/index.jsx'ten gelen ID ile eşleştireceğiz
-    id: "q1",
+    id: 1,
     title: "Oral Health with OroCare", // Quiz başlığı
     questions: [
       // 1. Soru (Sizin verdiğiniz)
@@ -86,8 +86,8 @@ const quizzes = {
     ],
   },
   // --- YENİ QUIZ: q2 ---
-  q2: {
-    id: "q2", // Quiz ID'si
+  2: {
+    id: 2, // Quiz ID'si
     title: "Advanced Oral Care Knowledge", // Quiz başlığı
     questions: [
       // 1. Soru
@@ -223,13 +223,13 @@ export const getQuizDataById = (quizId) => {
 
 export const dummyQuizzes = [
   {
-    _id: "q1",
+    _id: 1,
     title: "Breathing Filters, HMEs and HMEFs",
     imageUrl: "https://picsum.photos/seed/q1/220/120",
     questionCount: 6,
   },
   {
-    _id: "q2",
+    _id: 2,
     title: "Guide for in-patient oral hygiene using OroClean complete",
     imageUrl: "https://picsum.photos/seed/q2/220/120",
     questionCount: 10,

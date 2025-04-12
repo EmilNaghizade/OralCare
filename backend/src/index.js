@@ -32,7 +32,7 @@ app.use(cors(corsOptions));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
-api.use("/api/quizzes", quizRoutes) 
+app.use("/api/quizzes", quizRoutes) 
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on port 3000");

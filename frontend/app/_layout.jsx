@@ -4,7 +4,7 @@ import { Slot, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import { ActivityIndicator, View } from "react-native";
-import { authApi } from "../services/api";
+import { authApi, quizApi } from "../services/api";
 
 // --- Authentication Context ---
 const AuthContext = createContext(null);
@@ -147,9 +147,8 @@ function AuthProvider({ children }) {
       }
 
       // Call API to mark quiz as completed
-      if (authToken) {
-        await quizApi.markQuizCompleted(authToken, quizId);
-      }
+
+      await quizApi.markQuizCompleted(quizId);
 
       // Update local state
       const updatedQuizzes = [...completedQuizzes, quizId];

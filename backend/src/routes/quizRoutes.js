@@ -1,7 +1,6 @@
 // routes/quizzes.js - Express route handler for quiz-related endpoints
 import express from "express";
 import User from "../models/User.js";
-import Quiz from "../models/Quiz.js";
 import protectRoute from "../middleware/auth.middleware.js";
 
 const router = express.Router();
@@ -9,15 +8,18 @@ const router = express.Router();
 // GET endpoint to retrieve all finished quizzes for the authenticated user
 router.get('/finished', protectRoute, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate('finishedQuizzes');
+    // Get the user without attempting to populate
+    const user = await User.findById(req.user.id);
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
     
+
+    
     res.json({ 
-      finishedQuizzes: user.finishedQuizzes,
-      count: user.finishedQuizzes.length 
+      finishedQuizIds: user.finishedQuizzes || [],
+      count: (user.finishedQuizzes || []).length 
     });
   } catch (err) {
     console.error('Error fetching finished quizzes:', err.message);
@@ -30,12 +32,8 @@ router.post('/:quizId/finish', protectRoute, async (req, res) => {
   try {
     const quizId = req.params.quizId;
     
-    // Validate if quiz exists
-    const quiz = await Quiz.findById(quizId);
-    if (!quiz) {
-      return res.status(404).json({ message: 'Quiz not found' });
-    }
-    
+  
+
     // Update user document to add quiz to finishedQuizzes if not already there
     const user = await User.findById(req.user.id);
     

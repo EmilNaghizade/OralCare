@@ -13,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../_layout";
 import { fetchWithAuth } from "../../services/fetchWithAuth";
 import { useRouter } from "expo-router";
+import { quizApi } from "../../services/api";
 
 const getProfile = (token) => fetchWithAuth("/api/auth/profile", token);
 
@@ -32,11 +33,11 @@ const ProfileListItem = ({ iconName, label, onPress, isLogout = false }) => (
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { authToken, completedQuizzes, logout } = useAuth();
+  const { authToken, logout } = useAuth();
   const [user, setUser] = useState(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-
-  const completedCount = completedQuizzes?.length || 0;
+  const [quizCount, setQuizCount] = useState(0);
+  const [completedQuizzes, setCompletedQuizzes] = useState([]);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -65,7 +66,25 @@ export default function ProfileScreen() {
         setIsLoadingProfile(false);
       }
     };
+    const fetchCompletedQuizzes = async () => {
+      if (!authToken) return;
 
+      try {
+        console.log("Fetching completed quizzes...");
+        const quizData = await quizApi.getCompletedQuizzes(authToken);
+        console.log("Completed quizzes data:", quizData);
+
+        if (quizData && quizData.finishedQuizIds) {
+          setCompletedQuizzes(quizData.finishedQuizIds);
+          setQuizCount(quizData.count || quizData.finishedQuizIds.length);
+        }
+      } catch (error) {
+        console.error("Error fetching completed quizzes:", error);
+        // If there's an error, we'll just keep the default empty array
+      }
+    };
+
+    fetchCompletedQuizzes();
     loadProfile();
   }, [authToken]); // Depend only on authToken
 
@@ -76,7 +95,7 @@ export default function ProfileScreen() {
     // Use user profile image from context/API if available, otherwise placeholder
     profilePicUrl: require("../../assets/images/pp.png"),
     videoCount: 12, // Fetch from profile API later
-    quizCount: completedCount, // Fetch from profile API later (assuming quizzes = articles for now)
+    quizCount: quizCount, // Fetch from profile API later (assuming quizzes = articles for now)
   };
   // --- End Placeholder Data ---
   console.log(profileData, "PROFILE DATA");
@@ -407,9 +426,9 @@ const styles = StyleSheet.create({
     marginVertical: 0, // Remove vertical margin if padding handles spacing
   },
   achievement: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0F5F7',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0F5F7",
     padding: 12,
     borderRadius: 8,
     marginBottom: 8,
@@ -417,7 +436,7 @@ const styles = StyleSheet.create({
   achievementText: {
     marginLeft: 12,
     fontSize: 16,
-    fontWeight: '500',
-    color: '#1c1c1c',
+    fontWeight: "500",
+    color: "#1c1c1c",
   },
 });
