@@ -1,10 +1,17 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/authRoutes.js";
 import blogRoutes from "./routes/blogRoutes.js";
-import quizRoutes from "./routes/quizRoutes.js"
+import quizRoutes from "./routes/quizRoutes.js";
+import videoRoutes from "./routes/videoRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js";
 import { connectDb } from "./lib/db.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -25,14 +32,21 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"], // İzin verilen HTTP metotları
   allowedHeaders: ["Content-Type", "Authorization"], // İzin verilen başlıklar
   credentials: true, // Çerezlerin gönderilmesine izin ver
+  exposedHeaders: ["Content-Disposition"],
 };
 
-app.use(express.json());
+app.use(express.json({ limit: "15mb" }));
+app.use(express.urlencoded({ limit: "15mb", extended: true }));
+
 app.use(cors(corsOptions));
+
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
-app.use("/api/quizzes", quizRoutes) 
+app.use("/api/quizzes", quizRoutes);
+app.use("/api/videos", videoRoutes);
+app.use("/api/profile", profileRoutes);
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on port 3000");

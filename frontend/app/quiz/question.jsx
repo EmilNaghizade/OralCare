@@ -12,7 +12,7 @@ import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import BackButton from "../../components/BackButton"; // Kendi BackButton'unuz
 import Typo from "../../components/Typo"; // Kendi Typo'nuz
-import { getQuizDataById } from "../data"; // Quiz verisini import et
+import { quizzes } from "../data"; // Quiz verisini import et
 
 const TOTAL_TIME = 120; // Saniye cinsinden (2 dakika)
 
@@ -38,7 +38,9 @@ export default function QuizQuestionScreen() {
   const timerIntervalRef = useRef(null);
   // İlerleme çubuğu animasyonu için
   const progressAnim = useRef(new Animated.Value(0)).current;
-
+  const getQuizDataById = (quizId) => {
+    return quizzes[quizId] || null; // Quiz'i bulamazsa null döndür
+  };
   // Quiz verisini yükle
   useEffect(() => {
     const data = getQuizDataById(quizId?.toString());
@@ -114,7 +116,7 @@ export default function QuizQuestionScreen() {
     setIsAnswered(true); // Cevaplandı olarak işaretle
     let currentScore = score;
     if (correct) {
-        currentScore+=10
+      currentScore += 10;
       setScore((prevScore) => prevScore + 1); // Doğruysa skoru artır
     }
 

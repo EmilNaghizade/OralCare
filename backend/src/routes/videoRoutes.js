@@ -6,6 +6,24 @@ import protectRoute from "../middleware/auth.middleware.js";
 
 const router = express.Router();
 
+router.get("/watched", protectRoute, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      watchedVideosId: user.watchedVideos || [],
+      count: (user.watchedVideos || []).length,
+    });
+  } catch (error) {
+    console.error("Error fetching watched videos:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // --- GET all videos (add pagination similar to blogs if needed) ---
 router.get("/", async (req, res) => {
   try {
@@ -39,33 +57,30 @@ router.get("/:videoId", async (req, res) => {
 // --- NEW: Endpoint to mark a video as watched ---
 router.post("/:videoId/watch", protectRoute, async (req, res) => {
   try {
-    const { videoId } = req.params;
-    const userId = req.user._id; // Get user ID from protectRoute
-
-    // Validate videoId (optional)
-    const videoExists = await Video.findById(videoId);
-    if (!videoExists) {
-      return res.status(404).json({ message: "Video not found." });
-    }
+    const videoId = req.params.videoId;
+    const user = await User.findById(req.user.id);
 
     // Use $addToSet to add the videoId to the user's watchedVideos array
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $addToSet: { watchedVideos: videoId } },
-      { new: true }
-    );
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found." });
+    if (user.watchedVideos.includes(videoId)) {
+      return res.json({ message: "Quiz already marked as finished" });
     }
 
-    console.log(`User ${userId} marked video ${videoId} as watched.`);
-    res.status(200).json({ message: "Video marked as watched." });
+    user.watchedVideos.push(videoId);
+    await user.save();
+
+    res.json({
+      message: "Video marked as watched.",
+      watchedCount: user.watchedVideos.length,
+    });
   } catch (error) {
     console.error("Error marking video as watched:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// Add this endpoint to your videoRoutes.js file
+
+// --- NEW: Endpoint to get all watched videos for a user ---
 
 // TODO: Add routes for creating/updating/deleting videos if needed (likely admin only)
 

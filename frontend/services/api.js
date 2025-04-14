@@ -151,5 +151,70 @@ export const quizApi = {
   },
 };
 
+// Add these functions to your existing api.js file within the appropriate export object
+export const videoApi = {
+  // Mark a video as watched
+  markVideoAsWatched: async (videoId) => {
+    try {
+      const token = await getAuthToken();
+
+      // Check if token exists before making the request
+      if (!token) {
+        console.error("No auth token available");
+        throw new Error("Authentication token is missing");
+      }
+
+      console.log("Using token to mark video as watched:", token);
+
+      const response = await axios.post(
+        `${API_URL}/api/videos/${videoId}/watch`,
+        {}, // Empty object as request body
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error marking video as watched:", error);
+      // Log more details
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      }
+      throw error;
+    }
+  },
+
+  // Get all watched videos for the current user
+  getWatchedVideos: async () => {
+    try {
+      const token = await getAuthToken();
+
+      if (!token) {
+        console.error("No auth token available");
+        throw new Error("Authentication token is missing");
+      }
+
+      const response = await axios.get(`${API_URL}/api/videos/watched`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      console.log(response.data,"res")
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching watched videos:", error);
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      }
+      throw error;
+    }
+  },
+};
+
 // Export getProfileApi for backward compatibility
 export const getProfileApi = authApi.getProfile;

@@ -41,32 +41,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="education" // Matches education.jsx
-        options={{
-          title: "Education",
-          tabBarIcon: ({ color, focused }) => (
-            // Choose an appropriate icon name
-            <TabBarIcon
-              name={focused ? "book" : "book-outline"}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="contact" // Matches contact.jsx
-        options={{
-          title: "Contact",
-          tabBarIcon: ({ color, focused }) => (
-            // Choose an appropriate icon name
-            <TabBarIcon
-              name={focused ? "call" : "call-outline"}
-              color={color}
-            />
-          ),
-        }}
-      />
+
       <Tabs.Screen
         name="products" // Matches products.jsx
         options={{

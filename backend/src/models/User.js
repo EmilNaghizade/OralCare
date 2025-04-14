@@ -29,6 +29,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    profileImageBase64: {
+      type: String,
+      default: ""
+    },
     role: {
       type: String,
       enum: ["user", "admin"],
@@ -36,18 +40,8 @@ const userSchema = new mongoose.Schema(
     },
     watchedVideos: [
       {
-        video: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Video",
-        },
-        watchedAt: {
-          type: Date,
-          default: Date.now,
-        },
-        watchDuration: {
-          type: Number, // Duration in seconds
-          default: 0,
-        },
+        type: Number,
+        ref: "Video",
       },
     ],
     finishedQuizzes: [

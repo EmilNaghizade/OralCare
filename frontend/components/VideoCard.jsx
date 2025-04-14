@@ -29,6 +29,7 @@ export const VideoCard = ({ item, style,styleThumbnail }) => (
       </Text>
     </View>
   </TouchableOpacity>
+  
 );
 
 const styles = StyleSheet.create({

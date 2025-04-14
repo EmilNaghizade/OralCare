@@ -1,5 +1,5 @@
 // app/(modal)/video/[id].jsx
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -17,17 +17,76 @@ import { useVideoPlayer, VideoView } from "expo-video"; // Use ex// po-video
 import BackButton from "../../../components/BackButton";
 import Typo from "../../../components/Typo";
 import Ionicons from "@expo/vector-icons/Ionicons"; // Icon library
+import { dummyVideos } from "../../data";
+import { videoApi } from "../../../services/api"; // Import videoApi
 
 const LocalVideoSource = require("../../../assets/videos/Video1.mp4"); // Adjust path as needed
 const greenFeatureIcon = require("../../../assets/images/JasmineCircle.png");
+
 // --- Component ---
 export default function VideoDetailScreen() {
   const { id: videoId } = useLocalSearchParams(); // Get ID from route param
+  const numericVideoId = parseInt(videoId, 10); // Convert to number since IDs in data.js are numbers
+  const [isWatched, setIsWatched] = useState(false);
+  const [watchTrackingComplete, setWatchTrackingComplete] = useState(false);
+  const playerRef = useRef(null);
+
+  const getVideoDataById = (videoId) => {
+    return dummyVideos[videoId - 1] || null; // Quiz'i bulamazsa null döndür
+  };
+
+  console.log(numericVideoId)
+
+  const videoData = getVideoDataById(numericVideoId);
+
+  const videoDetails = {
+    // ID'ye göre farklı veri döndürmek için genişletilebilir
+    id: videoId,
+    title: videoData ? videoData.title : "Quiz Title",
+    subtitle: videoData ? videoData.subtitle : "Quiz Subtitle",
+    tag: videoData ? videoData.tag : "Quiz Tag",
+  };
+  console.log(videoDetails);
 
   const player = useVideoPlayer(LocalVideoSource, (player) => {
     player.loop = false; // Set looping to false
     player.staysActiveInBackground = true; // Keep video active in background
   });
+
+  // Call API to mark video as watched
+  const markVideoAsWatched = async () => {
+    try {
+      console.log(`Marking video ${numericVideoId} as watched`);
+      await videoApi.markVideoAsWatched(numericVideoId);
+      setIsWatched(true);
+      setWatchTrackingComplete(true);
+    } catch (error) {
+      console.error("Error marking video as watched:", error);
+      // Don't show error to user, just log it
+    }
+  };
+
+  // Mark video as watched on mount - as soon as they open the video screen
+  useEffect(() => {
+    // You can choose to either:
+    // 1. Mark as watched immediately when screen opens:
+    markVideoAsWatched();
+  }, [numericVideoId]);
+
+  const handlePlaybackStatusUpdate = (status) => {
+    // Check if video is playing and has been watched for at least 30% of its duration
+    if (
+      status.isLoaded &&
+      !watchTrackingComplete &&
+      status.positionMillis &&
+      status.durationMillis
+    ) {
+      const watchedPercentage = status.positionMillis / status.durationMillis;
+      if (watchedPercentage >= 0.3) {
+        markVideoAsWatched();
+      }
+    }
+  };
 
   const handleShare = async () => {
     try {
@@ -66,7 +125,7 @@ export default function VideoDetailScreen() {
           <Image source={greenFeatureIcon} style={styles.featureIcon} />
           {/* Placeholder Title */}
           <Typo fontWeight="600" size={24} style={styles.title}>
-            Guide for in-patent oral hygiene using OroClean complete
+            {videoDetails.title}
           </Typo>
         </View>
 
@@ -78,6 +137,8 @@ export default function VideoDetailScreen() {
             allowsFullscreen
             allowsPictureInPicture
             staysActiveInBackground
+            ref={playerRef}
+            onPlaybackStatusUpdate={handlePlaybackStatusUpdate}
           />
         </View>
 
@@ -166,16 +227,16 @@ const styles = StyleSheet.create({
   videoPlayer: {
     width: "90%",
     aspectRatio: 16 / 9,
-      borderRadius: 16,
+    borderRadius: 16,
     alignSelf: "center",
-    marginVertical:15
+    marginVertical: 15,
   },
   contentContainer: {
     paddingHorizontal: 10,
     paddingVertical: 10,
     borderRadius: 16,
 
-    backgroundColor: "#fff"
+    backgroundColor: "#fff",
   },
   description: {
     fontSize: 16,

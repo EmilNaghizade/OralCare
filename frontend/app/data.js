@@ -1,25 +1,28 @@
 // --- Dummy Data ---
 export const dummyVideos = [
   {
-    _id: "v1",
+    _id: 1,
     title: "Guide for in-patient oral hygiene using OroClean complete",
     thumbnailUrl: require("../assets/images/VideoThumbnail1.png"),
     duration: "2 min 16 sec",
     tag: "Oral Care",
   },
   {
-    _id: "v2",
-    title: "Guide for in-patient oral hygiene using OroClean complete",
+    _id: 2,
+    title: "Guide for in-patient oral hygiene using OroClean complete 2",
     thumbnailUrl: require("../assets/images/VideoThumbnail2.png"),
     duration: "3 min 05 sec",
     tag: "Oral Care",
   },
 ];
-const quizzes = {
+
+
+export const quizzes = {
   1: {
     // Bu ID'yi quiz/index.jsx'ten gelen ID ile eşleştireceğiz
     id: 1,
     title: "Oral Health with OroCare", // Quiz başlığı
+    subtitle: "Test your knowledge about oral care products and techniques",
     questions: [
       // 1. Soru (Sizin verdiğiniz)
       {
@@ -89,6 +92,7 @@ const quizzes = {
   2: {
     id: 2, // Quiz ID'si
     title: "Advanced Oral Care Knowledge", // Quiz başlığı
+    subtitle: "Test your knowledge about oral care products and techniques",
     questions: [
       // 1. Soru
       {
@@ -217,9 +221,7 @@ const quizzes = {
   // 'another_quiz_id': { ... }
 };
 // Quiz verisini ID'ye göre getiren fonksiyon
-export const getQuizDataById = (quizId) => {
-  return quizzes[quizId] || null; // Quiz'i bulamazsa null döndür
-};
+
 
 export const dummyQuizzes = [
   {

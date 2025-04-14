@@ -13,28 +13,29 @@ import { LinearGradient } from "expo-linear-gradient";
 import BackButton from "../../components/BackButton"; // Kendi BackButton'unuz
 import { VideoCard } from "../../components/VideoCard"; // Kendi VideoCard'ınız
 import Typo from "../../components/Typo"; // Kendi Typo'nuz
-import { dummyVideos } from "../data"; // Örnek videoları alalım
-
-// Örnek Quiz Verisi (Normalde ID'ye göre API'den veya önceki ekrandan gelir)
-const getQuizDetails = (quizId) => {
-  // ID'ye göre farklı veri döndürmek için genişletilebilir
-  
-  return {
-    id: quizId,
-    title: "Oral Health with OroCare",
-    subtitle:
-      "How often should you brush your teeth to maintain good oral hygiene?",
-    questionCount: 12,
-    gradientColors:
-      quizId == 1 ? ["#663399", "#8A2BE2"] : ["#2E8B57", "#69b58a"], // Mor tonları (ayarlayabilirsiniz)
-    relatedVideos: dummyVideos.slice(0, 2), // İlgili videolar (ilk 2'sini alalım)
-  };
-};
+import { dummyVideos, quizzes } from "../data"; // Örnek videoları alalım
 
 export default function QuizDetailScreen() {
   const router = useRouter();
   const { id: quizId } = useLocalSearchParams(); // Gelen quiz ID'sini al
-  const quizDetails = getQuizDetails(quizId); // ID'ye göre quiz detaylarını al
+  const numericQuizId = parseInt(quizId, 10); // Convert to number since IDs in data.js are numbers
+  const getQuizDataById = (quizId) => {
+    return quizzes[quizId] || null; // Quiz'i bulamazsa null döndür
+  };
+  // Get quiz data from data.js using the imported function
+  const quizData = getQuizDataById(numericQuizId);
+
+  // Örnek Quiz Verisi (Normalde ID'ye göre API'den veya önceki ekrandan gelir)
+  const quizDetails = {
+    // ID'ye göre farklı veri döndürmek için genişletilebilir
+    id: quizId,
+    title: quizData ? quizData.title : "Quiz Title",
+    subtitle: quizData ? quizData.subtitle : "Quiz Subtitle",
+    questionCount: quizData ? quizData.questions.length : 0,
+    gradientColors:
+      quizId == 1 ? ["#663399", "#8A2BE2"] : ["#2E8B57", "#69b58a"], // Mor tonları (ayarlayabilirsiniz)
+    relatedVideos: dummyVideos.slice(0, 2), // İlgili videolar (ilk 2'sini alalım)
+  };
 
   const handleStartQuiz = () => {
     console.log("Starting quiz:", quizDetails.id);

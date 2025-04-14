@@ -18,7 +18,7 @@ import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
 import { LinearGradient } from "expo-linear-gradient";
 
-const getProfile = (token) => fetchWithAuth("/api/auth/profile", token);
+const getProfile = (token) => fetchWithAuth("/api/profile/profile", token);
 
 export default function HomeScreen() {
   const { authToken } = useAuth();

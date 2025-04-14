@@ -32,7 +32,6 @@ router.post('/:quizId/finish', protectRoute, async (req, res) => {
   try {
     const quizId = req.params.quizId;
     
-  
 
     // Update user document to add quiz to finishedQuizzes if not already there
     const user = await User.findById(req.user.id);

@@ -138,35 +138,6 @@ function AuthProvider({ children }) {
     // !!! Backend olsaydı burada API'ye de gönderilebilirdi !!!
   };
 
-  // Add this function to mark a quiz as completed
-  const markQuizCompleted = async (quizId) => {
-    try {
-      // Check if quiz is already completed
-      if (completedQuizzes.includes(quizId)) {
-        return completedQuizzes.length; // Already completed, return current count
-      }
-
-      // Call API to mark quiz as completed
-
-      await quizApi.markQuizCompleted(quizId);
-
-      // Update local state
-      const updatedQuizzes = [...completedQuizzes, quizId];
-      setCompletedQuizzes(updatedQuizzes);
-
-      // Save to secure storage for offline access
-      await SecureStore.setItemAsync(
-        "completedQuizzes",
-        JSON.stringify(updatedQuizzes)
-      );
-
-      return updatedQuizzes.length; // Return the count of completed quizzes
-    } catch (error) {
-      console.error("[markQuizCompleted] Error:", error);
-      throw error;
-    }
-  };
-
   const value = {
     authToken,
     user,
@@ -174,7 +145,6 @@ function AuthProvider({ children }) {
     userPoints,
     login,
     logout,
-    markQuizCompleted, // Add this new function
     updateUserPoints,
   };
 

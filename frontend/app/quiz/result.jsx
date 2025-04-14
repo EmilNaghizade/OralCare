@@ -30,32 +30,22 @@ export default function QuizResultsScreen() {
   const earnedPoints = score * POINTS_PER_QUESTION;
   const confettiRef = useRef(null); // Konfeti için ref (opsiyonel, manuel tetikleme için)
 
+  // Call API to mark video as watched
+  const markQuizAsCompleted = async () => {
+    try {
+      await quizApi.markQuizCompleted(quizId);
+    } catch (error) {
+      console.error("Error marking video as watched:", error);
+      // Don't show error to user, just log it
+    }
+  };
+
   // Puanları context/storage üzerinden güncelle (sadece component mount olduğunda bir kere çalışır)
   useEffect(() => {
-    const handleQuizCompletion = async () => {
-      console.log(
-        `Quiz ${quizId} bitti. Skor: ${score}/${totalQuestions}. Kazanılan Puan: ${earnedPoints}`
-      );
-
-      console.log(quizId, "QUIZ ID")
-
-      if (quizId) {
-        try {
-          const completedCount = await markQuizCompleted(quizId);
-          console.log(
-            `Quiz marked as completed. Total completed: ${completedCount}`
-          );
-        } catch (error) {
-          console.error("Failed to mark quiz as completed:", error);
-        }
-      }
-    };
-    handleQuizCompletion();
-  }, []); // Boş dependency array, sadece bir kere çalışmasını sağlar
+    markQuizAsCompleted();
+  }, [quizId]); // Boş dependency array, sadece bir kere çalışmasını sağlar
 
   const handleGoHome = () => {
-    // Anasayfa tab'ına yönlendir (veya ana quiz listesine)
-    // Rota adının '/(tabs)/home' olduğundan emin olun veya kendi yapınıza göre değiştirin
     router.replace("/(tabs)/home"); // replace kullanarak geri tuşuyla buraya dönülmesini engelle
   };
 
