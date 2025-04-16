@@ -89,6 +89,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff", // Header altındaki alanın arka planı
   },
   header: {
+    height: 100, // Header yüksekliği
+    justifyContent: "flex-end", // Başlığı dikeyde ortala
     backgroundColor: "#fff", // Beyaz header arka planı
     paddingTop: Platform.OS === "android" ? 20 : 15, // Üst boşluk (statusBar'a göre)
     paddingBottom: 20, // Alt boşluk
@@ -107,6 +109,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: "#1c1c1c", // Koyu başlık rengi
     textAlign: "left", // Başlığı ortala
+    
   },
   listContainer: {
     // Kartlar marginHorizontal kullandığı için padding'i yarıya indiriyoruz

@@ -57,6 +57,11 @@ export default function ProfileScreen() {
   const [galleryPermission, setGalleryPermission] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [modalAnimation] = useState(new Animated.Value(0));
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState("success"); // 'success' or 'error'
+  const toastAnimation = useRef(new Animated.Value(0)).current;
+
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,
@@ -80,6 +85,30 @@ export default function ProfileScreen() {
       },
     })
   ).current;
+
+  const showToast = (message, type = "success") => {
+    setToastMessage(message);
+    setToastType(type);
+    setToastVisible(true);
+
+    // Animate toast in
+    Animated.timing(toastAnimation, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+
+    // Set timeout to hide toast
+    setTimeout(() => {
+      Animated.timing(toastAnimation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start(() => {
+        setToastVisible(false);
+      });
+    }, 2000); // Show for 2 seconds
+  };
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -216,10 +245,11 @@ export default function ProfileScreen() {
           newImage.uri,
           newImage.base64
         );
+        showToast("Profile photo added successfully");
       }
     } catch (error) {
       console.error("Error taking photo:", error);
-      Alert.alert("Error", "Failed to take photo. Please try again.");
+      showToast("Failed to add photo", "error");
     } finally {
       setPhotoModalVisible(false);
     }
@@ -259,10 +289,11 @@ export default function ProfileScreen() {
           newImage.uri,
           newImage.base64
         );
+        showToast("Profile photo uploaded successfully");
       }
     } catch (error) {
       console.error("Error picking image:", error);
-      Alert.alert("Error", "Failed to select photo. Please try again.");
+      showToast("Failed to upload photo", "error");
     } finally {
       setPhotoModalVisible(false);
     }
@@ -276,10 +307,11 @@ export default function ProfileScreen() {
         if (user) {
           setUser({ ...user, profileImage: null });
         }
+        showToast("Profile photo removed successfully");
       }
     } catch (error) {
       console.error("Error deleting photo:", error);
-      Alert.alert("Error", "Failed to delete profile photo. Please try again.");
+      showToast("Failed to remove photo", "error");
       if (user?.profileImage) {
         setProfileImage({ uri: user.profileImage });
       }
@@ -304,6 +336,27 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      {toastVisible && (
+        <Animated.View
+          style={[
+            styles.toast,
+            toastType === "error" ? styles.toastError : styles.toastSuccess,
+            {
+              opacity: toastAnimation,
+              transform: [
+                {
+                  translateY: toastAnimation.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-20, 0],
+                  }),
+                },
+              ],
+            },
+          ]}
+        >
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </Animated.View>
+      )}
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         {/* User Info Section */}
         <View style={styles.userInfoSection}>
@@ -326,18 +379,9 @@ export default function ProfileScreen() {
           <Text style={styles.userName}>{profileData.name}</Text>
 
           {/* Reward Card */}
-          <TouchableOpacity
-            style={styles.rewardCard}
-            onPress={navigateToRewards}
-          >
-            <View style={styles.rewardTextContainer}>
-              <Text style={styles.rewardCardTitle}>Get rewarded</Text>
-              <Text style={styles.rewardCardSubText}>
-                Invite your friends and get various rewards
-              </Text>
-            </View>
+          <TouchableOpacity onPress={navigateToRewards}>
             <Image
-              source={require("../../assets/images/banner2.png")}
+              source={require("../../assets/images/banner3.png")}
               style={styles.rewardCardImage}
               resizeMode="contain"
             />
@@ -394,15 +438,9 @@ export default function ProfileScreen() {
         <View style={styles.listCard}>
           <Text style={styles.listHeader}>Support & Feedback</Text>
           <ProfileListItem
-            iconName="help-circle-outline"
-            label="FAQ"
+            iconName="chatbubble-ellipses-outline"
+            label="Chat with us"
             onPress={navigateToFAQ}
-          />
-          <View style={styles.separator} />
-          <ProfileListItem
-            iconName="call-outline"
-            label="Contact support"
-            onPress={navigateToContact}
           />
           <View style={styles.separator} />
           <ProfileListItem
@@ -439,18 +477,33 @@ export default function ProfileScreen() {
             </View>
 
             <TouchableOpacity style={styles.modalOption} onPress={takePhoto}>
-              <Camera variant="Outline" size={48} />
+              <View style={styles.iconStyle}>
+                <Camera variant="Outline" size={48} />
+              </View>
               <Text style={styles.modalOptionText}>Take Photo</Text>
+              <View style={{ flex: 1, alignItems: "flex-end" }}>
+                <Ionicons name="chevron-forward" size={24} color="#000" />
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalOption} onPress={pickImage}>
-              <Gallery variant="Outline" size={48} />
-              <Text style={styles.modalOptionText}>Choose from Gallery</Text>
+              <View style={styles.iconStyle}>
+                <Gallery variant="Outline" size={48} />
+              </View>
+              <Text style={styles.modalOptionText}>Upload Photo</Text>
+              <View style={{ flex: 1, alignItems: "flex-end" }}>
+                <Ionicons name="chevron-forward" size={24} color="#000" />
+              </View>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalOption} onPress={deletePhoto}>
-              <GalleryRemove variant="Outline" size={48} />
+              <View style={styles.iconStyle}>
+                <GalleryRemove variant="Outline" size={48} />
+              </View>
               <Text style={[styles.modalOptionText, styles.deleteText]}>
-                Remove Current Photo
+                Delete Photo
               </Text>
+              <View style={{ flex: 1, alignItems: "flex-end" }}>
+                <Ionicons name="chevron-forward" size={24} color="#000" />
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.cancelButton}
@@ -505,9 +558,10 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontSize: 20,
-    fontWeight: "bold",
-    color: "#1F2937",
-    marginBottom: 8,
+    fontWeight: "500",
+    lineHeight: 28,
+    color: "#0F172A",
+    marginBottom: 16,
   },
   editButton: {
     backgroundColor: "#038565",
@@ -522,32 +576,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
-  rewardCard: {
-    backgroundColor: "#049472",
-    borderRadius: 20,
-    paddingVertical: 20,
-    paddingLeft: 20,
-    paddingRight: 10,
-    marginHorizontal: 15,
-    marginBottom: 15,
-    flexDirection: "row",
-    alignItems: "center",
-    overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-  rewardTextContainer: { flex: 1, paddingRight: 10 },
-  rewardCardTitle: {
-    color: "#fff",
-    fontSize: 20,
-    fontWeight: "bold",
-    marginBottom: 5,
-  },
-  rewardCardSubText: { color: "#fff", fontSize: 14, lineHeight: 18 },
-  rewardCardImage: { width: 170, height: 80, resizeMode: "" },
+
+  rewardCardImage: { width: 350, height: 112, resizeMode: "" },
   statsSection: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -629,7 +659,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    padding: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+  },
+  iconStyle: {
+    backgroundColor: "#F6F8FC",
+    borderRadius: 12,
+    padding: 8,
+  },
+  modalHandle: {
+    width: 36,
+    height: 5,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 3,
+    alignSelf: "center",
+    marginTop: 10,
+    marginBottom: 16,
   },
   modalTitle: {
     fontSize: 18,
@@ -640,19 +685,61 @@ const styles = StyleSheet.create({
   },
   modalOption: {
     flexDirection: "row",
+
     alignItems: "center",
     paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f0f2f5",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    borderRadius: 10,
+    marginBottom: 10,
+    paddingHorizontal: 10,
   },
-  modalOptionText: { fontSize: 16, color: "#1F2937", marginLeft: 15 },
-  deleteText: { color: "#DC2626" },
+  modalOptionText: {
+    fontSize: 16,
+    color: "#000",
+    marginLeft: 15,
+    fontWeight: "600",
+    lineHeight: 24,
+  },
   cancelButton: {
     marginTop: 15,
     paddingVertical: 15,
     alignItems: "center",
     backgroundColor: "#f0f2f5",
-    borderRadius: 10,
+    borderRadius: 28,
   },
   cancelButtonText: { fontSize: 16, fontWeight: "500", color: "#1F2937" },
+  // Toast styles
+  toast: {
+    position: "absolute",
+    top: 50,
+    left: 20,
+    right: 20,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 16,
+    zIndex: 1000,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  toastSuccess: {
+    borderLeftWidth: 5,
+    borderLeftColor: "#10B981", // Green color for success
+  },
+  toastError: {
+    borderLeftWidth: 5,
+    borderLeftColor: "#EF4444", // Red color for error
+  },
+  toastText: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#1F2937",
+  },
 });
