@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "frontend",
+    "name": "Oral Care",
     "slug": "oral-care",
     "version": "2.0.0",
     "orientation": "portrait",
@@ -10,12 +10,13 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.test.oralcare",
       "infoPlist": {
         "NSCameraUsageDescription": "This app uses the camera to take profile photos.",
-        "NSPhotoLibraryUsageDescription": "This app uses the photo library to select profile photos."
+        "NSPhotoLibraryUsageDescription": "This app uses the photo library to select profile photos.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
-
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
@@ -24,7 +25,8 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE"
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
       ],
       "package": "com.test.oralcare",
       "versionCode": 2

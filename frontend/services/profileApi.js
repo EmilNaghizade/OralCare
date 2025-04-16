@@ -51,7 +51,7 @@ export const profileApi = {
         throw new Error(result.message || "Failed to upload profile image");
       }
 
-      console.log("Upload successful:", result);
+  
       return result;
     } catch (error) {
       console.error("Error in profileApi.uploadProfileImage:", error);

@@ -1,14 +1,5 @@
 {
-  "expo": {
-    "plugins": [
-      [
-        "expo-dev-client",
-        {
-          "launchMode": "most-recent"
-        }
-      ]
-    ]
-  },
+
   "cli": {
     "version": ">= 16.2.1",
     "appVersionSource": "remote"

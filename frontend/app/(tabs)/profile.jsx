@@ -1,5 +1,5 @@
 // frontned/app/(tabs)/profile.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -10,8 +10,15 @@ import {
   TouchableOpacity,
   Modal,
   Alert,
+  PanResponder,
+  Animated,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  SimpleLineIcons,
+  Ionicons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+import { GalleryRemove, Gallery, Camera } from "iconsax-react-nativejs";
 import { useAuth } from "../_layout";
 import { fetchWithAuth } from "../../services/fetchWithAuth";
 import { useRouter } from "expo-router";
@@ -49,6 +56,30 @@ export default function ProfileScreen() {
   const [cameraPermission, setCameraPermission] = useState(null);
   const [galleryPermission, setGalleryPermission] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [modalAnimation] = useState(new Animated.Value(0));
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onPanResponderMove: (_, gestureState) => {
+        if (gestureState.dy > 0) {
+          // Only allow downward dragging
+          modalAnimation.setValue(gestureState.dy);
+        }
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (gestureState.dy > 50) {
+          // If dragged down more than 50px, close the modal
+          setPhotoModalVisible(false);
+        } else {
+          // Otherwise snap back to original position
+          Animated.spring(modalAnimation, {
+            toValue: 0,
+            useNativeDriver: true,
+          }).start();
+        }
+      },
+    })
+  ).current;
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -69,7 +100,6 @@ export default function ProfileScreen() {
             const imageUri = profileData.user.profileImage.startsWith("http")
               ? profileData.user.profileImage
               : `${process.env.EXPO_PUBLIC_API_BASE_URL}${profileData.user.profileImage}`;
-            console.log("Setting profile image from API:", imageUri);
             setProfileImage({ uri: imageUri });
           } else {
             setProfileImage(null);
@@ -90,6 +120,42 @@ export default function ProfileScreen() {
       }
     };
 
+    const fetchCompletedQuizzes = async () => {
+      if (!authToken) return;
+
+      try {
+        console.log("Fetching completed quizzes...");
+        const quizData = await quizApi.getCompletedQuizzes(authToken);
+        console.log("Completed quizzes data:", quizData);
+
+        if (quizData && quizData.finishedQuizIds) {
+          setCompletedQuizzes(quizData.finishedQuizIds);
+          setQuizCount(quizData.count || quizData.finishedQuizIds.length);
+        }
+      } catch (error) {
+        console.error("Error fetching completed quizzes:", error);
+        // If there's an error, we'll just keep the default empty array
+      }
+    };
+
+    const fetchWatchedVideos = async () => {
+      if (!authToken) return;
+      try {
+        console.log("Fetching watched videos...");
+        const videoData = await videoApi.getWatchedVideos(authToken);
+        console.log("Watched videos data:", videoData);
+        console.log("Watched videos data:", videoData);
+        if (videoData && videoData.watchedVideosId) {
+          setWatchedVideos(videoData.watchedVideosId);
+          setVideoCount(videoData.count || videoData.watchedVideosId.length);
+        }
+      } catch (error) {
+        console.error("Error fetching watched videos:", error);
+        // If there's an error, we'll just keep the default empty array
+      }
+    };
+    fetchWatchedVideos();
+    fetchCompletedQuizzes();
     // (Other data fetching functions for quizzes/videos remain unchanged)
     loadProfile();
   }, [authToken]);
@@ -100,12 +166,10 @@ export default function ProfileScreen() {
         const { status: cameraStatus } =
           await ImagePicker.requestCameraPermissionsAsync();
         setCameraPermission(cameraStatus === "granted");
-        console.log("Camera permission status:", cameraStatus);
 
         const { status: libraryStatus } =
           await ImagePicker.requestMediaLibraryPermissionsAsync();
         setGalleryPermission(libraryStatus === "granted");
-        console.log("Media library permission status:", libraryStatus);
       }
     })();
   }, []);
@@ -256,7 +320,7 @@ export default function ProfileScreen() {
               style={styles.editPhotoButton}
               onPress={() => setPhotoModalVisible(true)}
             >
-              <Ionicons name="pencil" size={18} color="#000" />
+              <SimpleLineIcons name="pencil" size={18} color="#000" />
             </TouchableOpacity>
           </View>
           <Text style={styles.userName}>{profileData.name}</Text>
@@ -352,7 +416,7 @@ export default function ProfileScreen() {
 
       {/* Photo Options Modal */}
       <Modal
-        animationType="slide"
+        animationType="fade"
         transparent={true}
         visible={photoModalVisible}
         onRequestClose={() => setPhotoModalVisible(false)}
@@ -362,17 +426,28 @@ export default function ProfileScreen() {
           activeOpacity={1}
           onPress={() => setPhotoModalVisible(false)}
         >
-          <View style={styles.modalContent}>
+          <Animated.View
+            style={[
+              styles.modalContent,
+              {
+                transform: [{ translateY: modalAnimation }],
+              },
+            ]}
+          >
+            <View {...panResponder.panHandlers}>
+              <View style={styles.modalHandle} />
+            </View>
+
             <TouchableOpacity style={styles.modalOption} onPress={takePhoto}>
-              <Ionicons name="camera-outline" size={24} color="#038565" />
+              <Camera variant="Outline" size={48} />
               <Text style={styles.modalOptionText}>Take Photo</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalOption} onPress={pickImage}>
-              <Ionicons name="image-outline" size={24} color="#038565" />
+              <Gallery variant="Outline" size={48} />
               <Text style={styles.modalOptionText}>Choose from Gallery</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalOption} onPress={deletePhoto}>
-              <Ionicons name="trash-outline" size={24} color="#DC2626" />
+              <GalleryRemove variant="Outline" size={48} />
               <Text style={[styles.modalOptionText, styles.deleteText]}>
                 Remove Current Photo
               </Text>
@@ -383,7 +458,7 @@ export default function ProfileScreen() {
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </TouchableOpacity>
-          </View>
+          </Animated.View>
         </TouchableOpacity>
       </Modal>
     </SafeAreaView>

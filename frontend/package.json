@@ -2,11 +2,24 @@
   "name": "frontend",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-confetti-cannon",
+          "patch-package",
+          "postinstall-postinstall",
+          "phosphor-react-native",
+          "env-cmd"
+        ]
+      }
+    }
+  },
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
@@ -18,17 +31,21 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
+    "@react-native-async-storage/async-storage": "^2.1.2",
     "axios": "^1.8.4",
     "env-cmd": "^10.1.0",
-    "expo": "~52.0.42",
+    "expo": "~52.0.46",
     "expo-constants": "~17.0.8",
+    "expo-dev-client": "~5.0.20",
     "expo-image-picker": "^16.0.6",
     "expo-linear-gradient": "~14.0.2",
     "expo-linking": "~7.0.5",
     "expo-router": "~4.0.20",
     "expo-secure-store": "~14.0.1",
-    "expo-splash-screen": "~0.29.22",
+    "expo-splash-screen": "~0.29.24",
     "expo-video": "~2.0.6",
+    "iconsax-react-native": "^0.0.8",
+    "iconsax-react-nativejs": "^0.0.8",
     "patch-package": "^8.0.0",
     "react": "18.3.1",
     "react-native": "0.76.9",
@@ -38,8 +55,8 @@
     "react-native-reanimated-carousel": "^4.0.2",
     "react-native-safe-area-context": "^4.12.0",
     "react-native-screens": "~4.4.0",
-    "react-native-webview": "13.12.5",
-    "expo-dev-client": "~5.0.20"
+    "react-native-svg": "^15.11.2",
+    "react-native-webview": "13.12.5"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -50,18 +67,6 @@
     "jest-expo": "~52.0.6",
     "react-test-renderer": "18.3.1",
     "typescript": "^5.3.3"
-  },
-  "expo": {
-    "doctor": {
-      "reactNativeDirectoryCheck": {
-        "exclude": [
-          "react-native-confetti-cannon",
-          "patch-package",
-          "postinstall-postinstall",
-          "phosphor-react-native"
-        ]
-      }
-    }
   },
   "private": true
 }

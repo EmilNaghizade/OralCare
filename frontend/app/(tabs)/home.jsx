@@ -7,7 +7,10 @@ import {
   ScrollView,
   FlatList,
   TouchableOpacity,
+  Modal,
+  Image,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../_layout"; // Adjust path if needed
@@ -17,7 +20,10 @@ import { dummyArticles, dummyNews, dummyQuizzes, dummyVideos } from "../data";
 import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
 import { LinearGradient } from "expo-linear-gradient";
+import ProceedArticleCard from "../../components/ProceedArticleCard";
 
+const getUserLaunchedKey = (userId) =>
+  `@OralCareApp:user_${userId}_hasLaunched`;
 const getProfile = (token) => fetchWithAuth("/api/profile/profile", token);
 
 export default function HomeScreen() {
@@ -26,10 +32,14 @@ export default function HomeScreen() {
   const [firstName, setFirstName] = useState("");
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles");
+  const [showModal, setShowModal] = useState(false);
+  const [userId, setUserId] = useState(null);
+
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
-      console.log(authToken,"token")
+      console.log(authToken, "token");
       if (!authToken) {
         console.log("Home: No auth token, cannot fetch profile.");
         setIsLoadingProfile(false);
@@ -40,6 +50,10 @@ export default function HomeScreen() {
         const profileData = await getProfile(authToken);
         if (profileData?.user) {
           setFirstName(profileData.user.name.split(" ")[0]);
+
+          if (profileData.user._id) {
+            setUserId(profileData.user._id);
+          }
         } else {
           console.warn(
             "Home: Profile data received, but user.name is missing or structure unexpected:",
@@ -55,7 +69,46 @@ export default function HomeScreen() {
       }
     };
 
+    const checkFirstTimeUser = async () => {
+      try {
+
+        // First, load the profile to get the user ID
+        const profileData = await getProfile(authToken);
+        console.log("Profile data:", profileData);
+        if (!profileData?.user?._id) {
+          console.warn("Cannot get user ID from profile data");
+          return;
+        }
+
+        const userId = profileData.user._id;
+        console.log("Checking first-time status for user:", userId);
+
+        // Now check if this specific user has launched the app before
+        const userLaunchedKey = getUserLaunchedKey(userId);
+        const hasLaunchedBefore = await AsyncStorage.getItem(userLaunchedKey);
+
+        console.log(`First-time check for user ${userId}:`, hasLaunchedBefore);
+
+        if (hasLaunchedBefore !== "true") {
+          console.log(
+            "This user hasn't seen the onboarding yet, showing modal"
+          );
+          setIsFirstTimeUser(true);
+          setShowModal(true);
+        } else {
+          console.log("This user has seen the onboarding before");
+          setIsFirstTimeUser(false);
+          setShowModal(false);
+        }
+      } catch (error) {
+        setShowModal(false);
+      }
+    };
+
+
     loadProfile();
+    checkFirstTimeUser();
+
   }, [authToken]);
 
   const knowledgeItemsToShow =
@@ -128,115 +181,183 @@ export default function HomeScreen() {
     );
   };
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
+    <>
+      {/* 1‑time “first login” modal */}
+      <Modal
+        visible={showModal}
+        animationType="fade"
+        transparent
+        onRequestClose={() => setShowModal(false)}
       >
-        <View style={styles.welcomeHeader}>
-          <Typo size={24} fontWeight="600">
-            👋 Welcome,{" "}
-            <Typo size={24} fontWeight="300">
-              {firstName}
-            </Typo>
-          </Typo>
-          <TouchableOpacity onPress={() => router.push("/notifications")}>
-            <Ionicons name="notifications-outline" size={28} color="#333" />
-          </TouchableOpacity>
-        </View>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            {/* Top Image */}
+            <Image
+              source={require("../../assets/images/ProceedImage.png")}
+              style={styles.modalImage}
+              resizeMode="cover"
+            />
 
-        {/* Watch & Learn Section */}
-        <View style={styles.sectionCard}>
-          <SectionHeader
-            title="Watch & Learn"
-            onSeeAllPress={() => router.push("/education")}
-            isOnSeeAll={true}
-          />
-          <Text style={styles.sectionSubtitle}>
-            Expert videos for step-by-step guidance
-          </Text>
-          <FlatList
-            data={dummyVideos} // Use dummy data
-            renderItem={({ item }) => <VideoCard item={item} />}
-            keyExtractor={(item) => item._id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
-          />
-        </View>
+            {/* Headline */}
+            <Text style={styles.modalTitle}>
+              Oral Care: Why it Matters More Than You Think
+            </Text>
 
-        <View style={styles.sectionCard}>
-          <SectionHeader title="Test your knowledge" isOnSeeAll={false} />
-          <Text style={styles.sectionSubtitle}>
-            Take quizzes based on videos and articles
-          </Text>
-          <FlatList
-            data={dummyQuizzes} // Use dummy data
-            renderItem={({ item }) => <QuizCard item={item} />}
-            keyExtractor={(item) => item._id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
-          />
-        </View>
+            {/* Body text */}
+            <Text style={styles.modalDescription}>
+              Some people are religious about brushing, flossing, and using
+              mouthwash. Others? Not so much. But the difference between those
+              who invest in oral care and those who skip it goes way beyond
+              fresh breath.
+            </Text>
 
-        <View style={styles.sectionCard}>
-          <SectionHeader
-            title="Knowledge Hub"
-            isOnSeeAll={true}
-            onSeeAllPress={() => router.push("/knowledge")}
-          />
-          <Text style={styles.sectionSubtitle}>
-            Articles and news on our industry.
-          </Text>
-
-          <View style={styles.knowledgeTabs}>
-            <TouchableOpacity
-              style={[
-                styles.tabButton,
-                activeKnowledgeTab === "Articles" && styles.activeTabButton,
-              ]}
-              onPress={() => setActiveKnowledgeTab("Articles")} // Simpler switch
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeKnowledgeTab === "Articles" && styles.activeTabText,
-                ]}
-              >
-                Articles
-              </Text>
+            {/* “Read more” link */}
+            <TouchableOpacity>
+              <Text style={styles.readMore}>Read more from this article</Text>
             </TouchableOpacity>
+
+            {/* Secondary card preview */}
+            <View style={styles.modalArticleWrapper}>
+              <ProceedArticleCard item={dummyArticles[0]} />
+            </View>
+
+            {/* Proceed button */}
             <TouchableOpacity
-              style={[
-                styles.tabButton,
-                activeKnowledgeTab === "News" && styles.activeTabButton,
-              ]}
-              onPress={() => setActiveKnowledgeTab("News")} // Simpler switch
+              style={styles.proceedButton}
+              onPress={() => {
+                // First close the modal
+                setShowModal(false);               
+                  console.log("HEYY:", userId);
+                  const userLaunchedKey = getUserLaunchedKey(userId);
+                  AsyncStorage.setItem(userLaunchedKey, "true")
+                    .then(() => {
+                      console.log(
+                        `User ${userId} marked as having launched the app`
+                      );
+                      setIsFirstTimeUser(false);
+                    })
+                    .catch((error) => {
+                      console.error("Error saving launch status:", error);
+                    });
+                
+              }}
             >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeKnowledgeTab === "News" && styles.activeTabText,
-                ]}
-              >
-                News
-              </Text>
+              <Text style={styles.proceedButtonText}>Proceed to app</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.welcomeHeader}>
+            <Typo size={28} fontWeight="600">
+              👋 Welcome,{" "}
+              <Typo size={28} fontWeight="600" color="#92999C">
+                {firstName}
+              </Typo>
+            </Typo>
+            <TouchableOpacity onPress={() => router.push("/notifications")}>
+              <Ionicons name="notifications-outline" size={28} color="#333" />
             </TouchableOpacity>
           </View>
 
-          {/* List for Articles/News */}
-          <FlatList
-            data={knowledgeItemsToShow} // Use filtered dummy data
-            renderItem={({ item }) => <ArticleCard item={item} />}
-            keyExtractor={(item) => item._id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+          {/* Watch & Learn Section */}
+          <View style={styles.sectionCard}>
+            <SectionHeader
+              title="Watch & Learn"
+              onSeeAllPress={() => router.push("/education")}
+              isOnSeeAll={true}
+            />
+            <Text style={styles.sectionSubtitle}>
+              Expert videos for step-by-step guidance
+            </Text>
+            <FlatList
+              data={dummyVideos} // Use dummy data
+              renderItem={({ item }) => <VideoCard item={item} />}
+              keyExtractor={(item) => item._id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+            />
+          </View>
+
+          <View style={styles.sectionCard}>
+            <SectionHeader title="Test your knowledge" isOnSeeAll={false} />
+            <Text style={styles.sectionSubtitle}>
+              Take quizzes based on videos and articles
+            </Text>
+            <FlatList
+              data={dummyQuizzes} // Use dummy data
+              renderItem={({ item }) => <QuizCard item={item} />}
+              keyExtractor={(item) => item._id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+            />
+          </View>
+
+          <View style={styles.sectionCard}>
+            <SectionHeader
+              title="Knowledge Hub"
+              isOnSeeAll={true}
+              onSeeAllPress={() => router.push("/knowledge")}
+            />
+            <Text style={styles.sectionSubtitle}>
+              Articles and news on our industry.
+            </Text>
+
+            <View style={styles.knowledgeTabs}>
+              <TouchableOpacity
+                style={[
+                  styles.tabButton,
+                  activeKnowledgeTab === "Articles" && styles.activeTabButton,
+                ]}
+                onPress={() => setActiveKnowledgeTab("Articles")} // Simpler switch
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeKnowledgeTab === "Articles" && styles.activeTabText,
+                  ]}
+                >
+                  Articles
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.tabButton,
+                  activeKnowledgeTab === "News" && styles.activeTabButton,
+                ]}
+                onPress={() => setActiveKnowledgeTab("News")} // Simpler switch
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeKnowledgeTab === "News" && styles.activeTabText,
+                  ]}
+                >
+                  News
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* List for Articles/News */}
+            <FlatList
+              data={knowledgeItemsToShow} // Use filtered dummy data
+              renderItem={({ item }) => <ArticleCard item={item} />}
+              keyExtractor={(item) => item._id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalList}
+            />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 }
 
@@ -299,6 +420,10 @@ const styles = StyleSheet.create({
     color: "gray",
     paddingHorizontal: 20,
     marginBottom: 15,
+  },
+  modalArticleWrapper: {
+    marginHorizontal: 16,
+    marginBottom: 16,
   },
   horizontalList: { paddingHorizontal: 20, paddingVertical: 5 },
   // --- Card Styles (Keep from previous version or enhance) ---
@@ -366,4 +491,89 @@ const styles = StyleSheet.create({
   activeTabButton: { backgroundColor: "#E0F2F7" },
   tabText: { fontSize: 14, fontWeight: "500", color: "#666" },
   activeTabText: { color: "#038565" },
+  // --- Modal Styles ---
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end", // <-- slide up from bottom
+    alignItems: "stretch",
+  },
+  // white card container
+  modalCard: {
+    width: "100%",
+    maxHeight: "84%", // <-- limit height
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20, // <-- only top corners
+    borderTopRightRadius: 20,
+    overflow: "hidden",
+    // shadow for iOS
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    // elevation for Android
+    elevation: 6,
+  },
+
+  // top image stretches full width & keeps aspect
+  modalImage: {
+    width: "90%",
+    alignSelf: "center",
+    height: 200,
+    margin: 20,
+    borderRadius: 20,
+  },
+
+  // headline
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    lineHeight: 32,
+    color: "#000",
+    marginHorizontal: 16,
+  },
+
+  // body paragraph
+  modalDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: "#666",
+    marginHorizontal: 16,
+    marginTop: 8,
+  },
+
+  // “Read more” link
+  readMore: {
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+    color: "#000",
+    marginHorizontal: 16,
+    marginTop: 12,
+  },
+
+  // wrapper around your ArticleCard preview
+  modalArticleWrapper: {
+    marginHorizontal: 16,
+    marginTop: 16,
+  },
+
+  // big green button at bottom
+  proceedButton: {
+    backgroundColor: "#038565",
+    height: 56,
+    borderRadius: 28,
+    marginHorizontal: 16,
+    marginTop: 10,
+    marginBottom: 40,
+    paddingVertical: 16,
+    alignItems: "center",
+  },
+  proceedButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 24,
+    textAlign: "center",
+  },
 });
