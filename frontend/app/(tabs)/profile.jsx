@@ -478,7 +478,7 @@ export default function ProfileScreen() {
 
             <TouchableOpacity style={styles.modalOption} onPress={takePhoto}>
               <View style={styles.iconStyle}>
-                <Camera variant="Outline" size={48} />
+                <Camera variant="Outline" size={24} />
               </View>
               <Text style={styles.modalOptionText}>Take Photo</Text>
               <View style={{ flex: 1, alignItems: "flex-end" }}>
@@ -487,7 +487,7 @@ export default function ProfileScreen() {
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalOption} onPress={pickImage}>
               <View style={styles.iconStyle}>
-                <Gallery variant="Outline" size={48} />
+                <Gallery variant="Outline" size={24} />
               </View>
               <Text style={styles.modalOptionText}>Upload Photo</Text>
               <View style={{ flex: 1, alignItems: "flex-end" }}>
@@ -496,7 +496,7 @@ export default function ProfileScreen() {
             </TouchableOpacity>
             <TouchableOpacity style={styles.modalOption} onPress={deletePhoto}>
               <View style={styles.iconStyle}>
-                <GalleryRemove variant="Outline" size={48} />
+                <GalleryRemove variant="Outline" size={24} />
               </View>
               <Text style={[styles.modalOptionText, styles.deleteText]}>
                 Delete Photo

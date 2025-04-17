@@ -13,6 +13,7 @@ import BackButton from "../../../components/BackButton";
 import Button from "../../../components/Button"; 
 import Typo from "../../../components/Typo";
 import { authApi } from "../../../services/api";
+import AnimatedIcon from "../../../components/AnimatedIcon";
 
 
 const emailIcon = require("../../../assets/images/Email.png");
@@ -76,7 +77,7 @@ const Login = () => {
       <BackButton />
       <View style={styles.container}>
         <View style={styles.content}>
-          <Image source={emailIcon} style={styles.icon} />
+          <AnimatedIcon iconSource={emailIcon}  />
 
           <Typo fontWeight="600" size={36} style={styles.title}>
             Enter your email
@@ -130,21 +131,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1, // Take remaining space
     justifyContent: "space-between", // Push content up, button down
-    paddingHorizontal: 30, // Push content up, button down
   },
   content: {
     flex: 1, // Allow content to take space
     alignItems: "center",
     justifyContent: "flex-start", // <--- Change to 'flex-start'
     paddingHorizontal: 30,
-    paddingBottom: 20,
-    paddingTop: Platform.OS === "ios" ? 80 : 60, // <-- Add paddingTop like other screens (adjust value if needed)
-  },
-  icon: {
-    // Style for PNG
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
+    paddingTop: Platform.OS === "ios" ? 20 : 60, // <-- Add paddingTop like other screens (adjust value if needed)
   },
   title: {
     lineHeight: 44, // Adjust line height for multi-line text

@@ -4,7 +4,7 @@ import { Slot, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
 import { ActivityIndicator, View } from "react-native";
-import { authApi, quizApi } from "../services/api";
+import { authApi } from "../services/api";
 
 // --- Authentication Context ---
 const AuthContext = createContext(null);
@@ -86,14 +86,27 @@ function AuthProvider({ children }) {
   }, []); // Sadece component mount edildiğinde çalışır
 
   useEffect(() => {
-    if (!isLoading) {
-      if (authToken) {
-        router.replace("/(tabs)/home");
-      } else {
-        router.replace("/onboarding");
+    const getAdmin = async () => {
+      try {
+        if (!isLoading && authToken && user) {
+          // User is authenticated and profile is loaded
+          const storedUser = await SecureStore.getItemAsync("user");
+          console.log(storedUser?.role, "heyyyyy");
+          // Check if user has admin role and redirect accordingly
+          if (user.role === "admin") {
+            router.replace("/admin");
+          } else {
+            router.replace("/(tabs)/home");
+          }
+        } else if (!isLoading && !authToken) {
+          router.replace("/onboarding");
+        }
+      } catch (error) {
+        console.error("[AuthProvider getAdmin] HATA:", error);
       }
-    }
-  }, [isLoading]);
+    };
+    getAdmin();
+  }, [isLoading, authToken, ]); // isLoading, authToken ve user değiştiğinde çalışır
 
   // Login fonksiyonu: token ve user objesini alır (API response'dan)
   const login = async (email, password) => {
@@ -104,6 +117,12 @@ function AuthProvider({ children }) {
       setUser(user);
       await SecureStore.setItemAsync("authToken", token);
       await SecureStore.setItemAsync("user", JSON.stringify(user));
+      console.log("Login response: USER", user.role === "admin");
+      if (user.role === "admin") {
+        router.replace("/admin");
+      } else {
+        router.replace("/(tabs)/home");
+      }
       return user;
     } catch (error) {
       console.error("[AuthProvider login] HATA:", error);

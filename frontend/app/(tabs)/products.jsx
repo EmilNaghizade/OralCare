@@ -9,36 +9,25 @@ import {
   Dimensions,
   SafeAreaView, // <-- SafeAreaView EKLENDİ
   Platform,
+  Linking,
 } from "react-native";
 // import { useRouter } from "expo-router"; // Şimdilik kullanılmıyor, gerekirse ekleyin
 import Typo from "../../components/Typo"; // Typo bileşeni varsayılıyor
+import { dummyProducts } from "../data";
 
-// --- Dummy Data ---
-// Her ürün için ayrı resim eklemek daha iyi olur
-const productImg1 = require("../../assets/images/Product2.png");
-// Örnek: const productImg2 = require("../../assets/images/Product2.png");
-
-const dummyProducts = [
-  // Her ürüne kendi image özelliğini ekleyin
-  { id: "p1", name: "OroCare™ Mini toothbrush", image: productImg1 },
-  { id: "p2", name: "OroCare™ Mini toothbrush", image: productImg1 }, // Farklı resim kullanın
-  { id: "p3", name: "OroCare™ Mini toothbrush", image: productImg1 },
-  { id: "p4", name: "OroCare™ Mini toothbrush", image: productImg1 },
-];
-
-// --- Stil Sabitleri ve Hesaplama ---
 const PADDING = 16; // Yeni padding/gap değeri
 const { width } = Dimensions.get("window");
-// Genişlik hesaplaması: (Ekran Genişliği - Sol Padding - Sağ Padding - Sütunlar Arası Boşluk) / 2
 const ITEM_WIDTH = (width - PADDING * 3) / 2;
 
 // --- Ürün Kartı Bileşeni ---
 const ProductCard = ({ item }) => {
-  // const router = useRouter(); // Kart tıklanınca yönlendirme için
   return (
     <TouchableOpacity
       style={styles.productCard}
       activeOpacity={0.8}
+      onPress={() => {
+        Linking.openURL(item.productLink);
+      }}
       // onPress={() => router.push(`/product-detail/${item.id}`)} // Örnek yönlendirme
     >
       {/* Resim Alanı */}
@@ -61,23 +50,28 @@ const ProductCard = ({ item }) => {
 export default function ProductsScreen() {
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Özel Başlık Alanı */}
-      <View style={styles.header}>
-        <Typo fontWeight="600" size={20} style={styles.headerTitle}>
-          Oral Care Products
-        </Typo>
-      </View>
+      <View
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Özel Başlık Alanı */}
+        <View style={styles.header}>
+          <Typo fontWeight="600" size={20} style={styles.headerTitle}>
+            Oral Care Products
+          </Typo>
+        </View>
 
-      {/* Ürün Listesi (Grid) */}
-      <FlatList
-        data={dummyProducts}
-        renderItem={({ item }) => <ProductCard item={item} />}
-        keyExtractor={(item) => item.id}
-        numColumns={2} // 2 Sütunlu Grid
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false} // Scroll bar'ı gizle
-        // columnWrapperStyle={styles.columnWrapper} // Gerekirse sütunlar arası boşluk için
-      />
+        {/* Ürün Listesi (Grid) */}
+        <FlatList
+          data={dummyProducts}
+          renderItem={({ item }) => <ProductCard item={item} />}
+          keyExtractor={(item) => item.id}
+          numColumns={2} // 2 Sütunlu Grid
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false} // Scroll bar'ı gizle
+          // columnWrapperStyle={styles.columnWrapper} // Gerekirse sütunlar arası boşluk için
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -86,8 +80,10 @@ export default function ProductsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff", // Header altındaki alanın arka planı
+    backgroundColor: "#fff ", // Header altındaki alanın arka planı
   },
+  scrollContainer: { paddingBottom: 30, backgroundColor: "#f0f2f5" },
+
   header: {
     height: 100, // Header yüksekliği
     justifyContent: "flex-end", // Başlığı dikeyde ortala
@@ -109,7 +105,6 @@ const styles = StyleSheet.create({
   headerTitle: {
     color: "#1c1c1c", // Koyu başlık rengi
     textAlign: "left", // Başlığı ortala
-    
   },
   listContainer: {
     // Kartlar marginHorizontal kullandığı için padding'i yarıya indiriyoruz

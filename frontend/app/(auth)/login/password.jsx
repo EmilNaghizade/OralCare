@@ -21,6 +21,7 @@ import Button from "../../../components/Button"; // Adjust path
 import Typo from "../../../components/Typo"; // Adjust path
 import { useAuth } from "../../_layout"; // Import your Auth context
 import { authApi } from "../../../services/api";
+import AnimatedIcon from "../../../components/AnimatedIcon";
 
 // UPDATE PATH if needed
 const passwordIcon = require("../../../assets/images/Password.png");
@@ -56,7 +57,7 @@ const PasswordScreen = () => {
     try {
       // --- Call context login function ---
       await login(email, password);
-      router.push("/(tabs)/home")
+      router.push("/(tabs)/home");
       // --- Handle Success ---
       console.log("Login successful");
     } catch (error) {
@@ -73,16 +74,14 @@ const PasswordScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <View style={styles.headerContainer}>
-        <BackButton />
-      </View>
+      <BackButton />
 
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
         <View style={styles.content}>
-          <Image source={passwordIcon} style={styles.icon} />
+          <AnimatedIcon iconSource={passwordIcon} />
 
           <Typo fontWeight="600" size={36} style={styles.title}>
             Enter password
@@ -121,11 +120,7 @@ const PasswordScreen = () => {
             onPress={handleLogin}
             disabled={isLoading}
           >
-            <Typo
-              fontWeight="600"
-              size={16}
-              color={"#fff"}
-            >
+            <Typo fontWeight="600" size={16} color={"#fff"}>
               {isLoading ? "Signing Up..." : "Complete sign in"}
             </Typo>
           </Button>
@@ -142,13 +137,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   // Added headerContainer style from previous examples
-  headerContainer: {
-    paddingTop: Platform.OS === "ios" ? 0 : 10,
-    paddingLeft: 15,
-    paddingBottom: 5,
-    width: "100%",
-    alignSelf: "flex-start", // Keep back button left aligned
-  },
+
   container: {
     flex: 1,
     justifyContent: "space-between",
@@ -158,16 +147,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start", // Align content higher
     paddingHorizontal: 30,
-    paddingTop: Platform.OS === "ios" ? 80 : 60, // Consistent padding
-  },
-  icon: {
-    // Style for PNG
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
-    marginBottom: 30, // Added margin below icon
+    paddingTop: Platform.OS === "ios" ? 20 : 60, // Consistent padding
   },
   title: {
+    lineHeight: 44, // Adjust line height for multi-line text
     textAlign: "center",
     marginBottom: 40,
     color: "#333",
@@ -175,13 +158,12 @@ const styles = StyleSheet.create({
   // animatedWrapperStyle is defined dynamically above
 
   input: {
-    flex: 1, // Allow input to take available space next to icon
-    fontSize: 20, // Adjusted size slightly
+    flex: 1,
+    fontSize: 24,
     paddingVertical: 10,
     paddingBottom: 10, // Space for underline
-    textAlign: "left", // Changed to left align
-    paddingLeft: 10, // Added padding for left align
-    color: "#333",
+    textAlign: "center",
+    color: "#000",
     // Remove borders here - handled by wrapper
   },
   eyeIconContainer: {

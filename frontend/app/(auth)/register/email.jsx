@@ -14,6 +14,7 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import BackButton from "../../../components/BackButton"; // Adjust path
 import Button from "../../../components/Button"; // Adjust path
 import Typo from "../../../components/Typo";
+import AnimatedIcon from "../../../components/AnimatedIcon";
 
 // Placeholder for PNG icon - UPDATE PATH
 const emailIcon = require("../../../assets/images/Email.png");
@@ -106,7 +107,8 @@ const EmailScreen = () => {
       <View style={styles.container}>
         <View style={styles.content}>
           {/* Replace with SVG if using SVG */}
-          <Image source={emailIcon} style={styles.icon} />
+          <AnimatedIcon iconSource={emailIcon}  />
+          {/* <Image source={emailIcon} style={styles.icon} />
           {/* <EmailIcon width={60} height={60} fill="#4CAF50" style={styles.iconSvg} /> */}
 
           <Typo fontWeight="600" size={36} style={styles.title}>
@@ -166,14 +168,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start", // <--- Change to 'flex-start'
     paddingHorizontal: 30,
     paddingBottom: 20,
-    paddingTop: Platform.OS === "ios" ? 80 : 60, // <-- Add paddingTop like other screens (adjust value if needed)
+    paddingTop: Platform.OS === "ios" ? 20 : 60, // <-- Add paddingTop like other screens (adjust value if needed)
   },
-  icon: {
-    // Style for PNG
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
-  },
+
   title: {
     lineHeight: 44, // Adjust line height for multi-line text
     textAlign: "center",

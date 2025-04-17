@@ -37,15 +37,6 @@ const videoSchema = new mongoose.Schema(
         trim: true,
       },
     ],
-    author: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-    views: {
-      type: Number,
-      default: 0,
-    },
     isPublished: {
       type: Boolean,
       default: false,

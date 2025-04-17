@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
-  Image, // Or import your SVG icon component
   Platform,
   Alert,
 } from "react-native";
@@ -13,9 +12,8 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import BackButton from "../../../components/BackButton"; // Adjust path
 import Button from "../../../components/Button"; // Adjust path
 import Typo from "../../../components/Typo";
-// import GenderIcon from '../../../assets/icons/gender-icon.svg'; // Example if using SVG
+import AnimatedIcon from "../../../components/AnimatedIcon";
 
-// Placeholder for PNG icon - UPDATE PATH
 const genderIcon = require("../../../assets/images/Gender.png");
 
 const genders = ["Man", "Woman", "Prefer not to say"];
@@ -51,11 +49,8 @@ const GenderSelectionScreen = () => {
 
       {/* Use flex: 1 and space-between to push button to bottom */}
       <View style={styles.container}>
-        {/* Content Area */}
         <View style={styles.content}>
-          {/* Replace with SVG if using SVG */}
-          <Image source={genderIcon} style={styles.icon} />
-          {/* <GenderIcon width={60} height={60} fill="#4CAF50" style={styles.iconSvg} /> */}
+          <AnimatedIcon iconSource={genderIcon} />
 
           <Typo fontWeight="600" size={36} style={styles.title}>
             Select your gender
@@ -110,18 +105,6 @@ const styles = StyleSheet.create({
     // flex: 1, // Allow content to take up space but not push button excessively
     alignItems: "center",
     paddingTop: 20, // Space below header/back button
-  },
-  icon: {
-    // Style for PNG
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
-    marginBottom: 30,
-    // tintColor: '#4CAF50' // Use tintColor if needed for PNG
-  },
-  iconSvg: {
-    // Style for SVG
-    marginBottom: 30,
   },
   title: {
     lineHeight: 44, // Adjust line height for multi-line text

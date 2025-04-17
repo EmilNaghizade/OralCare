@@ -8,10 +8,7 @@ import {
   Alert,
   Platform,
   KeyboardAvoidingView,
-  Animated,
-  Easing,
   TouchableOpacity, // For the eye icon
-  Image, // Or import your SVG icon component
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons"; // For the eye icon
@@ -21,6 +18,7 @@ import * as SecureStore from "expo-secure-store";
 import { useAuth } from "../../_layout"; // Import your Auth context
 import Typo from "../../../components/Typo";
 import { authApi } from "../../../services/api";
+import AnimatedIcon from "../../../components/AnimatedIcon";
 
 // Placeholder for PNG icon - UPDATE PATH
 const passwordIcon = require("../../../assets/images/Password.png");
@@ -31,24 +29,12 @@ const PasswordScreen = () => {
 
   const { name, gender, email } = params; // Get all previous data
   const { login } = useAuth(); // Get login function from context
-  const [isFocused, setIsFocused] = useState(null)
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false); // State for visibility
   const [isLoading, setIsLoading] = useState(false); // State for loading indicator on button
 
-  const focusAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    // Input focus animation
-    Animated.timing(focusAnim, {
-      toValue: isFocused ? 1 : 0,
-      duration: 200,
-      easing: Easing.bezier(0.4, 0, 0.2, 1),
-      useNativeDriver: false,
-    }).start();
-  }, []);
 
-  // Animated styles for the input wrapper view (containing input and eye icon)
   const animatedWrapperStyle = {
     width: "100%",
     flexDirection: "row", // Arrange input and eye icon horizontally
@@ -78,7 +64,7 @@ const PasswordScreen = () => {
       if (response && response.token) {
         // --- Call context login function ---
         await login(email, password);
-        router.push("(tabs)/home")
+        router.push("(tabs)/home");
         // *** REMOVE navigation from here - handled by _layout ***
         // router.replace(HOME_ROUTE);
         console.log("Register success: Context login called.");
@@ -109,8 +95,8 @@ const PasswordScreen = () => {
       >
         <View style={styles.content}>
           {/* Replace with SVG if using SVG */}
-          <Image source={passwordIcon} style={styles.icon} />
-          {/* <PasswordIcon width={60} height={60} fill="#4CAF50" style={styles.iconSvg} /> */}
+          <AnimatedIcon iconSource={passwordIcon} />
+       
 
           <Typo fontWeight="600" size={36} style={styles.title}>
             Create password
@@ -128,8 +114,6 @@ const PasswordScreen = () => {
               autoComplete="password" // Help suggest strong passwords
               textContentType="password" // Semantic meaning (iOS)
               returnKeyType="done" // Keyboard return key says "Done"
-              focusable={isFocused}
-              onSubmitEditing={handleSignUp} // Allow submitting via keyboard
             />
             {/* Eye Icon Button */}
             <TouchableOpacity
@@ -187,14 +171,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start", // Align content higher
     paddingHorizontal: 30,
-    paddingTop: Platform.OS === "ios" ? 80 : 60, // Consistent padding
+    paddingTop: Platform.OS === "ios" ? 20 : 60, // Consistent padding
   },
-  icon: {
-    // Style for PNG
-    width: 60,
-    height: 60,
-    resizeMode: "contain",
-  },
+
   title: {
     textAlign: "center",
     marginBottom: 40,

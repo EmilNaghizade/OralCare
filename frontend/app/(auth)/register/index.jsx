@@ -1,67 +1,30 @@
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
-  Image,
   SafeAreaView,
-  Alert, // Import Alert for validation messages
-  Platform, // For potential platform-specific styling
-  KeyboardAvoidingView, // Helps prevent keyboard from covering input/button
+  Alert,
+  Platform,
+  KeyboardAvoidingView,
   Animated,
-  Easing,
 } from "react-native";
 import { useRouter } from "expo-router";
 import Button from "../../../components/Button"; // Import your custom Button
 import Typo from "../../../components/Typo";
 import BackButton from "../../../components/BackButton";
+import AnimatedIcon from "../../../components/AnimatedIcon";
 
 const nameIcon = require("../../../assets/images/nameIconFinal.png");
 
 export default function register() {
   const [name, setName] = useState("");
   const router = useRouter();
-  const [isFocused, setIsFocused] = useState(false);
-  const iconAnim = useRef(new Animated.Value(0)).current;
-
-  const focusAnim = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    // Animate focusAnim value based on isFocused state
-    Animated.timing(focusAnim, {
-      toValue: isFocused ? 1 : 0, // Target value is 1 when focused, 0 when blurred
-      duration: 200, // Animation duration in milliseconds
-      easing: Easing.bezier(0.4, 0, 0.2, 1), // Smooth easing curve
-      useNativeDriver: false, // **IMPORTANT**: Color/border animations often don't work with native driver
-    }).start();
-
-    Animated.sequence([
-      // First move down with a bounce effect
-      Animated.spring(iconAnim, {
-        toValue: 1,
-        friction: 4, // Controls "bounciness"
-        tension: 40, // Controls speed
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [isFocused, focusAnim]);
 
   // Interpolate animation value for styles
   const animatedWrapperStyle = {
     // Ensure the wrapper takes the necessary width
     width: "100%",
-  };
-
-  const animatedIconStyle = {
-    opacity: iconAnim,
-    transform: [
-      {
-        translateY: iconAnim.interpolate({
-          inputRange: [0, 1],
-          outputRange: [-60, 0], // Start higher for more dramatic effect
-        }),
-      },
-    ],
   };
 
   const handleNext = () => {
@@ -88,10 +51,7 @@ export default function register() {
         <BackButton />
 
         <View style={styles.content}>
-          <Animated.Image
-            source={nameIcon}
-            style={[styles.icon, animatedIconStyle]}
-          />
+          <AnimatedIcon iconSource={nameIcon} />
 
           <Typo fontWeight="600" size={36} style={styles.title}>
             What's your name{"\n"}and surname?
@@ -107,9 +67,6 @@ export default function register() {
               autoCapitalize="words"
               returnKeyType="done"
               onSubmitEditing={handleNext}
-              blurOnSubmit={false}
-              onFocus={() => setIsFocused(true)} // Set focused state to true
-              onBlur={() => setIsFocused(false)} // Set focused state to false
             />
           </Animated.View>
         </View>
@@ -145,13 +102,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     paddingHorizontal: 30,
     // Added paddingTop to push content down from the top edge
-    paddingTop: Platform.OS === "ios" ? 80 : 60, // Adjust value as needed
+    paddingTop: Platform.OS === "ios" ? 20 : 60, // Adjust value as needed
   },
-  icon: {
-    width: 60, // Adjust size as needed
-    height: 60, // Adjust size as needed
-    resizeMode: "contain",
-  },
+
   title: {
     textAlign: "center",
     marginBottom: 40, // Space below title
@@ -180,10 +133,5 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: "center",
   },
-  buttonText: {
-    // Style for the text inside the button
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
+
 });
