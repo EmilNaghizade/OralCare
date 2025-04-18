@@ -5,9 +5,10 @@ import {
   TextInput,
   StyleSheet,
   SafeAreaView,
+  TouchableWithoutFeedback,
   Alert,
+  Keyboard,
   Platform,
-  KeyboardAvoidingView,
   Animated,
   Easing,
   TouchableOpacity,
@@ -73,60 +74,59 @@ const PasswordScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <BackButton />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.safeArea}>
+        <BackButton />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-      >
-        <View style={styles.content}>
-          <AnimatedIcon iconSource={passwordIcon} />
+        <View style={styles.container}>
+          <View style={styles.content}>
+            <AnimatedIcon iconSource={passwordIcon} />
 
-          <Typo fontWeight="600" size={36} style={styles.title}>
-            Enter password
-          </Typo>
+            <Typo fontWeight="600" size={36} style={styles.title}>
+              Enter password
+            </Typo>
 
-          <View style={animatedWrapperStyle}>
-            <TextInput
-              style={styles.input}
-              placeholder="Password"
-              placeholderTextColor="#ccc"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!isPasswordVisible}
-              autoCapitalize="none"
-              autoComplete="password"
-              textContentType="password"
-              returnKeyType="done"
-              onSubmitEditing={handleLogin}
-            />
-            <TouchableOpacity
-              onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-              style={styles.eyeIconContainer}
-            >
-              <Ionicons
-                name={isPasswordVisible ? "eye-off" : "eye"}
-                size={24}
-                color="#888"
+            <View style={animatedWrapperStyle}>
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="#ccc"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!isPasswordVisible}
+                autoCapitalize="none"
+                autoComplete="password"
+                textContentType="password"
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
               />
-            </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                style={styles.eyeIconContainer}
+              >
+                <Ionicons
+                  name={isPasswordVisible ? "eye-off" : "eye"}
+                  size={24}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <Button
+              style={[styles.button, isLoading && styles.disabledButton]}
+              onPress={handleLogin}
+              disabled={isLoading}
+            >
+              <Typo fontWeight="600" size={16} color={"#fff"}>
+                {isLoading ? "Signing Up..." : "Complete sign in"}
+              </Typo>
+            </Button>
           </View>
         </View>
-
-        <View style={styles.buttonContainer}>
-          <Button
-            style={[styles.button, isLoading && styles.disabledButton]}
-            onPress={handleLogin}
-            disabled={isLoading}
-          >
-            <Typo fontWeight="600" size={16} color={"#fff"}>
-              {isLoading ? "Signing Up..." : "Complete sign in"}
-            </Typo>
-          </Button>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 

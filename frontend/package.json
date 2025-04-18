@@ -13,7 +13,8 @@
           "env-cmd"
         ],
         "listUnknownPackages": false
-      }
+      },
+      "checkNativeProjectSync": false
     }
   },
   "scripts": {

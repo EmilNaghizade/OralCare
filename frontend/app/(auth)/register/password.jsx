@@ -6,6 +6,8 @@ import {
   StyleSheet,
   SafeAreaView,
   Alert,
+  TouchableWithoutFeedback,
+  Keyboard,
   Platform,
   KeyboardAvoidingView,
   TouchableOpacity, // For the eye icon
@@ -32,8 +34,6 @@ const PasswordScreen = () => {
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false); // State for visibility
   const [isLoading, setIsLoading] = useState(false); // State for loading indicator on button
-
-
 
   const animatedWrapperStyle = {
     width: "100%",
@@ -86,68 +86,66 @@ const PasswordScreen = () => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <BackButton />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <SafeAreaView style={styles.safeArea}>
+        <BackButton />
 
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
-      >
-        <View style={styles.content}>
-          {/* Replace with SVG if using SVG */}
-          <AnimatedIcon iconSource={passwordIcon} />
-       
+        <View style={styles.container}>
+          <View style={styles.content}>
+            {/* Replace with SVG if using SVG */}
+            <AnimatedIcon iconSource={passwordIcon} />
 
-          <Typo fontWeight="600" size={36} style={styles.title}>
-            Create password
-          </Typo>
-          {/* Animated Wrapper for Input + Eye Icon */}
-          <View style={animatedWrapperStyle}>
-            <TextInput
-              style={styles.input}
-              placeholder="Password" // Placeholder matching image
-              placeholderTextColor="#ccc"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!isPasswordVisible} // Toggle based on state
-              autoCapitalize="none"
-              autoComplete="password" // Help suggest strong passwords
-              textContentType="password" // Semantic meaning (iOS)
-              returnKeyType="done" // Keyboard return key says "Done"
-            />
-            {/* Eye Icon Button */}
-            <TouchableOpacity
-              onPress={() => setIsPasswordVisible(!isPasswordVisible)}
-              style={styles.eyeIconContainer}
-            >
-              <Ionicons
-                name={isPasswordVisible ? "eye-off" : "eye"} // Change icon based on state
-                size={24}
-                color="#888" // Icon color
+            <Typo fontWeight="600" size={36} style={styles.title}>
+              Create password
+            </Typo>
+            {/* Animated Wrapper for Input + Eye Icon */}
+            <View style={animatedWrapperStyle}>
+              <TextInput
+                style={styles.input}
+                placeholder="Password" // Placeholder matching image
+                placeholderTextColor="#ccc"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!isPasswordVisible} // Toggle based on state
+                autoCapitalize="none"
+                autoComplete="password" // Help suggest strong passwords
+                textContentType="password" // Semantic meaning (iOS)
+                returnKeyType="done" // Keyboard return key says "Done"
               />
-            </TouchableOpacity>
+              {/* Eye Icon Button */}
+              <TouchableOpacity
+                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                style={styles.eyeIconContainer}
+              >
+                <Ionicons
+                  name={isPasswordVisible ? "eye-off" : "eye"} // Change icon based on state
+                  size={24}
+                  color="#888" // Icon color
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.buttonContainer}>
+            <Button
+              style={[styles.button, isLoading && styles.disabledButton]}
+              onPress={handleSignUp}
+              disabled={isLoading} // Disable button while loading
+            >
+              {/* Show loading indicator or text */}
+              <Typo
+                fontWeight="600"
+                size={16}
+                color={"#fff"}
+                style={styles.buttonText}
+              >
+                {isLoading ? "Signing Up..." : "Complete sign up"}
+              </Typo>
+            </Button>
           </View>
         </View>
-
-        <View style={styles.buttonContainer}>
-          <Button
-            style={[styles.button, isLoading && styles.disabledButton]}
-            onPress={handleSignUp}
-            disabled={isLoading} // Disable button while loading
-          >
-            {/* Show loading indicator or text */}
-            <Typo
-              fontWeight="600"
-              size={16}
-              color={"#fff"}
-              style={styles.buttonText}
-            >
-              {isLoading ? "Signing Up..." : "Complete sign up"}
-            </Typo>
-          </Button>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </TouchableWithoutFeedback>
   );
 };
 
