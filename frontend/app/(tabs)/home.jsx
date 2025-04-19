@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
   // white card container
   modalCard: {
     width: "100%",
-    maxHeight: "84%", // <-- limit height
+    maxHeight: "95%", // <-- limit height
     backgroundColor: "#fff",
     borderTopLeftRadius: 20, // <-- only top corners
     borderTopRightRadius: 20,
