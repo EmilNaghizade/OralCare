@@ -6,76 +6,76 @@ import {
   TouchableOpacity,
   Platform,
   StatusBar,
-  Animated, // Animasyon için
+  Animated,
 } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import BackButton from "../../components/BackButton"; // Kendi BackButton'unuz
-import Typo from "../../components/Typo"; // Kendi Typo'nuz
-import { quizzes } from "../data"; // Quiz verisini import et
+import BackButton from "../../components/BackButton";
+import Typo from "../../components/Typo";
+import { quizzes } from "../data";
+import FeedbackToast from "../../components/QuizFeedback"; // Import the FeedbackToast component
 
-const TOTAL_TIME = 120; // Saniye cinsinden (2 dakika)
+const TOTAL_TIME = 120; // 2 minutes in seconds
 
 export default function QuizQuestionScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
   const quizId = params.quizId;
-  // questionIndex parametresini al, yoksa 0 varsay (string'den number'a çevir)
   const initialQuestionIndex = parseInt(
     params.questionIndex?.toString() || "0",
     10
   );
 
   const [quizData, setQuizData] = useState(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] =
-    useState(initialQuestionIndex);
-  const [selectedAnswer, setSelectedAnswer] = useState(null); // Seçilen cevap
-  const [isAnswered, setIsAnswered] = useState(false); // Cevap verildi mi?
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME); // Kalan süre
-  const [score, setScore] = useState(0); // Doğru cevap sayısı
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(initialQuestionIndex);
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [isAnswered, setIsAnswered] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
+  const [score, setScore] = useState(0);
+  
+  // State for feedback toast
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isCorrectAnswer, setIsCorrectAnswer] = useState(false);
 
-  // Zamanlayıcı için referans
+  // Timer reference
   const timerIntervalRef = useRef(null);
-  // İlerleme çubuğu animasyonu için
+  // Progress bar animation
   const progressAnim = useRef(new Animated.Value(0)).current;
+  
   const getQuizDataById = (quizId) => {
-    return quizzes[quizId] || null; // Quiz'i bulamazsa null döndür
+    return quizzes[quizId] || null;
   };
-  // Quiz verisini yükle
+  
+  // Load quiz data
   useEffect(() => {
     const data = getQuizDataById(quizId?.toString());
     if (data?.questions?.length) {
       setQuizData(data);
     } else {
-      console.error("Quiz verisi bulunamadı veya boş:", quizId);
-      // Hata durumunda geri dön
+      console.error("Quiz data not found or empty:", quizId);
       if (router.canGoBack()) router.back();
     }
   }, [quizId, router]);
 
-  // İlerleme çubuğu animasyonunu güncelle
+  // Update progress bar animation
   useEffect(() => {
     if (quizData?.questions?.length) {
-      const newProgress =
-        (currentQuestionIndex + 1) / quizData.questions.length;
+      const newProgress = (currentQuestionIndex + 1) / quizData.questions.length;
       Animated.timing(progressAnim, {
         toValue: newProgress,
-        duration: 300, // Animasyon süresi
-        useNativeDriver: false, // width animasyonu için false olmalı
+        duration: 300,
+        useNativeDriver: false,
       }).start();
     }
   }, [currentQuestionIndex, quizData, progressAnim]);
 
-  // Zamanlayıcıyı başlat/durdur
+  // Start/stop timer
   useEffect(() => {
     if (quizData) {
-      // Sadece quiz verisi yüklendiğinde başlat
       timerIntervalRef.current = setInterval(() => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
             clearInterval(timerIntervalRef.current);
-            // Süre bitti, sonuçlara git
-            console.log("Süre bitti!");
             navigateToResults();
             return 0;
           }
@@ -84,82 +84,82 @@ export default function QuizQuestionScreen() {
       }, 1000);
     }
 
-    // Component unmount olduğunda interval'ı temizle
     return () => {
       if (timerIntervalRef.current) {
         clearInterval(timerIntervalRef.current);
       }
     };
-  }, [quizData]); // quizData yüklendiğinde başlasın
+  }, [quizData]);
 
-  // --- Fonksiyonlar ---
   const navigateToResults = () => {
     if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current); // Zamanlayıcıyı durdur
+      clearInterval(timerIntervalRef.current);
     }
     router.replace({
-      // Geri dönülememesi için replace kullan
-      pathname: "/quiz/result", // Sonuçlar sayfasının rotası
+      pathname: "/quiz/result",
       params: {
         quizId: quizId,
-        score: score, // Güncel skoru gönder
-        totalQuestions: quizData?.questions?.length || 0, // Toplam soru sayısını gönder
+        score: score,
+        totalQuestions: quizData?.questions?.length || 0,
       },
     });
   };
 
   const handleAnswerSelect = (option) => {
-    if (isAnswered) return; // Zaten cevaplandıysa tekrar seçtirme
+    if (isAnswered) return;
 
     const correct = option === currentQuestion?.correctAnswer;
-    setSelectedAnswer(option); // Seçimi state'e kaydet
-    setIsAnswered(true); // Cevaplandı olarak işaretle
-    let currentScore = score;
+    setSelectedAnswer(option);
+    setIsAnswered(true);
+    
+    // Show the feedback toast
+    setIsCorrectAnswer(correct);
+    setShowFeedback(true);
+    
+    // Update score if correct
     if (correct) {
-      currentScore += 10;
-      setScore((prevScore) => prevScore + 1); // Doğruysa skoru artır
+      setScore((prevScore) => prevScore + 1);
     }
 
-    // Geri bildirim için kısa bir süre bekle
+    // Wait a moment before proceeding to the next question
     setTimeout(() => {
       const nextIndex = currentQuestionIndex + 1;
       if (nextIndex < quizData.questions.length) {
-        // Sonraki soruya geç
+        // Move to next question
         setCurrentQuestionIndex(nextIndex);
-        setSelectedAnswer(null); // Seçimi sıfırla
-        setIsAnswered(false); // Cevaplandı durumunu sıfırla
+        setSelectedAnswer(null);
+        setIsAnswered(false);
+        setShowFeedback(false);
       } else {
-        // Quiz bitti, sonuçlara git
+        // Quiz is finished, navigate to results
         navigateToResults();
       }
-    }, 1000); // 1 saniye bekleme süresi
+    }, 2000); // 2 seconds delay to show feedback
   };
 
-  // Zamanı MM:SS formatına çevir
+  // Format time as MM:SS
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
   };
 
-  // --- Render ---
   const currentQuestion = quizData?.questions?.[currentQuestionIndex];
   const totalQuestions = quizData?.questions?.length || 0;
 
-  // Veri yüklenirken veya hata durumunda gösterilecek ekran
+  // Loading screen
   if (!quizData || !currentQuestion) {
     return (
       <SafeAreaView style={styles.container}>
-        {/* Stack header'ı gizleyebilir veya basit bir başlık gösterebilir */}
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.loadingContainer}>
-          <Typo>Quiz Yükleniyor...</Typo>
+          <Typo>Loading Quiz...</Typo>
         </View>
       </SafeAreaView>
     );
   }
 
-  // İlerleme çubuğunun genişliğini hesapla
+  // Calculate progress bar width
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ["0%", "100%"],
@@ -179,7 +179,7 @@ export default function QuizQuestionScreen() {
         </View>
       </View>
 
-      {/* İlerleme Çubuğu */}
+      {/* Progress Bar */}
       <View style={styles.progressTrack}>
         <Animated.View style={[styles.progressBar, { width: progressWidth }]} />
       </View>
@@ -187,20 +187,20 @@ export default function QuizQuestionScreen() {
         Question {currentQuestionIndex + 1} of {totalQuestions}
       </Typo>
 
-      {/* Soru */}
+      {/* Question */}
       <View style={styles.questionContainer}>
         <Typo size={22} fontWeight="600" style={styles.questionText}>
           {currentQuestion.text}
         </Typo>
       </View>
 
-      {/* Cevap Seçenekleri */}
+      {/* Answer Options */}
       <View style={styles.optionsContainer}>
         {currentQuestion.options.map((option, index) => {
           const isSelected = selectedAnswer === option;
           const isCorrect = currentQuestion.correctAnswer === option;
 
-          // Geri bildirim için dinamik stiller
+          // Dynamic styles for feedback
           let optionStyle = [styles.optionButton];
           let textStyle = [styles.optionText];
 
@@ -210,7 +210,7 @@ export default function QuizQuestionScreen() {
             );
             textStyle.push(styles.selectedOptionText);
           } else if (isAnswered && isCorrect) {
-            // Seçilmese bile doğru cevabı göster (isteğe bağlı)
+            // Optionally show the correct answer even if not selected
             // optionStyle.push(styles.correctOption);
             // textStyle.push(styles.selectedOptionText);
           }
@@ -220,10 +220,9 @@ export default function QuizQuestionScreen() {
               key={index}
               style={optionStyle}
               onPress={() => handleAnswerSelect(option)}
-              disabled={isAnswered} // Cevaplandıysa butonu pasif yap
+              disabled={isAnswered}
             >
               <Typo style={textStyle}>{option}</Typo>
-              {/* Doğru/Yanlış ikonu ekleme (isteğe bağlı) */}
               {isAnswered && isSelected && (
                 <Ionicons
                   name={isCorrect ? "checkmark-circle" : "close-circle"}
@@ -240,15 +239,22 @@ export default function QuizQuestionScreen() {
           );
         })}
       </View>
+
+      {/* Feedback Toast */}
+      <FeedbackToast 
+        isVisible={showFeedback} 
+        isCorrect={isCorrectAnswer}
+        onAnimationEnd={() => {}}
+      />
     </SafeAreaView>
   );
 }
 
-// --- Stiller ---
+// Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f8f9fa", // Biraz daha açık gri arka plan
+    backgroundColor: "#f8f9fa",
   },
   loadingContainer: {
     flex: 1,
@@ -262,96 +268,92 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingTop: Platform.OS === "android" ? 15 : 10,
     paddingBottom: 10,
-    backgroundColor: "#f0f2f5", // Beyaz header arka planı
+    backgroundColor: "#fff",
     borderBottomWidth: 1,
     borderBottomColor: "#eee",
   },
   timerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f0f2f5", // Zamanlayıcı arka planı
+    backgroundColor: "#f0f2f5",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 15,
   },
   timerText: {
     marginLeft: 6,
-    fontWeight: "600", // Biraz daha kalın
+    fontWeight: "600",
     fontSize: 14,
     color: "#333",
   },
   progressTrack: {
-    // İlerleme çubuğunun arka planı
-    height: 8, // Biraz daha kalın
+    height: 8,
     backgroundColor: "#e9ecef",
     marginHorizontal: 20,
-    marginTop: 15, // Header'dan sonra boşluk
+    marginTop: 15,
     borderRadius: 4,
     overflow: "hidden",
   },
   progressBar: {
-    // İlerleyen kısım
     height: "100%",
-    backgroundColor: "#038565", // Ana tema rengi
+    backgroundColor: "#038565",
     borderRadius: 4,
   },
   questionCounter: {
     textAlign: "center",
     marginTop: 12,
     fontSize: 14,
-    color: "#6c757d", // Daha soluk gri
+    color: "#6c757d",
   },
   questionContainer: {
     paddingHorizontal: 20,
-    marginTop: 25, // Soru ile sayaç arası boşluk
-    marginBottom: 35, // Soru ile cevaplar arası boşluk
-    alignItems: "center", // Soruyu ortala
+    marginTop: 25,
+    marginBottom: 35,
+    alignItems: "center",
   },
   questionText: {
-    lineHeight: 30, // Satır yüksekliği
-    color: "#212529", // Koyu renk soru metni
+    lineHeight: 30,
+    color: "#212529",
     textAlign: "center",
   },
   optionsContainer: {
     paddingHorizontal: 20,
-    gap: 15, // Seçenekler arası boşluk
+    gap: 15,
   },
   optionButton: {
-    flexDirection: "row", // İkonu sağa almak için
-    justifyContent: "space-between", // İkonu sağa almak için
+    flexDirection: "row",
+    justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#ffffff",
     paddingVertical: 18,
-    paddingHorizontal: 20, // İç boşluk artırıldı
-    borderRadius: 16, // Daha yuvarlak köşeler
+    paddingHorizontal: 20,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#dee2e6", // Daha belirgin sınır
-    // Gölge
+    borderColor: "#dee2e6",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
   },
   optionText: {
-    flex: 1, // Metnin ikon gelince kaymasını engelle
+    flex: 1,
     fontSize: 16,
     fontWeight: "500",
     color: "#343a40",
   },
-  // Seçim sonrası stiller
   correctOption: {
-    backgroundColor: "#e7f5ec", // Açık yeşil
-    borderColor: "#28a745", // Yeşil sınır
+    backgroundColor: "#e7f5ec",
+    borderColor: "#28a745",
   },
   incorrectOption: {
-    backgroundColor: "#fdecef", // Açık kırmızı
-    borderColor: "#dc3545", // Kırmızı sınır
+    backgroundColor: "#fdecef",
+    borderColor: "#dc3545",
   },
   selectedOptionText: {
-    fontWeight: "600", // Seçili/sonuç metnini biraz kalın yap
+    fontWeight: "600",
   },
   feedbackIcon: {
-    marginLeft: 10, // İkon ile metin arası boşluk
+    marginLeft: 10,
   },
 });

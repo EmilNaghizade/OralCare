@@ -6,7 +6,9 @@ import {
   ScrollView,
   TouchableOpacity,
   Platform, // Platform kontrolü için
+  StatusBar,
 } from "react-native";
+
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -49,9 +51,13 @@ export default function QuizDetailScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["bottom", "left", "right"]}>
+    <View style={styles.safeArea} edges={["bottom", "left", "right"]}>
       {/* Üstteki gradient koyu olduğu için status bar'ı light yapalım */}
-
+      <StatusBar
+       translucent
+       backgroundColor="transparent"
+       barStyle="light-content"
+      />
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
@@ -120,28 +126,30 @@ export default function QuizDetailScreen() {
           </View>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#fff", // Alt kısmın arka planı beyaz
   },
   scrollView: {
     flex: 1,
   },
   gradientContainer: {
-    paddingTop: Platform.OS === "ios" ? 50 : 25, // Status bar + back button için boşluk
+
+    paddingTop: 80, // Status bar + back button için boşluk
     paddingBottom: 40, // Buton için altta boşluk
     paddingHorizontal: 20,
   },
   backButtonContainer: {
     position: "absolute", // Mutlak konumlandırma
-    top: Platform.OS === "ios" ? 20 : 30, // Status bar'a göre ayarla
+    top: Platform.OS === "ios" ? 20 : 35, // Status bar'a göre ayarla
     left: 10,
     zIndex: 1, // Diğer içeriklerin üzerinde
+    paddingTop: 25,
+  
   },
   badgeRow: {
     flexDirection: "row",
@@ -155,6 +163,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)", // Yarı saydam beyaz
     borderRadius: 15, // Pill shape
     paddingVertical: 6,
+    marginTop: Platform.OS === "android" ? 8 :0,
     paddingHorizontal: 12,
   },
   badgeText: {

@@ -261,7 +261,7 @@ export default function HomeScreen() {
               </Typo>
             </Typo>
             <TouchableOpacity onPress={() => router.push("/notifications")}>
-              <Ionicons name="notifications-outline" size={28} color="#333" />
+              <Ionicons  name="notifications-outline" size={28} color="#333" />
             </TouchableOpacity>
           </View>
 
@@ -485,12 +485,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     marginRight: 10,
-    borderRadius: 20,
-    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
   },
-  activeTabButton: { backgroundColor: "#E0F2F7" },
-  tabText: { fontSize: 14, fontWeight: "500", color: "#666" },
-  activeTabText: { color: "#038565" },
+  activeTabButton: {
+    backgroundColor: "#E3ECF0",
+  },
+  tabText: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#64748B",
+  },
+  activeTabText: {
+    color: "#000",
+  },
   // --- Modal Styles ---
   modalOverlay: {
     flex: 1,

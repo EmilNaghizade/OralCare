@@ -14,6 +14,20 @@ export const dummyVideos = [
     duration: "3 min 05 sec",
     tag: "Oral Care",
   },
+  {
+    _id: 3,
+    title: "Guide for in-patient oral hygiene using OroClean complete 2",
+    thumbnailUrl: require("../assets/images/VideoThumbnail2.png"),
+    duration: "3 min 05 sec",
+    tag: "Oral Care",
+  },
+  {
+    _id: 4,
+    title: "Guide for in-patient oral hygiene using OroClean complete 2",
+    thumbnailUrl: require("../assets/images/VideoThumbnail2.png"),
+    duration: "3 min 05 sec",
+    tag: "Oral Care",
+  },
 ];
 
 export const quizzes = {
@@ -251,6 +265,20 @@ export const dummyArticles = [
     readTime: "4min read",
     createdAt: "30 March, 2024",
   },
+  {
+    _id: "a3",
+    title: "Benefits of Regular Checkups",
+    image: require("../assets/images/Article2.png"),
+    readTime: "4min read",
+    createdAt: "30 March, 2024",
+  },
+  {
+    _id: "a4",
+    title: "Benefits of Regular Checkups",
+    image: require("../assets/images/Article2.png"),
+    readTime: "4min read",
+    createdAt: "30 March, 2024",
+  },
 ];
 
 export const dummyNews = [
@@ -263,6 +291,20 @@ export const dummyNews = [
   },
   {
     _id: "n2",
+    title: "Community Health Initiative Update",
+    image: require("../assets/images/Article2.png"),
+    readTime: "2min read",
+    createdAt: "30 March, 2024",
+  },
+  {
+    _id: "n3",
+    title: "Community Health Initiative Update",
+    image: require("../assets/images/Article2.png"),
+    readTime: "2min read",
+    createdAt: "30 March, 2024",
+  },
+  {
+    _id: "n4",
     title: "Community Health Initiative Update",
     image: require("../assets/images/Article2.png"),
     readTime: "2min read",

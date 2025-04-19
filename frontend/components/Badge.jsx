@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     paddingHorizontal: 12,
     alignSelf: "flex-start",
-    marginBottom: 12,
+    marginBottom: 8,
   },
   badgeText: {
     color: "#4a4a4a",

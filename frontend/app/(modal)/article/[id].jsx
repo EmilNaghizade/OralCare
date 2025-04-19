@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   title: {
     color: "#1c1c1c", // Koyu başlık rengi
     lineHeight: 36, // Satır yüksekliği
-
+    marginBottom: 8,
   },
   badgeRow: {
     flexDirection: "row", // Rozetleri yan yana dizer

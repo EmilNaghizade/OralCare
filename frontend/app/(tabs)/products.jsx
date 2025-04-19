@@ -83,7 +83,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff ", // Header altındaki alanın arka planı
   },
   scrollContainer: { paddingBottom: 30, backgroundColor: "#f0f2f5" },
-
   header: {
     height: 100, // Header yüksekliği
     justifyContent: "flex-end", // Başlığı dikeyde ortala
@@ -94,13 +93,6 @@ const styles = StyleSheet.create({
     // Alt köşeleri yuvarlatma
     borderBottomLeftRadius: 24, // <<< YUVARLAK KÖŞE
     borderBottomRightRadius: 24, // <<< YUVARLAK KÖŞE
-    // Header'ı listeden ayırmak için gölge (opsiyonel)
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 5, // Android için gölge
-    zIndex: 1, // Header'ın listenin üzerinde görünmesini sağla
   },
   headerTitle: {
     color: "#1c1c1c", // Koyu başlık rengi
@@ -111,8 +103,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: PADDING / 2,
     paddingTop: 20, // Header ile liste arası boşluk
     paddingBottom: 20, // Listenin altındaki boşluk
+    backgroundColor: "#fff",
+    marginTop: 30,
+    borderRadius: 20
   },
-
   productCard: {
     width: ITEM_WIDTH, // Hesaplanan genişlik
     backgroundColor: "#fff", // Kart arka planı
@@ -120,13 +114,10 @@ const styles = StyleSheet.create({
     marginBottom: PADDING, // Dikey boşluk (satırlar arası)
     marginHorizontal: PADDING / 2, // Yatay boşluk (sütunlar arası - toplam PADDING olur)
     padding: 12, // Kart içi boşluk (biraz azaltıldı)
-    alignItems: "center", // İçeriği ortala
+
     // Gölge
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: "#F0F5F7"
   },
   productImageContainer: {
     width: "100%", // Kart genişliğini doldur

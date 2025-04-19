@@ -40,21 +40,16 @@ const styles = StyleSheet.create({
     borderRadius: 12, // Rounded corners
     // Shadow for iOS
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1, // Softer shadow
-    shadowRadius: 3.84,
-    // Shadow for Android
-    elevation: 5,
+    borderWidth: 1,
+    borderColor: "#F0F5F7",
     marginBottom: 5, // Add margin to bottom if needed for shadow
   },
   videoThumbnail: {
-    width: "100%",
+    width: "90%",
+    alignSelf: "center",
     height: 110, // Adjust height as needed
-    borderTopLeftRadius: 12, // Match card's border radius
-    borderTopRightRadius: 12, // Match card's border radius
+    marginTop: 10,
+    borderRadius: 16, 
     backgroundColor: "#eee", // Background color while image loads
   },
   videoInfoContainer: {
