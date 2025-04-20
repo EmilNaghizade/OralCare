@@ -4,7 +4,7 @@
     "slug": "oral-care",
     "version": "2.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/OralCareIcon.png",
+    "icon": "./assets/images/IconOralCare2.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/OralCareIcon.png",
+        "foregroundImage": "./assets/images/IconOralCare2.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
@@ -68,6 +68,6 @@
         "projectId": "eb758988-f4d4-455a-ac23-bc34307b1842"
       }
     },
-    "owner": "xalturwik"
+    "owner": "Emil Naghizade"
   }
 }

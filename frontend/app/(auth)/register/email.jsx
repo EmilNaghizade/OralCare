@@ -160,14 +160,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1, // Take remaining space
     justifyContent: "space-between", // Push content up, button down
-    paddingHorizontal: 30, // Push content up, button down
   },
   content: {
     flex: 1, // Allow content to take space
     alignItems: "center",
     justifyContent: "flex-start", // <--- Change to 'flex-start'
     paddingHorizontal: 30,
-    paddingBottom: 20,
     paddingTop: Platform.OS === "ios" ? 20 : 60, // <-- Add paddingTop like other screens (adjust value if needed)
   },
 
