@@ -26,6 +26,14 @@ export default function TabLayout() {
         tabBarInactiveTintColor: "gray", // Color for inactive tabs
         // You can add other options like tabBarShowLabel: false, etc.
         headerShown: false, // Usually hide the default header in tabs layout
+        tabBarStyle: {
+          height: 70, 
+          paddingTop: 8, // Add padding at the top
+          paddingBottom: 8, // Add padding at the bottom
+        },
+        tabBarLabelStyle: {
+          marginTop: 4, // Add space between icon and label
+        },
       }}
     >
       <Tabs.Screen
