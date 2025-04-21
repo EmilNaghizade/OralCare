@@ -153,6 +153,21 @@ export const quizApi = {
 
 // Add these functions to your existing api.js file within the appropriate export object
 export const videoApi = {
+  //get all videos
+  getAllVideos: async (token) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/videos`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+      throw error;
+    }
+  },
+
   // Mark a video as watched
   markVideoAsWatched: async (videoId) => {
     try {
@@ -188,30 +203,25 @@ export const videoApi = {
   },
 
   // Get all watched videos for the current user
-  getWatchedVideos: async () => {
+  getWatchedVideos: async (token) => {
     try {
-      const token = await getAuthToken();
-
       if (!token) {
         console.error("No auth token available");
-        throw new Error("Authentication token is missing");
+        return { watchedVideosId: [], count: 0 };
       }
 
-      const response = await axios.get(`${API_URL}/api/videos/watched`, {
+      const response = await axios.get(`${API_URL}/api/videos/user/watched`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      console.log(response.data,"res")
+      console.log("Watched videos API response:", response.data);
       return response.data;
     } catch (error) {
       console.error("Error fetching watched videos:", error);
-      if (error.response) {
-        console.error("Response data:", error.response.data);
-        console.error("Response status:", error.response.status);
-      }
-      throw error;
+      // Return a default value instead of throwing
+      return { watchedVideosId: [], count: 0 };
     }
   },
 };

@@ -1,19 +1,25 @@
-// routes/videoRoutes.js
+// backend/src/routes/videoRoutes.js
 import express from "express";
 import Video from "../models/Video.js";
-import User from "../models/User.js"; // <-- Import User model
+import User from "../models/User.js";
 import protectRoute from "../middleware/auth.middleware.js";
-import cloudinary from "../lib/cloudinary.js";
+import upload from "../middleware/multer.js";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
-// Get all videos
+// Get all videos with pagination and filtering
 router.get("/", async (req, res) => {
   try {
     const page = req.query.page ? Number(req.query.page) : 1;
     const limit = req.query.limit ? Number(req.query.limit) : 10;
     const skip = (page - 1) * limit;
-
+    
     const videos = await Video.find()
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -32,43 +38,39 @@ router.get("/", async (req, res) => {
 });
 
 // Create video (admin only)
-router.post("/", protectRoute, async (req, res) => {
+router.post("/", protectRoute, upload.fields([
+  { name: 'video', maxCount: 1 },
+  { name: 'thumbnail', maxCount: 1 }
+]), async (req, res) => {
   try {
     if (req.user.role !== "admin") {
-      return res.status(403).json({ error: "Not authorized to create videos" });
+      return res.status(403).json({ error: "Not authorized to add videos" });
     }
 
-    const { title, description, category, tags, videoData, thumbnailData } =
-      req.body;
-
-    // Validate required fields
-    if (!title || !description || !videoData || !thumbnailData) {
-      return res.status(400).json({ error: "Missing required fields" });
+    const { title, description, category, duration } = req.body;
+    const tags = req.body.tags ? JSON.parse(req.body.tags) : [];
+    
+    // Check if files were uploaded
+    if (!req.files || !req.files.video || !req.files.thumbnail) {
+      return res.status(400).json({ error: "Both video and thumbnail files are required" });
     }
 
-    // Upload video to cloudinary
-    const videoUpload = await cloudinary.uploader.upload(videoData, {
-      resource_type: "video",
-      folder: "oralcare_videos",
-    });
+    const videoFile = req.files.video[0];
+    const thumbnailFile = req.files.thumbnail[0];
 
-    // Upload thumbnail to cloudinary
-    const thumbnailUpload = await cloudinary.uploader.upload(thumbnailData, {
-      folder: "oralcare_thumbnails",
-    });
+    // Create paths that will be accessible from the frontend
+    const videoUrl = `/uploads/videos/${videoFile.filename}`;
+    const thumbnailUrl = `/uploads/thumbnails/${thumbnailFile.filename}`;
 
-    // Create new video
     const video = new Video({
       title,
       description,
-      videoUrl: videoUpload.secure_url,
-      thumbnailUrl: thumbnailUpload.secure_url,
-      duration: Math.round(videoUpload.duration || 0),
-      category: category || "General",
-      tags: tags || [],
+      videoUrl,
+      thumbnailUrl,
+      duration: duration || 0, // Default to 0 if not provided
+      category,
+      tags,
       isPublished: true,
-      fileSize: videoUpload.bytes,
-      format: videoUpload.format,
     });
 
     await video.save();
@@ -105,18 +107,21 @@ router.delete("/:id", protectRoute, async (req, res) => {
       return res.status(404).json({ error: "Video not found" });
     }
 
-    // Extract public IDs from URLs
-    const videoPublicId = video.videoUrl.split("/").slice(-1)[0].split(".")[0];
-    const thumbnailPublicId = video.thumbnailUrl
-      .split("/")
-      .slice(-1)[0]
-      .split(".")[0];
-
-    // Delete from cloudinary
-    await cloudinary.uploader.destroy(videoPublicId, {
-      resource_type: "video",
-    });
-    await cloudinary.uploader.destroy(thumbnailPublicId);
+    // Delete files from the server
+    try {
+      const videoPath = path.join(__dirname, '../..', video.videoUrl);
+      const thumbnailPath = path.join(__dirname, '../..', video.thumbnailUrl);
+      
+      if (fs.existsSync(videoPath)) {
+        fs.unlinkSync(videoPath);
+      }
+      if (fs.existsSync(thumbnailPath)) {
+        fs.unlinkSync(thumbnailPath);
+      }
+    } catch (err) {
+      console.error("Error deleting files:", err);
+      // Continue even if file deletion fails
+    }
 
     await Video.findByIdAndDelete(req.params.id);
     res.json({ message: "Video removed successfully" });
@@ -126,11 +131,10 @@ router.delete("/:id", protectRoute, async (req, res) => {
   }
 });
 
-router.get("/watched", protectRoute, async (req, res) => {
+// Get watched videos for current user
+router.get("/user/watched", protectRoute, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select(
-      "name email watchedVideos finishedQuizzes role"
-    );
+    const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -146,17 +150,15 @@ router.get("/watched", protectRoute, async (req, res) => {
   }
 });
 
-// --- NEW: Endpoint to mark a video as watched ---
+// Mark a video as watched
 router.post("/:videoId/watch", protectRoute, async (req, res) => {
   try {
     const videoId = req.params.videoId;
-    const user = await User.findById(req.user.id).select(
-      "name email watchedVideos finishedQuizzes role"
-    );
+    const user = await User.findById(req.user.id);
 
-    // Use $addToSet to add the videoId to the user's watchedVideos array
+    // Check if video is already marked as watched
     if (user.watchedVideos.includes(videoId)) {
-      return res.json({ message: "Quiz already marked as finished" });
+      return res.json({ message: "Video already marked as watched" });
     }
 
     user.watchedVideos.push(videoId);

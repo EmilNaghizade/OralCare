@@ -114,27 +114,54 @@ export default function ProfileScreen() {
     const fetchUserData = async () => {
       try {
         setIsLoading(true);
-        
+
         // Use Promise.all to make concurrent requests
-        const [profileData, quizData, videoData] = await Promise.all([
-          getProfile(authToken),
-          quizApi.getCompletedQuizzes(authToken),
-          videoApi.getWatchedVideos(authToken)
-        ]);
-        
-        // Set all data at once
-        if (profileData?.user) {
-          setUser(profileData.user);
+        let profileData = null;
+        try {
+          profileData = await getProfile(authToken);
+          if (profileData?.user) {
+            setUser(profileData.user);
+
+            // Set profile image if it exists
+            if (
+              profileData.user.profileImage &&
+              profileData.user.profileImage !== ""
+            ) {
+              const imageUri = profileData.user.profileImage.startsWith("http")
+                ? profileData.user.profileImage
+                : `${process.env.EXPO_PUBLIC_API_BASE_URL}${profileData.user.profileImage}`;
+              setProfileImage({ uri: imageUri });
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching profile:", error);
         }
-        
-        if (quizData?.finishedQuizIds) {
-          setCompletedQuizzes(quizData.finishedQuizIds);
-          setQuizCount(quizData.count || quizData.finishedQuizIds.length);
+
+        try {
+          const quizData = await quizApi.getCompletedQuizzes(authToken);
+          if (quizData?.finishedQuizIds) {
+            setCompletedQuizzes(quizData.finishedQuizIds);
+            setQuizCount(quizData.count || quizData.finishedQuizIds.length);
+          }
+        } catch (error) {
+          console.error("Error fetching completed quizzes:", error);
+          // Set default values on error
+          setCompletedQuizzes([]);
+          setQuizCount(0);
         }
-        
-        if (videoData?.watchedVideosId) {
-          setWatchedVideos(videoData.watchedVideosId);
-          setVideoCount(videoData.count || videoData.watchedVideosId.length);
+
+        // Fetch watched videos - continue even if this fails
+        try {
+          const videoData = await videoApi.getWatchedVideos(authToken);
+          if (videoData?.watchedVideosId) {
+            setWatchedVideos(videoData.watchedVideosId);
+            setVideoCount(videoData.count || videoData.watchedVideosId.length);
+          }
+        } catch (error) {
+          console.error("Error fetching watched videos:", error);
+          // Set default values on error
+          setWatchedVideos([]);
+          setVideoCount(0);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -435,7 +462,7 @@ export default function ProfileScreen() {
 
             <TouchableOpacity style={styles.modalOption} onPress={takePhoto}>
               <View style={styles.iconStyle}>
-                <Camera variant="Outline" size={24} color="#000"    />
+                <Camera variant="Outline" size={24} color="#000" />
               </View>
               <Text style={styles.modalOptionText}>Take Photo</Text>
               <View style={{ flex: 1, alignItems: "flex-end" }}>

@@ -10,8 +10,10 @@ import {
   StatusBar,
   Modal,
   Image,
-
+  BackHandler,
+  Platform,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -38,6 +40,23 @@ export default function HomeScreen() {
   const [userId, setUserId] = useState(null);
 
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (Platform.OS === "android") {
+          BackHandler.exitApp(); // exits the app
+          return true; // prevent default behavior
+        }
+        return false;
+      };
+
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+    }, [])
+  );
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -70,8 +89,6 @@ export default function HomeScreen() {
         setIsLoadingProfile(false);
       }
     };
-
-
 
     const checkFirstTimeUser = async () => {
       try {

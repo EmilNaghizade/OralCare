@@ -5,7 +5,6 @@ import compression from 'compression';
 import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/authRoutes.js";
-import blogRoutes from "./routes/blogRoutes.js";
 import quizRoutes from "./routes/quizRoutes.js";
 import videoRoutes from "./routes/videoRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
@@ -36,15 +35,14 @@ const corsOptions = {
   exposedHeaders: ["Content-Disposition"],
 };
 
-app.use(express.json({ limit: "15mb" }));
-app.use(express.urlencoded({ limit: "15mb", extended: true }));
-
 app.use(cors(corsOptions));
+app.use(express.urlencoded({ extended: true, limit: "100mb" }));
+app.use(express.json({ limit: "100mb" }));
+app.use(compression());
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-app.use(compression()); 
+
 app.use("/api/auth", authRoutes);
-app.use("/api/blogs", blogRoutes);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/profile", profileRoutes);

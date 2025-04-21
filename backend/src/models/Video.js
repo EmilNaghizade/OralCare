@@ -37,19 +37,6 @@ const videoSchema = new mongoose.Schema(
         trim: true,
       },
     ],
-    isPublished: {
-      type: Boolean,
-      default: false,
-    },
-    fileSize: {
-      type: Number, // Size in bytes
-      required: true,
-    },
-    format: {
-      type: String,
-      required: true,
-      trim: true,
-    },
   },
   { timestamps: true }
 );
