@@ -1,4 +1,4 @@
-// models/Video.js
+// backend/src/models/Video.js (already in your codebase)
 import mongoose from "mongoose";
 
 const videoSchema = new mongoose.Schema(

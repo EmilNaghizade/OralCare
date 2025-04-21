@@ -28,9 +28,7 @@ export default function Education() {
         <View style={styles.header}>
           <View style={styles.headerButtons}>
             <BackButton />
-            <TouchableOpacity style={styles.shareButton}>
-              <Ionicons name="share-social-outline" size={24} color="#000" />
-            </TouchableOpacity>
+
           </View>
           <Text style={styles.headerTitle}>Watch & Learn</Text>
         </View>
