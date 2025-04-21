@@ -27,12 +27,13 @@ export default function QuizQuestionScreen() {
   );
 
   const [quizData, setQuizData] = useState(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(initialQuestionIndex);
+  const [currentQuestionIndex, setCurrentQuestionIndex] =
+    useState(initialQuestionIndex);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [score, setScore] = useState(0);
-  
+
   // State for feedback toast
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrectAnswer, setIsCorrectAnswer] = useState(false);
@@ -41,11 +42,11 @@ export default function QuizQuestionScreen() {
   const timerIntervalRef = useRef(null);
   // Progress bar animation
   const progressAnim = useRef(new Animated.Value(0)).current;
-  
+
   const getQuizDataById = (quizId) => {
     return quizzes[quizId] || null;
   };
-  
+
   // Load quiz data
   useEffect(() => {
     const data = getQuizDataById(quizId?.toString());
@@ -60,7 +61,8 @@ export default function QuizQuestionScreen() {
   // Update progress bar animation
   useEffect(() => {
     if (quizData?.questions?.length) {
-      const newProgress = (currentQuestionIndex + 1) / quizData.questions.length;
+      const newProgress =
+        (currentQuestionIndex + 1) / quizData.questions.length;
       Animated.timing(progressAnim, {
         toValue: newProgress,
         duration: 300,
@@ -91,7 +93,7 @@ export default function QuizQuestionScreen() {
     };
   }, [quizData]);
 
-  const navigateToResults = () => {
+  const navigateToResults = (finalScore) => {
     if (timerIntervalRef.current) {
       clearInterval(timerIntervalRef.current);
     }
@@ -99,7 +101,7 @@ export default function QuizQuestionScreen() {
       pathname: "/quiz/result",
       params: {
         quizId: quizId,
-        score: score,
+        score: finalScore !== undefined ? finalScore : score,
         totalQuestions: quizData?.questions?.length || 0,
       },
     });
@@ -111,30 +113,49 @@ export default function QuizQuestionScreen() {
     const correct = option === currentQuestion?.correctAnswer;
     setSelectedAnswer(option);
     setIsAnswered(true);
-    
+
     // Show the feedback toast
     setIsCorrectAnswer(correct);
     setShowFeedback(true);
-    
+
     // Update score if correct
     if (correct) {
-      setScore((prevScore) => prevScore + 1);
-    }
+      setScore((prevScore) => {
+        const newScore = prevScore + 1;
 
-    // Wait a moment before proceeding to the next question
-    setTimeout(() => {
-      const nextIndex = currentQuestionIndex + 1;
-      if (nextIndex < quizData.questions.length) {
-        // Move to next question
-        setCurrentQuestionIndex(nextIndex);
-        setSelectedAnswer(null);
-        setIsAnswered(false);
-        setShowFeedback(false);
-      } else {
-        // Quiz is finished, navigate to results
-        navigateToResults();
-      }
-    }, 2000); // 2 seconds delay to show feedback
+        // Store the new score for later use
+        setTimeout(() => {
+          const nextIndex = currentQuestionIndex + 1;
+          if (nextIndex < quizData.questions.length) {
+            // Move to next question
+            setCurrentQuestionIndex(nextIndex);
+            setSelectedAnswer(null);
+            setIsAnswered(false);
+            setShowFeedback(false);
+          } else {
+            // Quiz is finished, navigate to results with the UPDATED score
+            navigateToResults(newScore);
+          }
+        }, 2000);
+
+        return newScore;
+      });
+    } else {
+      // If the answer is incorrect, we don't update the score but still need to continue
+      setTimeout(() => {
+        const nextIndex = currentQuestionIndex + 1;
+        if (nextIndex < quizData.questions.length) {
+          // Move to next question
+          setCurrentQuestionIndex(nextIndex);
+          setSelectedAnswer(null);
+          setIsAnswered(false);
+          setShowFeedback(false);
+        } else {
+          // Quiz is finished, navigate to results
+          navigateToResults(score); // Use current score
+        }
+      }, 2000);
+    }
   };
 
   // Format time as MM:SS
@@ -241,8 +262,8 @@ export default function QuizQuestionScreen() {
       </View>
 
       {/* Feedback Toast */}
-      <FeedbackToast 
-        isVisible={showFeedback} 
+      <FeedbackToast
+        isVisible={showFeedback}
         isCorrect={isCorrectAnswer}
         onAnimationEnd={() => {}}
       />

@@ -93,7 +93,8 @@ router.post("/upload-photo-base64-json", protectRoute, async (req, res) => {
 // Delete profile photo endpoint (unchanged)
 router.delete("/delete-photo", protectRoute, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select('name email watchedVideos finishedQuizzes role');
+
 
     if (user.profileImage) {
       const relativePath = user.profileImage;

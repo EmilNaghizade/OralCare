@@ -6,7 +6,7 @@ import {
   SafeAreaView,
   FlatList,
   TouchableOpacity,
-  ScrollView,
+  StatusBar,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,15 +20,15 @@ export default function KnowledgeHub() {
 
   const displayData = activeTab === "Articles" ? dummyArticles : dummyNews;
 
-  const renderArticleItem = ({ item }) => <ArticleCard item={item} cardWidth={"47%"} />;
+  const renderArticleItem = ({ item }) => (
+    <ArticleCard item={item} cardWidth={"47%"} />
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" />
       {/* Header */}
-      <View
-        style={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.headerButtons}>
             <BackButton />
@@ -145,9 +145,9 @@ const styles = StyleSheet.create({
   articleGrid: {
     padding: 8,
     marginTop: 20,
-    borderRadius: 20,   
-    backgroundColor: "#fff"
-},
+    borderRadius: 20,
+    backgroundColor: "#fff",
+  },
   columnWrapper: {
     justifyContent: "space-between",
   },

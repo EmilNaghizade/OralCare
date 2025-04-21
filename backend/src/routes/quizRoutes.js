@@ -9,7 +9,8 @@ const router = express.Router();
 router.get('/finished', protectRoute, async (req, res) => {
   try {
     // Get the user without attempting to populate
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select('name email watchedVideos finishedQuizzes role');
+
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
@@ -34,7 +35,8 @@ router.post('/:quizId/finish', protectRoute, async (req, res) => {
     
 
     // Update user document to add quiz to finishedQuizzes if not already there
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select('name email watchedVideos finishedQuizzes role');
+
     
     // Check if quiz is already marked as finished
     if (user.finishedQuizzes.includes(quizId)) {

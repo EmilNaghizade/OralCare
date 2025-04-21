@@ -8,7 +8,9 @@ const router = express.Router();
 
 router.get("/watched", protectRoute, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select(
+      "name email watchedVideos finishedQuizzes role"
+    );
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -58,7 +60,9 @@ router.get("/:videoId", async (req, res) => {
 router.post("/:videoId/watch", protectRoute, async (req, res) => {
   try {
     const videoId = req.params.videoId;
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).select(
+      "name email watchedVideos finishedQuizzes role"
+    );
 
     // Use $addToSet to add the videoId to the user's watchedVideos array
     if (user.watchedVideos.includes(videoId)) {

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Platform,
   Alert,
+  StatusBar,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import BackButton from "../../../components/BackButton"; // Adjust path
@@ -45,6 +46,8 @@ const GenderSelectionScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+                  <StatusBar barStyle="dark-content" />
+      
       <BackButton />
 
       {/* Use flex: 1 and space-between to push button to bottom */}

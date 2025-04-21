@@ -78,6 +78,9 @@ userSchema.methods.getStats = function () {
   };
 };
 
+userSchema.index({ email: 1 }); // Index on email field
+userSchema.index({ role: 1 }); // Index on role field
+
 const User = mongoose.model("User", userSchema);
 
 export default User;

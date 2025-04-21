@@ -6,26 +6,26 @@ import {
   SafeAreaView,
   Alert,
   Platform,
-  Image, 
+  StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import BackButton from "../../../components/BackButton";
-import Button from "../../../components/Button"; 
+import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
 import { authApi } from "../../../services/api";
 import AnimatedIcon from "../../../components/AnimatedIcon";
 
-
 const emailIcon = require("../../../assets/images/Email.png");
 
-const NEXT_SCREEN_ROUTE = "/(auth)/login/password"; 
+const NEXT_SCREEN_ROUTE = "/(auth)/login/password";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const Login = () => {
   const router = useRouter();
-  const params = useLocalSearchParams(); 
   const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Added loading state
 
   const validateEmail = (emailToValidate) => {
     return emailRegex.test(emailToValidate);
@@ -42,7 +42,7 @@ const Login = () => {
       Alert.alert("Invalid Email", "Please enter a valid email address.");
       return;
     }
-
+    setIsLoading(true);
     try {
       const response = await authApi.checkEmail(trimmedEmail);
       console.log(response.exists, "RESPONSE HEYYY");
@@ -55,29 +55,32 @@ const Login = () => {
     } catch (error) {
       console.error("Error during email check:", error); // Tüm hatayı logla
       Alert.alert("Error", "User not found. Please try again.");
-    }
-    if (error) {
-      console.error("Error response status:", error.response.status); // Durum kodunu logla
-      console.error("Error response data:", error.response.data); // Dönen veriyi logla
-      if (error.response.status === 404) {
-        Alert.alert("Error", "User not found.");
-      } else {
-        // Daha genel bir hata mesajı gösterilebilir
-        Alert.alert(
-          "Error",
-          "An error occurred during login. Please try again."
-        );
-       
+
+      if (error) {
+        console.error("Error response status:", error.response.status); // Durum kodunu logla
+        console.error("Error response data:", error.response.data); // Dönen veriyi logla
+        if (error.response.status === 404) {
+          Alert.alert("Error", "User not found.");
+        } else {
+          // Daha genel bir hata mesajı gösterilebilir
+          Alert.alert(
+            "Error",
+            "An error occurred during login. Please try again."
+          );
+        }
       }
+    } finally {
+      setIsLoading(false); // Reset loading state regardless of result
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" />
       <BackButton />
       <View style={styles.container}>
         <View style={styles.content}>
-          <AnimatedIcon iconSource={emailIcon}  />
+          <AnimatedIcon iconSource={emailIcon} />
 
           <Typo fontWeight="600" size={36} style={styles.title}>
             Enter your email
@@ -107,15 +110,23 @@ const Login = () => {
         </View>
 
         <View style={styles.buttonContainer}>
-          <Button style={styles.button} onPress={handleNext}>
-            <Typo
-              fontWeight="600"
-              size={16}
-              color={"#fff"}
-              style={styles.buttonText}
-            >
-              Next
-            </Typo>
+          <Button
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+            onPress={handleNext}
+            disabled={isLoading} // Disable button while loading
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Typo
+                fontWeight="600"
+                size={16}
+                color={"#fff"}
+                style={styles.buttonText}
+              >
+                Next
+              </Typo>
+            )}
           </Button>
         </View>
       </View>
@@ -166,6 +177,9 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 15,
     alignItems: "center",
+  },
+  buttonDisabled: {
+    backgroundColor: "#7FCFB6", // Lighter green for disabled state
   },
 });
 

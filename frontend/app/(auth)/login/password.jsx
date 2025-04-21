@@ -13,6 +13,7 @@ import {
   Easing,
   TouchableOpacity,
   Image,
+  StatusBar,
 } from "react-native";
 import { useRouter, useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -58,7 +59,7 @@ const PasswordScreen = () => {
     try {
       // --- Call context login function ---
       await login(email, password);
-      router.push("/(tabs)/home");
+      router.replace("/(tabs)/home");
       // --- Handle Success ---
       console.log("Login successful");
     } catch (error) {
@@ -76,6 +77,8 @@ const PasswordScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.safeArea}>
+                    <StatusBar barStyle="dark-content" />
+        
         <BackButton />
 
         <View style={styles.container}>

@@ -46,7 +46,7 @@ export default function ProfileScreen() {
   const router = useRouter();
   const { authToken, logout } = useAuth();
   const [user, setUser] = useState(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [quizCount, setQuizCount] = useState(0);
   const [completedQuizzes, setCompletedQuizzes] = useState([]);
   const [watchedVideos, setWatchedVideos] = useState([]);
@@ -111,82 +111,39 @@ export default function ProfileScreen() {
   };
 
   useEffect(() => {
-    const loadProfile = async () => {
-      if (!authToken) {
-        console.log("Home: No auth token, cannot fetch profile.");
-        setIsLoadingProfile(false);
-        return;
-      }
-      setIsLoadingProfile(true);
+    const fetchUserData = async () => {
       try {
-        const profileData = await getProfile(authToken);
+        setIsLoading(true);
+        
+        // Use Promise.all to make concurrent requests
+        const [profileData, quizData, videoData] = await Promise.all([
+          getProfile(authToken),
+          quizApi.getCompletedQuizzes(authToken),
+          videoApi.getWatchedVideos(authToken)
+        ]);
+        
+        // Set all data at once
         if (profileData?.user) {
           setUser(profileData.user);
-          if (
-            profileData.user.profileImage &&
-            profileData.user.profileImage !== ""
-          ) {
-            const imageUri = profileData.user.profileImage.startsWith("http")
-              ? profileData.user.profileImage
-              : `${process.env.EXPO_PUBLIC_API_BASE_URL}${profileData.user.profileImage}`;
-            setProfileImage({ uri: imageUri });
-          } else {
-            setProfileImage(null);
-          }
-        } else {
-          console.warn(
-            "Home: Profile data received, but unexpected structure:",
-            profileData
-          );
-          setProfileImage(null);
         }
-      } catch (error) {
-        console.error("Home: Failed to fetch profile:", error);
-        setUser(null);
-        setProfileImage(null);
-      } finally {
-        setIsLoadingProfile(false);
-      }
-    };
-
-    const fetchCompletedQuizzes = async () => {
-      if (!authToken) return;
-
-      try {
-        console.log("Fetching completed quizzes...");
-        const quizData = await quizApi.getCompletedQuizzes(authToken);
-        console.log("Completed quizzes data:", quizData);
-
-        if (quizData && quizData.finishedQuizIds) {
+        
+        if (quizData?.finishedQuizIds) {
           setCompletedQuizzes(quizData.finishedQuizIds);
           setQuizCount(quizData.count || quizData.finishedQuizIds.length);
         }
-      } catch (error) {
-        console.error("Error fetching completed quizzes:", error);
-        // If there's an error, we'll just keep the default empty array
-      }
-    };
-
-    const fetchWatchedVideos = async () => {
-      if (!authToken) return;
-      try {
-        console.log("Fetching watched videos...");
-        const videoData = await videoApi.getWatchedVideos(authToken);
-        console.log("Watched videos data:", videoData);
-        console.log("Watched videos data:", videoData);
-        if (videoData && videoData.watchedVideosId) {
+        
+        if (videoData?.watchedVideosId) {
           setWatchedVideos(videoData.watchedVideosId);
           setVideoCount(videoData.count || videoData.watchedVideosId.length);
         }
       } catch (error) {
-        console.error("Error fetching watched videos:", error);
-        // If there's an error, we'll just keep the default empty array
+        console.error("Error fetching user data:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchWatchedVideos();
-    fetchCompletedQuizzes();
-    // (Other data fetching functions for quizzes/videos remain unchanged)
-    loadProfile();
+
+    fetchUserData();
   }, [authToken]);
 
   useEffect(() => {

@@ -8,7 +8,8 @@ import {
   Platform,
   Animated,
   Easing,
-  Image, // Or import your SVG icon component
+  ActivityIndicator,
+  StatusBar,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import BackButton from "../../../components/BackButton"; // Adjust path
@@ -32,6 +33,7 @@ const EmailScreen = () => {
 
   const [email, setEmail] = useState("");
   const [isFocused, setIsFocused] = useState(false); // State for animation
+  const [isLoading, setIsLoading] = useState(false); // Added loading state
   const focusAnim = useRef(new Animated.Value(0)).current; // Animation value
 
   useEffect(() => {
@@ -63,6 +65,8 @@ const EmailScreen = () => {
       Alert.alert("Invalid Email", "Please enter a valid email address.");
       return;
     }
+
+    setIsLoading(true); // Set loading to true before API call
 
     try {
       // Backend'e e-posta kontrolü için istek gönder
@@ -98,16 +102,20 @@ const EmailScreen = () => {
         "Error",
         "An error occurred while checking the email. Please try again later."
       );
+    } finally {
+      setIsLoading(false); // Set loading to false after API call
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
+                  <StatusBar barStyle="dark-content" />
+      
       <BackButton />
       <View style={styles.container}>
         <View style={styles.content}>
           {/* Replace with SVG if using SVG */}
-          <AnimatedIcon iconSource={emailIcon}  />
+          <AnimatedIcon iconSource={emailIcon} />
           {/* <Image source={emailIcon} style={styles.icon} />
           {/* <EmailIcon width={60} height={60} fill="#4CAF50" style={styles.iconSvg} /> */}
 
@@ -136,15 +144,23 @@ const EmailScreen = () => {
         </View>
 
         <View style={styles.buttonContainer}>
-          <Button style={styles.button} onPress={handleNext}>
-            <Typo
-              fontWeight="600"
-              size={16}
-              color={"#fff"}
-              style={styles.buttonText}
-            >
-              Next
-            </Typo>
+          <Button
+            style={[styles.button, isLoading && styles.buttonDisabled]}
+            disabled={isLoading}
+            onPress={handleNext}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Typo
+                fontWeight="600"
+                size={16}
+                color={"#fff"}
+                style={styles.buttonText}
+              >
+                Next
+              </Typo>
+            )}
           </Button>
         </View>
       </View>
@@ -160,6 +176,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1, // Take remaining space
     justifyContent: "space-between", // Push content up, button down
+    paddingHorizontal: 30,
   },
   content: {
     flex: 1, // Allow content to take space
@@ -196,6 +213,9 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 15,
     alignItems: "center",
+  },
+  buttonDisabled: {
+    backgroundColor: "#7FCFB6", // Lighter green for disabled state
   },
 });
 

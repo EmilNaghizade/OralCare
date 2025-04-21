@@ -10,7 +10,8 @@ import {
   Keyboard,
   Platform,
   KeyboardAvoidingView,
-  TouchableOpacity, // For the eye icon
+  TouchableOpacity,
+  StatusBar, // For the eye icon
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons"; // For the eye icon
@@ -62,17 +63,9 @@ const PasswordScreen = () => {
 
       // Check if the backend automatically logs the user in and sends a token
       if (response && response.token) {
-        // --- Call context login function ---
         await login(email, password);
-        router.push("(tabs)/home");
-        // *** REMOVE navigation from here - handled by _layout ***
-        // router.replace(HOME_ROUTE);
-        console.log("Register success: Context login called.");
-      } else {
-        // If backend doesn't log in automatically, redirect to login screen
-        Alert.alert("Registration Successful", "Please log in.");
-        router.push("/(auth)/login"); // Keep navigation here as user is NOT logged in yet
-      }
+        router.replace("(tabs)/home");
+      } 
     } catch (error) {
       // --- Handle Error ---
       console.error("Registration Error:", error);
@@ -88,6 +81,8 @@ const PasswordScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.safeArea}>
+                    <StatusBar barStyle="dark-content" />
+        
         <BackButton />
 
         <View style={styles.container}>

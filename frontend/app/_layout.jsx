@@ -91,7 +91,6 @@ function AuthProvider({ children }) {
         if (!isLoading && authToken && user) {
           // User is authenticated and profile is loaded
           const storedUser = await SecureStore.getItemAsync("user");
-          console.log(storedUser?.role, "heyyyyy");
           // Check if user has admin role and redirect accordingly
           if (user.role === "admin") {
             router.replace("/admin");

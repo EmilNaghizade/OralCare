@@ -314,54 +314,7 @@ export const dummyNews = [
 
 const defaultProfilePic = require("../assets/images/pp.png");
 
-// --- Örnek Kişi Verileri ---
-export const dummyContacts = [
-  {
-    id: "1",
-    name: "Vuqar Mammadov",
-    title: "Manager, Azerbaijan",
-    image: defaultProfilePic,
-    countryCode: "AZ",
-    phone: "+9940517638223",
-    facebookUrl: "https://www.facebook.com/profile.php?id=100009325839474",
-  },
-  {
-    id: "2",
-    name: "Alice Johnson",
-    title: "Manager, United States",
-    image: defaultProfilePic,
-    countryCode: "USA",
-  },
-  {
-    id: "3",
-    name: "Satoshi Nakamoto",
-    title: "Manager, Japan",
-    image: defaultProfilePic,
-    countryCode: "JP",
-  },
-  {
-    id: "4",
-    name: "Maria Garcia",
-    title: "Manager, Spain",
-    image: defaultProfilePic,
-    countryCode: "SP",
-  },
-  {
-    id: "5",
-    name: "Liam Patel",
-    title: "Manager, Canada",
-    image: defaultProfilePic,
-    countryCode: "CA",
-  },
-  {
-    id: "6",
-    name: "Anastasia Ivanova",
-    title: "Manager, Russia",
-    image: defaultProfilePic,
-    countryCode: "RU",
-  },
-  // İhtiyaç halinde daha fazla kişi eklenebilir
-];
+
 
 export const dummyProducts = [
   // Her ürüne kendi image özelliğini ekleyin

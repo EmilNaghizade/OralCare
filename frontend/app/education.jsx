@@ -6,6 +6,7 @@ import {
   SafeAreaView,
   FlatList,
   TouchableOpacity,
+  StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BackButton from "../components/BackButton";
@@ -18,6 +19,7 @@ export default function Education() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="dark-content" />
       {/* Header */}
       <View
         style={styles.scrollContainer}

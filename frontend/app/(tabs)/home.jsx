@@ -7,8 +7,10 @@ import {
   ScrollView,
   FlatList,
   TouchableOpacity,
+  StatusBar,
   Modal,
   Image,
+
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -69,9 +71,10 @@ export default function HomeScreen() {
       }
     };
 
+
+
     const checkFirstTimeUser = async () => {
       try {
-
         // First, load the profile to get the user ID
         const profileData = await getProfile(authToken);
         console.log("Profile data:", profileData);
@@ -105,10 +108,8 @@ export default function HomeScreen() {
       }
     };
 
-
     loadProfile();
     checkFirstTimeUser();
-
   }, [authToken]);
 
   const knowledgeItemsToShow =
@@ -226,20 +227,19 @@ export default function HomeScreen() {
               style={styles.proceedButton}
               onPress={() => {
                 // First close the modal
-                setShowModal(false);               
-                  console.log("HEYY:", userId);
-                  const userLaunchedKey = getUserLaunchedKey(userId);
-                  AsyncStorage.setItem(userLaunchedKey, "true")
-                    .then(() => {
-                      console.log(
-                        `User ${userId} marked as having launched the app`
-                      );
-                      setIsFirstTimeUser(false);
-                    })
-                    .catch((error) => {
-                      console.error("Error saving launch status:", error);
-                    });
-                
+                setShowModal(false);
+                console.log("HEYY:", userId);
+                const userLaunchedKey = getUserLaunchedKey(userId);
+                AsyncStorage.setItem(userLaunchedKey, "true")
+                  .then(() => {
+                    console.log(
+                      `User ${userId} marked as having launched the app`
+                    );
+                    setIsFirstTimeUser(false);
+                  })
+                  .catch((error) => {
+                    console.error("Error saving launch status:", error);
+                  });
               }}
             >
               <Text style={styles.proceedButtonText}>Proceed to app</Text>
@@ -249,6 +249,8 @@ export default function HomeScreen() {
       </Modal>
 
       <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" />
+
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}
@@ -261,7 +263,7 @@ export default function HomeScreen() {
               </Typo>
             </Typo>
             <TouchableOpacity onPress={() => router.push("/notifications")}>
-              <Ionicons  name="notifications-outline" size={28} color="#333" />
+              <Ionicons name="notifications-outline" size={28} color="#333" />
             </TouchableOpacity>
           </View>
 

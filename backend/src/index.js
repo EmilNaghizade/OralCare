@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
+import compression from 'compression';
 import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -41,7 +42,7 @@ app.use(express.urlencoded({ limit: "15mb", extended: true }));
 app.use(cors(corsOptions));
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+app.use(compression()); 
 app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/quizzes", quizRoutes);

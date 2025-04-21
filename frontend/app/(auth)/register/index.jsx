@@ -8,6 +8,7 @@ import {
   Platform,
   KeyboardAvoidingView,
   Animated,
+  StatusBar
 } from "react-native";
 import { useRouter } from "expo-router";
 import Button from "../../../components/Button"; // Import your custom Button
@@ -43,6 +44,7 @@ export default function register() {
   };
   return (
     <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="dark-content" />
       {/* KeyboardAvoidingView helps push content up when keyboard shows */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}

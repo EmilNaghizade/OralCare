@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Image,
   Share,
+  StatusBar,
   Platform,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
@@ -102,6 +103,7 @@ export default function VideoDetailScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="dark-content" />
       {/* Configure Header using Stack.Screen */}
       <View style={styles.manualHeader}>
         {/* Back Button */}

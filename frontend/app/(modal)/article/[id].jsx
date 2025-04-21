@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   View,
   Image,
+  StatusBar
 } from "react-native";
 import React from "react";
 import { useLocalSearchParams } from "expo-router";
@@ -32,6 +33,7 @@ const ArticleDetail = () => {
   };
   return (
     <SafeAreaView style={styles.safeArea}>
+            <StatusBar barStyle="dark-content" />
       <View style={styles.manualHeader}>
         {/* Back Button */}
         <BackButton />
