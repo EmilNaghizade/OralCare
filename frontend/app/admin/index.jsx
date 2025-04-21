@@ -1,9 +1,10 @@
 // frontend/admin/index.jsx
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../_layout";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, BackHandler, Platform, StatusBar } from "react-native";
 import VideoManagement from "./VideoManagement";
 import ArticleManagement from "./ArticleManagement";
 import ProductManagement from "./ProductManagement";
@@ -12,17 +13,23 @@ const Tab = createBottomTabNavigator();
 
 export default function AdminPanel() {
   const { user } = useAuth();
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (Platform.OS === "android") {
+          BackHandler.exitApp(); // exits the app
+          return true; // prevent default behavior
+        }
+        return false;
+      };
 
-  // Check if user has admin role
-  if (!user || user.role !== "admin") {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.text}>
-          You don't have permission to access this page.
-        </Text>
-      </View>
-    );
-  }
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+    }, [])
+  );
+ 
 
   return (
     <Tab.Navigator
@@ -44,9 +51,11 @@ export default function AdminPanel() {
         tabBarInactiveTintColor: "gray",
       })}
     >
-      <Tab.Screen name="Videos" component={VideoManagement} />
-      <Tab.Screen name="Articles" component={ArticleManagement} />
-      <Tab.Screen name="Products" component={ProductManagement} />
+           
+      
+      <Tab.Screen name="Videos" options={{headerShown: false}}  component={VideoManagement} />
+      <Tab.Screen name="Articles" options={{headerShown: false}} component={ArticleManagement} />
+      <Tab.Screen name="Products" options={{headerShown: false}} component={ProductManagement} />
     </Tab.Navigator>
   );
 }
@@ -63,6 +72,3 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
-
-  
-  

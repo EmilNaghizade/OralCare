@@ -206,7 +206,6 @@ export const videoApi = {
   getWatchedVideos: async (token) => {
     try {
       if (!token) {
-        console.error("No auth token available");
         return { watchedVideosId: [], count: 0 };
       }
 

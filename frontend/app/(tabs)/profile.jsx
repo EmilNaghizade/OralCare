@@ -16,7 +16,7 @@ import {
 import {
   SimpleLineIcons,
   Ionicons,
-  MaterialCommunityIcons,
+  MaterialIcons
 } from "@expo/vector-icons";
 import { GalleryRemove, Gallery, Camera } from "iconsax-react-nativejs";
 import { useAuth } from "../_layout";
@@ -44,7 +44,7 @@ const ProfileListItem = ({ iconName, label, onPress, isLogout = false }) => (
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { authToken, logout } = useAuth();
+  const { authToken, logout,  } = useAuth();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [quizCount, setQuizCount] = useState(0);
@@ -61,6 +61,7 @@ export default function ProfileScreen() {
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState("success"); // 'success' or 'error'
   const toastAnimation = useRef(new Animated.Value(0)).current;
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -121,6 +122,8 @@ export default function ProfileScreen() {
           profileData = await getProfile(authToken);
           if (profileData?.user) {
             setUser(profileData.user);
+            console.log("Profile Data:", profileData?.user);
+            setIsAdmin(profileData?.user?.role === "admin");
 
             // Set profile image if it exists
             if (
@@ -310,13 +313,11 @@ export default function ProfileScreen() {
   };
 
   // Navigation functions remain unchanged...
-  const navigateToEditProfile = () => console.log("Navigate to Edit Profile");
   const navigateToRewards = () => console.log("Navigate to Rewards");
   const navigateToInvite = () => console.log("Navigate to Invite");
   const navigateToNotifications = () => router.push("/notifications");
   const navigateToAppSettings = () => console.log("Navigate to App Settings");
   const navigateToFAQ = () => console.log("Navigate to FAQ");
-  const navigateToContact = () => console.log("Navigate to Contact Support");
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -399,6 +400,19 @@ export default function ProfileScreen() {
         {/* Profile List Section */}
         <View style={styles.listCard}>
           <Text style={styles.listHeader}>Profile</Text>
+          {isAdmin && (  
+             <TouchableOpacity style={styles.listItem} onPress={() => router.replace("/admin")}>
+             <MaterialIcons
+               name="admin-panel-settings"
+               size={22}
+               style={styles.listItemIcon}
+             />
+             <Text style={styles.listItemText}>
+               Admin Panel
+             </Text>
+           </TouchableOpacity>          
+     
+          )}
           <ProfileListItem
             iconName="person-add-outline"
             label="Invite a friend"

@@ -1,7 +1,7 @@
 
   // frontend/admin/ProductManagement.jsx
   import React, { useState, useEffect } from 'react';
-  import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+  import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert, StatusBar } from 'react-native';
   import { Ionicons } from '@expo/vector-icons';
   import { createStackNavigator } from '@react-navigation/stack';
   import { useAuth } from '../_layout';
@@ -80,6 +80,8 @@
   
     return (
       <View style={styles.container}>
+                   <StatusBar barStyle="dark-content" />
+        
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => navigation.navigate('AddProduct')}

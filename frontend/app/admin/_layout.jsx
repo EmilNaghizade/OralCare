@@ -3,20 +3,10 @@
 // frontend/admin/_layout.jsx
 import React from 'react';
 import { Stack } from 'expo-router';
-import { useAuth } from '../_layout';
 import { View, Text, StyleSheet } from 'react-native';
 
 export default function AdminLayout() {
-  const { user } = useAuth();
-  
-  // Ensure only admin users can access this section
-  if (!user || user.role !== 'admin') {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.text}>You don't have permission to access this page.</Text>
-      </View>
-    );
-  }
+
 
   return (
     <Stack>
@@ -25,27 +15,28 @@ export default function AdminLayout() {
         options={{
           title: "Admin Panel",
           headerShown: true,
+          
         }}
       />
       <Stack.Screen
         name="VideoManagement"
         options={{
           title: "Video Management",
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
         name="ArticleManagement"
         options={{
           title: "Article Management",
-          headerShown: true,
+          headerShown: false,
         }}
       />
       <Stack.Screen
         name="ProductManagement"
         options={{
           title: "Product Management",
-          headerShown: true,
+          headerShown: false,
         }}
       />
     </Stack>

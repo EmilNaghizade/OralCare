@@ -2,11 +2,12 @@
   // frontend/admin/ArticleManagement.jsx
   // Similar structure to VideoManagement, but for articles
   import React from 'react';
-  import { View, Text, StyleSheet } from 'react-native';
+  import { View, Text, StyleSheet, StatusBar } from 'react-native';
   
   export default function ArticleManagement() {
     return (
       <View style={styles.container}>
+           <StatusBar barStyle="dark-content" />
         <Text style={styles.text}>Article Management - Implement similar to Video Management</Text>
       </View>
     );

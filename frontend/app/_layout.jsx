@@ -1,5 +1,11 @@
 // app/_layout.jsx
-import React, { useState, useEffect, createContext, useContext } from "react";
+import React, {
+  useState,
+  useEffect,
+  createContext,
+  useContext,
+  ueseRef,
+} from "react";
 import { Slot, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
@@ -24,6 +30,7 @@ function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true); // Başlangıçta yükleniyor
   const [userPoints, setUserPoints] = useState(0); // <<< YENİ: Quiz Puanları State'i
   const router = useRouter();
+  const hasNavigated = React.useRef(false);
 
   useEffect(() => {
     const loadInitialState = async () => {
@@ -85,29 +92,39 @@ function AuthProvider({ children }) {
     getProfile();
   }, []); // Sadece component mount edildiğinde çalışır
 
+  // Modified getAdmin useEffect
   useEffect(() => {
     const getAdmin = async () => {
       try {
-        if (!isLoading && authToken && user) {
-          // User is authenticated and profile is loaded
-          const storedUser = await SecureStore.getItemAsync("user");
-          // Check if user has admin role and redirect accordingly
+        if (isLoading || hasNavigated.current) return;
+
+        if (!authToken) {
+          hasNavigated.current = true;
+          console.log("Navigating to onboarding");
+          router.replace("/onboarding");
+        } else if (authToken && user && user?.role) {
+          hasNavigated.current = true;
+          console.log("User role is:", user.role);
           if (user.role === "admin") {
+            console.log("Navigating to /admin");
             router.replace("/admin");
           } else {
+
             router.replace("/(tabs)/home");
           }
-        } else if (!isLoading && !authToken) {
-          router.replace("/onboarding");
+        } else {
+          console.log("User or role not ready yet, waiting...");
         }
       } catch (error) {
-        console.error("[AuthProvider getAdmin] HATA:", error);
+        console.error("Navigation error:", error);
       }
     };
+
     getAdmin();
-  }, [isLoading, authToken]); // isLoading, authToken ve user değiştiğinde çalışır
+  }, [isLoading, authToken, user?.role]); // Add router and user to dependencies isLoading, authToken ve user değiştiğinde çalışır
 
   // Login fonksiyonu: token ve user objesini alır (API response'dan)
+  // Login function without routing
   const login = async (email, password) => {
     try {
       const response = await authApi.login(email, password);
@@ -129,6 +146,13 @@ function AuthProvider({ children }) {
       setAuthToken(token);
       setUser(user);
 
+      console.log("User role is:", user.role);
+      if (user?.role === "admin") {
+        router.replace("/admin");
+      } else {
+        router.replace("/(tabs)/home");
+      }
+
       // Store in SecureStore
       try {
         await SecureStore.setItemAsync("authToken", token);
@@ -139,11 +163,8 @@ function AuthProvider({ children }) {
         // Continue anyway - state is already set
       }
 
-      if (user.role === "admin") {
-        router.replace("/admin");
-      } else {
-        router.replace("/(tabs)/home");
-      }
+      // Let the useEffect handle routing based on user role
+      // REMOVE the routing logic from here
 
       return user;
     } catch (error) {
