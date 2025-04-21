@@ -105,26 +105,49 @@ function AuthProvider({ children }) {
       }
     };
     getAdmin();
-  }, [isLoading, authToken, ]); // isLoading, authToken ve user değiştiğinde çalışır
+  }, [isLoading, authToken]); // isLoading, authToken ve user değiştiğinde çalışır
 
   // Login fonksiyonu: token ve user objesini alır (API response'dan)
   const login = async (email, password) => {
     try {
       const response = await authApi.login(email, password);
       const { token, user } = response;
+
+      // Validate token before storing
+      if (
+        !token ||
+        typeof token !== "string" ||
+        token.split(".").length !== 3
+      ) {
+        console.error("Invalid token received from server:", token);
+        throw new Error("Received invalid authentication token");
+      }
+
+      console.log("Received valid token, storing...");
+
+      // Set in state
       setAuthToken(token);
       setUser(user);
-      await SecureStore.setItemAsync("authToken", token);
-      await SecureStore.setItemAsync("user", JSON.stringify(user));
-      console.log("Login response: USER", user.role === "admin");
+
+      // Store in SecureStore
+      try {
+        await SecureStore.setItemAsync("authToken", token);
+        await SecureStore.setItemAsync("user", JSON.stringify(user));
+        console.log("Token and user data saved successfully");
+      } catch (storageError) {
+        console.error("Failed to store authentication data:", storageError);
+        // Continue anyway - state is already set
+      }
+
       if (user.role === "admin") {
         router.replace("/admin");
       } else {
         router.replace("/(tabs)/home");
       }
+
       return user;
     } catch (error) {
-      console.error("[AuthProvider login] HATA:", error);
+      console.error("[AuthProvider login] ERROR:", error);
       throw error;
     }
   };

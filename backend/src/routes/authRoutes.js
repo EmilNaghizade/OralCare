@@ -8,9 +8,26 @@ const router = express.Router();
 const generateToken = (userId) => {
   if (!process.env.JWT_SECRET) {
     console.error("FATAL ERROR: JWT_SECRET is not defined.");
-    process.exit(1); // Exit if secret is missing
+    process.exit(1);
   }
-  return jwt.sign({ userId }, process.env.JWT_SECRET, { expiresIn: "15d" });
+
+  try {
+    // Make sure userId is a string and trim any whitespace
+    const userIdStr = userId.toString().trim();
+    console.log("Generating token for user ID:", userIdStr);
+
+    const token = jwt.sign({ userId: userIdStr }, process.env.JWT_SECRET, {
+      expiresIn: "15d",
+    });
+
+    // Verify the token is valid before returning it
+    jwt.verify(token, process.env.JWT_SECRET);
+
+    return token;
+  } catch (error) {
+    console.error("Error generating token:", error);
+    throw new Error("Failed to generate authentication token");
+  }
 };
 
 // Register new user
@@ -127,8 +144,7 @@ router.post("/logout", protectRoute, async (req, res) => {
 // Get user profile
 router.get("/profile", protectRoute, async (req, res) => {
   try {
-    const userProfile = await User.findById(req.user._id)
-      .select("-password") 
+    const userProfile = await User.findById(req.user._id).select("-password");
 
     if (!userProfile) {
       // This case should be rare if protectRoute middleware works correctly
