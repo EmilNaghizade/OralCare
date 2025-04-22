@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema(
     },
     profileImageBase64: {
       type: String,
-      default: ""
+      default: "",
     },
     role: {
       type: String,
@@ -40,7 +40,7 @@ const userSchema = new mongoose.Schema(
     },
     watchedVideos: [
       {
-        type: Number,
+        type: String,
         ref: "Video",
       },
     ],

@@ -1,19 +1,23 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Redirect } from "expo-router";
 import { useAuth } from "./_layout";
 
 export default function App() {
-  const { isLoading, authToken } = useAuth();
+  const { isLoading, authToken, user } = useAuth();
 
-  // If loading, don't redirect yet
   if (isLoading) {
-    return null; // Or return a splash screen/loading component
+    return null; // Loading zamanı heç nə göstərməyək
   }
 
-  // Only redirect if we know the auth state
-  return authToken ? (
-    <Redirect href="/(tabs)/home" />
-  ) : (
-    <Redirect href="/onboarding" />
-  );
+  // Auth yoxdursa → onboarding
+  if (!authToken) {
+    return <Redirect href="/onboarding" />;
+  }
+
+  // Auth varsa, user də gəlibsə → role yoxlanır
+  if (user?.role === "admin") {
+    return <Redirect href="/admin" />;
+  }
+
+  return <Redirect href="/(tabs)/home" />;
 }

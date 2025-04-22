@@ -12,6 +12,7 @@ import {
   Image,
   BackHandler,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -20,15 +21,127 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../_layout"; // Adjust path if needed
 import Typo from "../../components/Typo"; // Adjust path if needed
 import { fetchWithAuth } from "../../services/fetchWithAuth";
-import { dummyArticles, dummyNews, dummyQuizzes, dummyVideos } from "../data";
+import { dummyArticles, dummyNews, dummyQuizzes } from "../data";
 import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
 import { LinearGradient } from "expo-linear-gradient";
 import ProceedArticleCard from "../../components/ProceedArticleCard";
+import { videoApi } from "../../services/api";
 
 const getUserLaunchedKey = (userId) =>
   `@OralCareApp:user_${userId}_hasLaunched`;
 const getProfile = (token) => fetchWithAuth("/api/profile/profile", token);
+
+const SectionHeader = ({ title, onSeeAllPress, isOnSeeAll }) => (
+  <View style={styles.sectionHeader}>
+    <Text style={styles.sectionTitle}>{title}</Text>
+    {isOnSeeAll && (
+      <TouchableOpacity onPress={onSeeAllPress}>
+        <Text style={styles.seeAllText}>See all</Text>
+      </TouchableOpacity>
+    )}
+  </View>
+);
+
+const WatchAndLearnSection = ({ authToken }) => {
+  const router = useRouter();
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchVideos = async () => {
+    try {
+      const data = await videoApi.getAllVideos(authToken);
+
+      if (data && data.videos) {
+        setVideos(data.videos.slice(0, 4)); // Take only the first 4 videos
+        console.log("Fetched videos:", data.videos);
+      }
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={styles.sectionCard}>
+        <SectionHeader
+          title="Watch & Learn"
+          onSeeAllPress={() => router.push("/education")}
+          isOnSeeAll={true}
+        />
+        <Text style={styles.sectionSubtitle}>
+          Expert videos for step-by-step guidance
+        </Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#038565" />
+        </View>
+      </View>
+    );
+  }
+
+  // If no videos, show placeholder
+  if (videos.length === 0) {
+    return (
+      <View style={styles.sectionCard}>
+        <SectionHeader
+          title="Watch & Learn"
+          onSeeAllPress={() => router.push("/education")}
+          isOnSeeAll={true}
+        />
+        <Text style={styles.sectionSubtitle}>
+          Expert videos for step-by-step guidance
+        </Text>
+        <View style={styles.emptyContainer}>
+          <Typo style={styles.emptyText}>No videos available</Typo>
+        </View>
+      </View>
+    );
+  }
+
+  // Adapt the backend video data format to match what VideoCard expects
+  const adaptedVideos = videos.map((video) => ({
+    _id: video._id,
+    title: video.title,
+    thumbnailUrl: {
+      uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${video.thumbnailUrl}`,
+    },
+    duration: video.duration
+      ? `${
+          Math.floor(video.duration / 60) === 0
+            ? ""
+            : Math.floor(video.duration / 60) + " min"
+        }  ${video.duration  % 60} sec`
+      : "0 min 00 sec",
+    tag: video.category || "Video",
+  }));
+
+  return (
+    <View style={styles.sectionCard}>
+      <SectionHeader
+        title="Watch & Learn"
+        onSeeAllPress={() => router.push("/education")}
+        isOnSeeAll={true}
+      />
+      <Text style={styles.sectionSubtitle}>
+        Expert videos for step-by-step guidance
+      </Text>
+      <FlatList
+        data={adaptedVideos}
+        renderItem={({ item }) => <VideoCard item={item} />}
+        keyExtractor={(item) => item._id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.horizontalList}
+      />
+    </View>
+  );
+};
 
 export default function HomeScreen() {
   const { authToken } = useAuth();
@@ -285,24 +398,7 @@ export default function HomeScreen() {
           </View>
 
           {/* Watch & Learn Section */}
-          <View style={styles.sectionCard}>
-            <SectionHeader
-              title="Watch & Learn"
-              onSeeAllPress={() => router.push("/education")}
-              isOnSeeAll={true}
-            />
-            <Text style={styles.sectionSubtitle}>
-              Expert videos for step-by-step guidance
-            </Text>
-            <FlatList
-              data={dummyVideos} // Use dummy data
-              renderItem={({ item }) => <VideoCard item={item} />}
-              keyExtractor={(item) => item._id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-            />
-          </View>
+          <WatchAndLearnSection authToken={authToken} />
 
           <View style={styles.sectionCard}>
             <SectionHeader title="Test your knowledge" isOnSeeAll={false} />

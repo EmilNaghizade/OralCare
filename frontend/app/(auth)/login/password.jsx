@@ -59,7 +59,7 @@ const PasswordScreen = () => {
     try {
       // --- Call context login function ---
       await login(email, password);
-      router.replace("/(tabs)/home");
+    
       // --- Handle Success ---
       console.log("Login successful");
     } catch (error) {

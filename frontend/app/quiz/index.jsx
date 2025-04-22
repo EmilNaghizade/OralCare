@@ -1,12 +1,12 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
-  Platform, // Platform kontrolü için
+  Platform,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -16,6 +16,83 @@ import BackButton from "../../components/BackButton"; // Kendi BackButton'unuz
 import { VideoCard } from "../../components/VideoCard"; // Kendi VideoCard'ınız
 import Typo from "../../components/Typo"; // Kendi Typo'nuz
 import { dummyVideos, quizzes } from "../data"; // Örnek videoları alalım
+import { videoApi } from "../../services/api";
+import { useAuth } from "../_layout";
+
+const RelatedVideos = ({ quizId }) => {
+  const { authToken } = useAuth();
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
+
+  const fetchVideos = async () => {
+    try {
+      const data = await videoApi.getAllVideos(authToken);
+      if (data && data.videos) {
+        // In a real app, you might have a way to fetch videos related to the specific quiz
+        // For now, we'll just take the first 2 videos
+        setVideos(data.videos.slice(0, 2));
+      } else {
+        setVideos([]);
+      }
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+      setVideos([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#038565" />
+      </View>
+    );
+  }
+
+  if (videos.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Typo style={styles.emptyText}>No related videos available</Typo>
+      </View>
+    );
+  }
+
+  // Adapt the backend video data format to match what VideoCard expects
+  const adaptedVideos = videos.map((video) => ({
+    _id: video._id,
+    title: video.title,
+    thumbnailUrl: {
+      uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${video.thumbnailUrl}`,
+    },
+    duration: video.duration
+      ? `${
+          Math.floor(video.duration / 60) === 0
+            ? ""
+            : Math.floor(video.duration / 60) + " min"
+        }  ${video.duration % 60} sec`
+      : "0 min 00 sec",
+    
+    tag: video.category || "Video",
+  }));
+
+  return (
+    <View style={styles.videoList}>
+      {adaptedVideos.map((video) => (
+        <VideoCard
+          key={video._id}
+          item={video}
+          style={{ width: "100%" }}
+          styleThumbnail={{ height: 200 }}
+        />
+      ))}
+    </View>
+  );
+};
 
 export default function QuizDetailScreen() {
   const router = useRouter();
@@ -54,9 +131,9 @@ export default function QuizDetailScreen() {
     <View style={styles.safeArea} edges={["bottom", "left", "right"]}>
       {/* Üstteki gradient koyu olduğu için status bar'ı light yapalım */}
       <StatusBar
-       translucent
-       backgroundColor="transparent"
-       barStyle="light-content"
+        translucent
+        backgroundColor="transparent"
+        barStyle="light-content"
       />
       <ScrollView
         style={styles.scrollView}
@@ -114,16 +191,7 @@ export default function QuizDetailScreen() {
           </Typo>
 
           {/* Video Kartları */}
-          <View style={styles.videoList}>
-            {quizDetails.relatedVideos.map((video) => (
-              <VideoCard
-                key={video._id}
-                item={video}
-                style={{ width: "100%" }}
-                styleThumbnail={{ height: 200 }}
-              />
-            ))}
-          </View>
+          <RelatedVideos quizId={numericQuizId} />
         </View>
       </ScrollView>
     </View>
@@ -138,7 +206,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   gradientContainer: {
-
     paddingTop: 80, // Status bar + back button için boşluk
     paddingBottom: 40, // Buton için altta boşluk
     paddingHorizontal: 20,
@@ -149,7 +216,6 @@ const styles = StyleSheet.create({
     left: 10,
     zIndex: 1, // Diğer içeriklerin üzerinde
     paddingTop: 25,
-  
   },
   badgeRow: {
     flexDirection: "row",
@@ -163,7 +229,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.2)", // Yarı saydam beyaz
     borderRadius: 15, // Pill shape
     paddingVertical: 6,
-    marginTop: Platform.OS === "android" ? 8 :0,
+    marginTop: Platform.OS === "android" ? 8 : 0,
     paddingHorizontal: 12,
   },
   badgeText: {

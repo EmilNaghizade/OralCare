@@ -1,4 +1,4 @@
-// frontend/admin/components/ProductForm.jsx
+// frontend/app/admin/components/ProductForm.jsx
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -10,25 +10,30 @@ import {
   Alert,
   ActivityIndicator,
   Switch,
+  Image,
+  Platform,
 } from "react-native";
 import { useAuth } from "../../_layout";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
+import BackButton from "../../../components/BackButton";
+import axios from "axios";
+import * as FileSystem from "expo-file-system";
 
 export default function ProductForm({ route, navigation }) {
   const { isEditing, productId } = route.params;
   const { authToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const API_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   const [formData, setFormData] = useState({
     name: "",
-    description: "",
-    price: "",
-    category: "",
-    inStock: true,
-    images: [],
+    link: "",
+    imageFile: null,
   });
+
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     if (isEditing && productId) {
@@ -39,24 +44,21 @@ export default function ProductForm({ route, navigation }) {
   const fetchProductDetails = async () => {
     setLoading(true);
     try {
-      // Replace with your actual API call
-      // const response = await fetch(`your-api-endpoint/${productId}`, {
-      //   headers: { Authorization: `Bearer ${authToken}` }
-      // });
-      // const data = await response.json();
+      const response = await axios.get(`${API_URL}/api/products/${productId}`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
 
-      // Dummy data for now
-      const dummyData = {
-        name: "Electric Toothbrush",
-        description:
-          "High-quality electric toothbrush with multiple brushing modes.",
-        price: "89.99",
-        category: "Toothbrushes",
-        inStock: true,
-        images: ["url1", "url2"],
-      };
+      const product = response.data;
+      setFormData({
+        name: product.name || "",
+        link: product.link || "",
+        imageFile: null, // We don't reload the actual file
+      });
 
-      setFormData(dummyData);
+      // Set image preview if available
+      if (product.imageUrl) {
+        setImagePreview(`${API_URL}${product.imageUrl}`);
+      }
     } catch (error) {
       console.error("Error fetching product details:", error);
       Alert.alert("Error", "Failed to load product details");
@@ -88,77 +90,87 @@ export default function ProductForm({ route, navigation }) {
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         aspect: [1, 1],
-        quality: 1,
+        quality: 0.8,
       });
 
       if (!result.canceled && result.assets && result.assets[0]) {
         const imageUri = result.assets[0].uri;
         setFormData({
           ...formData,
-          images: [...formData.images, imageUri],
+          imageFile: imageUri,
         });
+        setImagePreview(imageUri);
       }
     } catch (error) {
       console.error("Error picking image:", error);
     }
   };
 
-  const removeImage = (index) => {
-    const updatedImages = [...formData.images];
-    updatedImages.splice(index, 1);
-    setFormData({
-      ...formData,
-      images: updatedImages,
-    });
-  };
-
   const handleSubmit = async () => {
     // Validate form
-    if (
-      !formData.name ||
-      !formData.description ||
-      !formData.price ||
-      !formData.category
-    ) {
-      Alert.alert("Missing Information", "Please fill in all required fields");
-      return;
-    }
-    if (formData.images.length === 0) {
-      Alert.alert("Missing Images", "Please upload at least one product image");
+    if (!formData.name || !formData.link) {
+      Alert.alert(
+        "Missing Information",
+        "Please fill in all required fields (name and link)"
+      );
       return;
     }
 
-    // Validate price format
-    if (isNaN(parseFloat(formData.price))) {
-      Alert.alert("Invalid Price", "Please enter a valid price");
+    if (!isEditing && !formData.imageFile) {
+      Alert.alert("Missing Image", "Please upload a product image");
       return;
     }
 
     setSubmitting(true);
 
     try {
-      // Replace with your actual API call
-      // For new product
-      // if (!isEditing) {
-      //   await fetch('your-api-endpoint', {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //       Authorization: `Bearer ${authToken}`
-      //     },
-      //     body: JSON.stringify(formData)
-      //   });
-      // } else {
-      //   // For updating existing product
-      //   await fetch(`your-api-endpoint/${productId}`, {
-      //     method: 'PUT',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //       Authorization: `Bearer ${authToken}`
-      //     },
-      //     body: JSON.stringify(formData)
-      //   });
-      // }
+      // Create FormData object for file upload
+      const formDataForUpload = new FormData();
+      formDataForUpload.append("name", formData.name);
+      formDataForUpload.append("link", formData.link);
+
+      // Append image file if we have one
+      if (formData.imageFile) {
+        const imageFileInfo = await FileSystem.getInfoAsync(formData.imageFile);
+        if (!imageFileInfo.exists) {
+          throw new Error("Image file does not exist at the specified path");
+        }
+
+        const imageFileName = formData.imageFile.split("/").pop();
+        const imageFile = {
+          uri: formData.imageFile,
+          type: "image/jpeg", // Set appropriate type based on file
+          name: imageFileName,
+        };
+
+        formDataForUpload.append("image", imageFile);
+      }
+
+      // Make API call
+      let response;
+      if (isEditing) {
+        response = await axios.put(
+          `${API_URL}/api/products/${productId}`,
+          formDataForUpload,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+      } else {
+        response = await axios.post(
+          `${API_URL}/api/products`,
+          formDataForUpload,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              Authorization: `Bearer ${authToken}`,
+            },
+          }
+        );
+      }
 
       // Success message
       Alert.alert(
@@ -170,7 +182,11 @@ export default function ProductForm({ route, navigation }) {
       );
     } catch (error) {
       console.error("Error saving product:", error);
-      Alert.alert("Error", "Failed to save product");
+      let errorMessage = "Failed to save product";
+      if (error.response && error.response.data && error.response.data.error) {
+        errorMessage = error.response.data.error;
+      }
+      Alert.alert("Error", errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -187,6 +203,8 @@ export default function ProductForm({ route, navigation }) {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.formContainer}>
+        <BackButton onPress={() => navigation.goBack()} />
+
         <Text style={styles.label}>Product Name *</Text>
         <TextInput
           style={styles.input}
@@ -195,63 +213,36 @@ export default function ProductForm({ route, navigation }) {
           placeholder="Enter product name"
         />
 
-        <Text style={styles.label}>Description *</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          value={formData.description}
-          onChangeText={(text) => handleInputChange("description", text)}
-          placeholder="Enter product description"
-          multiline={true}
-          numberOfLines={4}
-        />
-
-        <Text style={styles.label}>Price *</Text>
-        <View style={styles.priceContainer}>
-          <Text style={styles.currencySymbol}>$</Text>
-          <TextInput
-            style={styles.priceInput}
-            value={formData.price}
-            onChangeText={(text) => handleInputChange("price", text)}
-            placeholder="0.00"
-            keyboardType="decimal-pad"
-          />
-        </View>
-
-        <Text style={styles.label}>Category *</Text>
+        <Text style={styles.label}>Product Link *</Text>
         <TextInput
           style={styles.input}
-          value={formData.category}
-          onChangeText={(text) => handleInputChange("category", text)}
-          placeholder="Enter product category"
+          value={formData.link}
+          onChangeText={(text) => handleInputChange("link", text)}
+          placeholder="Enter product link (URL)"
+          autoCapitalize="none"
         />
 
-        <View style={styles.stockContainer}>
-          <Text style={styles.label}>In Stock</Text>
-          <Switch
-            value={formData.inStock}
-            onValueChange={(value) => handleInputChange("inStock", value)}
-            trackColor={{ false: "#767577", true: "#81b0ff" }}
-            thumbColor={formData.inStock ? "#007AFF" : "#f4f3f4"}
-          />
-        </View>
 
-        <Text style={styles.label}>Product Images *</Text>
-        <View style={styles.imagesContainer}>
-          {formData.images.map((image, index) => (
-            <View key={index} style={styles.imagePreviewContainer}>
-              <View style={styles.imagePreview} />
-              <TouchableOpacity
-                style={styles.removeImageButton}
-                onPress={() => removeImage(index)}
-              >
-                <Ionicons name="close-circle" size={22} color="#FF3B30" />
-              </TouchableOpacity>
-            </View>
-          ))}
-          <TouchableOpacity style={styles.addImageButton} onPress={pickImage}>
-            <Ionicons name="add" size={30} color="#007AFF" />
-          </TouchableOpacity>
-        </View>
+  
+
+        <Text style={styles.label}>Product Image *</Text>
+        <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
+          <Ionicons name="image-outline" size={24} color="#007AFF" />
+          <Text style={styles.uploadButtonText}>
+            {imagePreview ? "Change Image" : "Upload Image"}
+          </Text>
+        </TouchableOpacity>
+
+        {imagePreview && (
+          <View style={styles.previewContainer}>
+            <Text style={styles.fileSelected}>Image selected</Text>
+            <Image
+              source={{ uri: imagePreview }}
+              style={styles.imagePreview}
+              resizeMode="contain"
+            />
+          </View>
+        )}
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -306,68 +297,40 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
   },
-  textArea: {
-    minHeight: 100,
-    textAlignVertical: "top",
-  },
-  priceContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "white",
-    borderRadius: 8,
-    paddingHorizontal: 12,
-  },
-  currencySymbol: {
-    fontSize: 16,
-    color: "#8E8E93",
-    marginRight: 4,
-  },
-  priceInput: {
-    flex: 1,
-    padding: 12,
-    fontSize: 16,
-  },
   stockContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     marginVertical: 8,
   },
-  imagesContainer: {
+  uploadButton: {
     flexDirection: "row",
-    flexWrap: "wrap",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 8,
+    padding: 12,
     marginTop: 8,
   },
-  imagePreviewContainer: {
-    position: "relative",
-    width: 100,
-    height: 100,
-    margin: 4,
+  uploadButtonText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: "#007AFF",
+  },
+  previewContainer: {
+    marginTop: 8,
+    marginBottom: 16,
+  },
+  fileSelected: {
+    marginTop: 8,
+    fontSize: 14,
+    color: "#8E8E93",
   },
   imagePreview: {
     width: "100%",
-    height: "100%",
-    backgroundColor: "#E5E5EA",
+    height: 200,
     borderRadius: 8,
-  },
-  removeImageButton: {
-    position: "absolute",
-    top: -8,
-    right: -8,
-    backgroundColor: "white",
-    borderRadius: 12,
-  },
-  addImageButton: {
-    width: 100,
-    height: 100,
-    backgroundColor: "white",
-    borderRadius: 8,
-    margin: 4,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#E5E5EA",
-    borderStyle: "dashed",
+    marginTop: 8,
+    backgroundColor: "#f0f0f0",
   },
   buttonContainer: {
     flexDirection: "row",

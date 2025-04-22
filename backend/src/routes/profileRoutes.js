@@ -127,7 +127,7 @@ router.delete("/delete-photo", protectRoute, async (req, res) => {
 router.get("/profile", protectRoute, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select(
-      "name email profileImage"
+      "name email profileImage role"
     );
     if (!user) {
       return res.status(404).json({

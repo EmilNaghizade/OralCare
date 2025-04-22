@@ -64,7 +64,6 @@ const PasswordScreen = () => {
       // Check if the backend automatically logs the user in and sends a token
       if (response && response.token) {
         await login(email, password);
-        router.replace("(tabs)/home");
       } 
     } catch (error) {
       // --- Handle Error ---

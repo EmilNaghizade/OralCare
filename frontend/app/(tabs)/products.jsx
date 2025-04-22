@@ -1,5 +1,5 @@
 // app/(tabs)/products.jsx
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -7,13 +7,15 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
-  SafeAreaView, // <-- SafeAreaView EKLENDİ
+  SafeAreaView,
   Platform,
   Linking,
+  ActivityIndicator,
+  StatusBar,
 } from "react-native";
-// import { useRouter } from "expo-router"; // Şimdilik kullanılmıyor, gerekirse ekleyin
-import Typo from "../../components/Typo"; // Typo bileşeni varsayılıyor
-import { dummyProducts } from "../data";
+import { useAuth } from "../_layout";
+import Typo from "../../components/Typo";
+import axios from "axios";
 
 const PADDING = 16; // Yeni padding/gap değeri
 const { width } = Dimensions.get("window");
@@ -21,24 +23,57 @@ const ITEM_WIDTH = (width - PADDING * 3) / 2;
 
 // --- Ürün Kartı Bileşeni ---
 const ProductCard = ({ item }) => {
+  // Fix the image source handling
+  let imageSource;
+
+  if (item.image) {
+    // Case 1: If it's a local image from dummyProducts
+    imageSource = item.image;
+  } else if (item.imageUrl) {
+    // Case 2: If it's a URL from the API (needs to be converted to an object with uri)
+    if (typeof item.imageUrl === "string") {
+      // If imageUrl is already a string, make it an object with uri property
+      if (item.imageUrl.startsWith("http")) {
+        // If it's a full URL
+        imageSource = { uri: item.imageUrl };
+      } else {
+        // If it's a relative path from the API
+        imageSource = {
+          uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${item.imageUrl}`,
+        };
+      }
+    } else {
+      // If it's already an object with uri
+      imageSource = item.imageUrl;
+    }
+  } else {
+    // Fallback to default image if no image is provided
+    imageSource = require("../../assets/images/Product2.png");
+  }
+
+  // Get the product link based on available properties
+  const productLink =
+    item.productLink || item.link || "https://www.intersurgical.com/products";
+
   return (
     <TouchableOpacity
       style={styles.productCard}
       activeOpacity={0.8}
       onPress={() => {
-        Linking.openURL(item.productLink);
+        if (productLink) {
+          Linking.openURL(productLink);
+        }
       }}
-      // onPress={() => router.push(`/product-detail/${item.id}`)} // Örnek yönlendirme
     >
-      {/* Resim Alanı */}
+      {/* Image Area */}
       <View style={styles.productImageContainer}>
         <Image
-          source={item.image} // item'dan gelen resmi kullan
+          source={imageSource}
           style={styles.productImage}
-          resizeMode="contain" // Resmin tamamı görünsün, oran korunsun
+          resizeMode="cover"
         />
       </View>
-      {/* Ürün Adı */}
+      {/* Product Name */}
       <Typo style={styles.productName} numberOfLines={2}>
         {item.name}
       </Typo>
@@ -48,29 +83,86 @@ const ProductCard = ({ item }) => {
 
 // --- Ana Ürünler Ekranı Bileşeni ---
 export default function ProductsScreen() {
+  const { authToken } = useAuth();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Try to fetch products from API
+      const response = await axios.get(
+        `${process.env.EXPO_PUBLIC_API_BASE_URL}/api/products`,
+        {
+          headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+        }
+      );
+
+      if (response.data && response.data.products) {
+        setProducts(response.data.products);
+      } else {
+        // If no products from API, use dummy data
+        console.log("No products returned from API, using dummy data");
+        setProducts(dummyProducts);
+      }
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      // Fall back to dummy data on error
+      setProducts(dummyProducts);
+      setError(
+        "Could not load products from server. Showing sample products instead."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Özel Başlık Alanı */}
+        {/* Custom Header */}
         <View style={styles.header}>
           <Typo fontWeight="600" size={20} style={styles.headerTitle}>
             Oral Care Products
           </Typo>
         </View>
-
-        {/* Ürün Listesi (Grid) */}
-        <FlatList
-          data={dummyProducts}
-          renderItem={({ item }) => <ProductCard item={item} />}
-          keyExtractor={(item) => item.id}
-          numColumns={2} // 2 Sütunlu Grid
-          contentContainerStyle={styles.listContainer}
-          showsVerticalScrollIndicator={false} // Scroll bar'ı gizle
-          // columnWrapperStyle={styles.columnWrapper} // Gerekirse sütunlar arası boşluk için
-        />
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#038565" />
+          </View>
+        ) : (
+          <FlatList
+            data={products}
+            renderItem={({ item }) => <ProductCard item={item} />}
+            keyExtractor={(item) =>
+              item.id || item._id || Math.random().toString()
+            }
+            numColumns={2}
+            contentContainerStyle={styles.listContainer}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={
+              <View style={styles.emptyContainer}>
+                <Typo style={styles.emptyText}>No products available</Typo>
+              </View>
+            }
+          />
+        )}
+        {/* Error message if any */}
+        {error && (
+          <View style={styles.errorContainer}>
+            <Typo style={styles.errorText}>{error}</Typo>
+          </View>
+        )}
       </View>
     </SafeAreaView>
   );
@@ -105,7 +197,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20, // Listenin altındaki boşluk
     backgroundColor: "#fff",
     marginTop: 30,
-    borderRadius: 20
+    borderRadius: 20,
+    minHeight: 200, // Ensure container has minimum height
   },
   productCard: {
     width: ITEM_WIDTH, // Hesaplanan genişlik
@@ -114,10 +207,9 @@ const styles = StyleSheet.create({
     marginBottom: PADDING, // Dikey boşluk (satırlar arası)
     marginHorizontal: PADDING / 2, // Yatay boşluk (sütunlar arası - toplam PADDING olur)
     padding: 12, // Kart içi boşluk (biraz azaltıldı)
-
     // Gölge
     borderWidth: 1,
-    borderColor: "#F0F5F7"
+    borderColor: "#F0F5F7",
   },
   productImageContainer: {
     width: "100%", // Kart genişliğini doldur
@@ -127,6 +219,11 @@ const styles = StyleSheet.create({
     justifyContent: "center", // İçeriği (resmi) dikeyde ortala
     alignItems: "center", // İçeriği (resmi) yatayda ortala
     overflow: "hidden", // İçerideki resmin taşmasını engelle
+  },
+  productImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16, // <<< İÇ KÖŞE YUVARLAKLIĞI (Karttan biraz az)
   },
   productName: {
     fontSize: 14,
