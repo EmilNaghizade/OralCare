@@ -3,16 +3,19 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../_layout";
-import { View, Text, StyleSheet, BackHandler, Platform, StatusBar } from "react-native";
+import {StyleSheet, BackHandler, Platform } from "react-native";
 import VideoManagement from "./VideoManagement";
 import ArticleManagement from "./ArticleManagement";
 import ProductManagement from "./ProductManagement";
+import AdminManagement from "./AdminManagement";
+
+
 
 const Tab = createBottomTabNavigator();
 
 export default function AdminPanel() {
-  const { user } = useAuth();
+ 
+
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
@@ -43,6 +46,8 @@ export default function AdminPanel() {
             iconName = focused ? "document-text" : "document-text-outline";
           } else if (route.name === "Products") {
             iconName = focused ? "pricetag" : "pricetag-outline";
+          }else if (route.name === "Admin") {
+            iconName = focused ? "settings" : "settings-outline";
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -56,6 +61,8 @@ export default function AdminPanel() {
       <Tab.Screen name="Videos" options={{headerShown: false}}  component={VideoManagement} />
       <Tab.Screen name="Articles" options={{headerShown: false}} component={ArticleManagement} />
       <Tab.Screen name="Products" options={{headerShown: false}} component={ProductManagement} />
+      <Tab.Screen name="Admin" options={{headerShown: false}} component={AdminManagement} />
+
     </Tab.Navigator>
   );
 }

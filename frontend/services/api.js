@@ -223,6 +223,104 @@ export const videoApi = {
       return { watchedVideosId: [], count: 0 };
     }
   },
+  // New admin methods for video management
+  getVideoById: async (videoId, token) => {
+    try {
+      // Use provided token or get it from secure storage
+      const authToken = token || (await getAuthToken());
+
+      if (!authToken) {
+        console.error("No auth token available");
+        throw new Error("Authentication token is missing");
+      }
+
+      console.log(`Fetching video with ID: ${videoId} using token`);
+
+      const response = await axios.get(`${API_URL}/api/videos/${videoId}`, {
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching video with ID ${videoId}:`, error);
+
+      // Handle specific error cases
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+
+        if (error.response.status === 404) {
+          throw new Error("Video not found");
+        }
+      }
+
+      throw new Error("Failed to load video. Please try again later.");
+    }
+  },
+
+  createVideo: async (videoData, token) => {
+    try {
+      // videoData should be FormData with all required fields and files
+      const response = await axios.post(`${API_URL}/api/videos`, videoData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error creating video:", error);
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      }
+      throw error;
+    }
+  },
+
+  updateVideo: async (videoId, videoData, token) => {
+    try {
+      // videoData should be FormData with all required fields and possibly files
+      const response = await axios.put(
+        `${API_URL}/api/videos/${videoId}`,
+        videoData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating video with ID ${videoId}:`, error);
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      }
+      throw error;
+    }
+  },
+
+  deleteVideo: async (videoId, token) => {
+    try {
+      const response = await axios.delete(`${API_URL}/api/videos/${videoId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting video with ID ${videoId}:`, error);
+      if (error.response) {
+        console.error("Response data:", error.response.data);
+        console.error("Response status:", error.response.status);
+      }
+      throw error;
+    }
+  },
 };
 
 // Export getProfileApi for backward compatibility

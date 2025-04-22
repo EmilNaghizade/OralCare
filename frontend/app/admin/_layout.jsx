@@ -1,41 +1,51 @@
-
-// Add a navigation file for the Admin Panel
-// frontend/admin/_layout.jsx
+// frontend/app/admin/_layout.jsx
 import React from 'react';
-import { Stack } from 'expo-router';
-import { View, Text, StyleSheet } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function AdminLayout() {
-
-
+  const router = useRouter();
+  
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerShown: true,
+        headerTitle: () => (
+          <View style={styles.headerContainer}>
+            <Text style={styles.headerTitle}>Admin Panel</Text>
+
+          </View>
+        ),
+      }}
+    >
       <Stack.Screen
         name="index"
         options={{
-          title: "Admin Panel",
           headerShown: true,
-          
         }}
       />
       <Stack.Screen
         name="VideoManagement"
         options={{
-          title: "Video Management",
           headerShown: false,
         }}
       />
       <Stack.Screen
         name="ArticleManagement"
         options={{
-          title: "Article Management",
           headerShown: false,
         }}
       />
       <Stack.Screen
         name="ProductManagement"
         options={{
-          title: "Product Management",
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
+        name="Admin"
+        options={{
           headerShown: false,
         }}
       />
@@ -44,14 +54,30 @@ export default function AdminLayout() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
+  headerContainer: {
+    flexDirection: 'row',
     alignItems: 'center',
-    padding: 20,
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingRight: 10,
   },
-  text: {
-    fontSize: 18,
-    textAlign: 'center',
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#000',
   },
+  homeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F0F5F7',
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+  },
+  homeButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#038565',
+    marginLeft: 4,
+  }
 });

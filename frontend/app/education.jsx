@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   View,
   Text,
@@ -7,43 +7,93 @@ import {
   FlatList,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import BackButton from "../components/BackButton";
 import { VideoCard } from "../components/VideoCard";
-import { dummyVideos } from "./data";
+import { videoApi } from "../services/api";
+
+import Typo from "../components/Typo";
+import { useAuth } from "./_layout";
 
 export default function Education() {
+  const { authToken } = useAuth();
+  const [videos, setVideos] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const renderVideos = ({ item }) => <VideoCard item={item} style={{width: "47%"}} />;
+  useEffect(() => {
+    fetchVideos();
+  }, []);
+
+  const fetchVideos = async () => {
+    try {
+      setLoading(true);
+      const data = await videoApi.getAllVideos(authToken);
+      if (data && data.videos) {
+        setVideos(data.videos);
+      } else {
+        setVideos([]);
+      }
+    } catch (error) {
+      console.error("Error fetching videos:", error);
+      setVideos([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const adaptedVideos = videos.map((video) => ({
+    _id: video._id,
+    title: video.title,
+    thumbnailUrl: {
+      uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${video.thumbnailUrl}`,
+    },
+    duration: video.duration
+      ? `${Math.floor(video.duration % 60)} min ${
+          (video.duration * 60) % 60
+        } sec`
+      : "0 min 00 sec",
+    tag: video.category || "Video",
+  }));
+
+  const renderVideos = ({ item }) => (
+    <VideoCard item={item} style={{ width: "47%" }} />
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-            <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" />
       {/* Header */}
-      <View
-        style={styles.scrollContainer}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.headerButtons}>
             <BackButton />
-
           </View>
           <Text style={styles.headerTitle}>Watch & Learn</Text>
         </View>
 
         {/* Articles Grid */}
 
-        <FlatList
-          data={dummyVideos}
-          renderItem={renderVideos}
-          keyExtractor={(item) => item._id.toString()}
-          numColumns={2}
-          contentContainerStyle={styles.articleGrid}
-          showsVerticalScrollIndicator={false}
-          columnWrapperStyle={styles.columnWrapper}
-        />
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#038565" />
+          </View>
+        ) : videos.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Typo style={styles.emptyText}>No videos available</Typo>
+          </View>
+        ) : (
+          <FlatList
+            data={adaptedVideos}
+            renderItem={renderVideos}
+            keyExtractor={(item) => item._id.toString()}
+            numColumns={2}
+            contentContainerStyle={styles.articleGrid}
+            showsVerticalScrollIndicator={false}
+            columnWrapperStyle={styles.columnWrapper}
+          />
+        )}
       </View>
     </SafeAreaView>
   );

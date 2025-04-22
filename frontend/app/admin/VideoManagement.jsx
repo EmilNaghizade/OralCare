@@ -7,12 +7,16 @@ import {
   FlatList,
   TouchableOpacity,
   Alert,
+  ActivityIndicator,
+  Image,
   StatusBar,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { createStackNavigator } from "@react-navigation/stack";
 import { useAuth } from "../_layout";
 import VideoForm from "./components/VideoForm";
+import axios from "axios";
+import { videoApi } from "../../services/api";
 
 const Stack = createStackNavigator();
 
@@ -20,18 +24,43 @@ function VideoListScreen({ navigation }) {
   const { authToken } = useAuth();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const API_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   useEffect(() => {
-    // Fetch videos from your API
-    fetchVideos();
-  }, []);
+    // Add a listener to refresh the list when we navigate back to it
+    const unsubscribe = navigation.addListener("focus", () => {
+      fetchVideos();
+    });
+
+    // Clean up the listener
+    return unsubscribe;
+  }, [navigation]);
 
   const fetchVideos = async () => {
+    setLoading(true);
     try {
+      const response = await axios.get(`${API_URL}/api/videos`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+
+      if (response.data && response.data.videos) {
+        setVideos(response.data.videos);
+      } else {
+        setVideos([]);
+      }
     } catch (error) {
       console.error("Error fetching videos:", error);
+      Alert.alert("Error", "Failed to load videos");
+      setVideos([]);
+    } finally {
       setLoading(false);
     }
+  };
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchVideos();
+    setRefreshing(false);
   };
 
   const handleDelete = (id) => {
@@ -45,16 +74,17 @@ function VideoListScreen({ navigation }) {
           style: "destructive",
           onPress: async () => {
             try {
-              // Replace with your actual API call
-              // await fetch(`your-api-endpoint/${id}`, {
-              //   method: 'DELETE',
-              //   headers: { Authorization: `Bearer ${authToken}` }
-              // });
+              setLoading(true);
+              await videoApi.deleteVideo(id, authToken);
 
-              // Update local state
-              setVideos(videos.filter((video) => video.id !== id));
+              // Update local state to remove deleted video
+              setVideos(videos.filter((video) => video._id !== id));
+              Alert.alert("Success", "Video deleted successfully");
             } catch (error) {
               console.error("Error deleting video:", error);
+              Alert.alert("Error", "Failed to delete video");
+            } finally {
+              setLoading(false);
             }
           },
         },
@@ -65,7 +95,7 @@ function VideoListScreen({ navigation }) {
   if (videos.length === 0) {
     return (
       <View style={styles.centered}>
-        <Text style={{marginBottom: 16}}>No videos found</Text>
+        <Text style={{ marginBottom: 16 }}>No videos found</Text>
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => navigation.navigate("AddVideo")}
@@ -77,10 +107,10 @@ function VideoListScreen({ navigation }) {
     );
   }
 
-  if (loading && videos.length !== 0) {
+  if (loading && !refreshing) {
     return (
       <View style={styles.centered}>
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
   }
@@ -104,19 +134,29 @@ function VideoListScreen({ navigation }) {
       ) : (
         <FlatList
           data={videos}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id}
           renderItem={({ item }) => (
             <View style={styles.videoItem}>
               <View style={styles.videoInfo}>
-                <View style={styles.thumbnailPlaceholder} />
+                {item.thumbnailUrl ? (
+                  <Image
+                    source={{ uri: `${API_URL}${item.thumbnailUrl}` }}
+                    style={styles.thumbnailImage}
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <View style={styles.thumbnailPlaceholder} />
+                )}
                 <View style={styles.textContainer}>
                   <Text style={styles.videoTitle}>{item.title}</Text>
+                  <Text style={styles.videoCategory}>{item.category}</Text>
                   <View style={styles.tagsContainer}>
-                    {item.tags.map((tag, index) => (
-                      <View key={index} style={styles.tag}>
-                        <Text style={styles.tagText}>{tag}</Text>
-                      </View>
-                    ))}
+                    {item.tags &&
+                      item.tags.map((tag, index) => (
+                        <View key={index} style={styles.tag}>
+                          <Text style={styles.tagText}>{tag}</Text>
+                        </View>
+                      ))}
                   </View>
                 </View>
               </View>
@@ -125,7 +165,7 @@ function VideoListScreen({ navigation }) {
                 <TouchableOpacity
                   style={styles.actionButton}
                   onPress={() =>
-                    navigation.navigate("EditVideo", { videoId: item.id })
+                    navigation.navigate("EditVideo", { videoId: item._id })
                   }
                 >
                   <Ionicons name="create-outline" size={24} color="#007AFF" />
@@ -133,13 +173,18 @@ function VideoListScreen({ navigation }) {
 
                 <TouchableOpacity
                   style={styles.actionButton}
-                  onPress={() => handleDelete(item.id)}
+                  onPress={() => handleDelete(item._id)}
                 >
                   <Ionicons name="trash-outline" size={24} color="#FF3B30" />
                 </TouchableOpacity>
               </View>
             </View>
           )}
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          contentContainerStyle={
+            videos.length === 0 ? styles.fullContainer : null
+          }
         />
       )}
     </View>
@@ -181,6 +226,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  fullContainer: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   addButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -219,10 +269,16 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   thumbnailPlaceholder: {
-    width: 60,
-    height: 40,
+    width: 80,
+    height: 60,
     backgroundColor: "#E5E5EA",
     borderRadius: 6,
+  },
+  thumbnailImage: {
+    width: 80,
+    height: 60,
+    borderRadius: 6,
+    backgroundColor: "#E5E5EA",
   },
   textContainer: {
     marginLeft: 12,
@@ -231,7 +287,12 @@ const styles = StyleSheet.create({
   videoTitle: {
     fontWeight: "bold",
     fontSize: 16,
-    marginBottom: 6,
+    marginBottom: 4,
+  },
+  videoCategory: {
+    fontSize: 14,
+    color: "#007AFF",
+    marginBottom: 4,
   },
   tagsContainer: {
     flexDirection: "row",
@@ -241,8 +302,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#E5E5EA",
     borderRadius: 12,
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 2,
     marginRight: 6,
+    marginBottom: 4,
   },
   tagText: {
     fontSize: 12,
