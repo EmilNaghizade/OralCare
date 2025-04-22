@@ -1,4 +1,4 @@
-import React, {useState,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   StyleSheet,
@@ -70,10 +70,13 @@ const RelatedVideos = ({ quizId }) => {
       uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${video.thumbnailUrl}`,
     },
     duration: video.duration
-      ? `${Math.floor(video.duration / 60)} min ${
-          (video.duration * 60) % 60
-        } sec`
+      ? `${
+          Math.floor(video.duration / 60) === 0
+            ? ""
+            : Math.floor(video.duration / 60) + " min"
+        }  ${video.duration % 60} sec`
       : "0 min 00 sec",
+    
     tag: video.category || "Video",
   }));
 

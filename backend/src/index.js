@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import quizRoutes from "./routes/quizRoutes.js";
 import videoRoutes from "./routes/videoRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
+import productRoutes from "./routes/productRoutes.js";
 import { connectDb } from "./lib/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -46,6 +47,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/quizzes", quizRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/profile", profileRoutes);
+app.use("/api/products", productRoutes);
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on port 3000");

@@ -7,6 +7,7 @@ import upload from "../middleware/multer.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import { optimizeVideo } from "../middleware/optimizeVideo.js"; // Import the optimization function
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -81,6 +82,26 @@ router.post(
       const videoUrl = `/uploads/videos/${videoFile.filename}`;
       const thumbnailUrl = `/uploads/thumbnails/${thumbnailFile.filename}`;
 
+      // --- FFmpeg ilə OPTIMIZE ET ---
+      const inputPath = videoFile.path;
+      const optimizedDir = path.join(__dirname, "../../uploads/optimized");
+      const optimizedPath = path.join(optimizedDir, videoFile.filename);
+
+      // Qovluq yoxdursa, yarat
+      if (!fs.existsSync(optimizedDir)) {
+        fs.mkdirSync(optimizedDir, { recursive: true });
+      }
+
+      ffmpeg(inputPath)
+        .outputOptions(["-movflags faststart", "-preset veryfast", "-crf 28"])
+        .save(optimizedPath)
+        .on("end", () => {
+          console.log("✅ Video optimized:", optimizedPath);
+        })
+        .on("error", (err) => {
+          console.error("❌ FFmpeg optimization error:", err.message);
+        });
+
       const video = new Video({
         title,
         description,
@@ -93,6 +114,7 @@ router.post(
       });
 
       await video.save();
+
       res.status(201).json(video);
     } catch (error) {
       console.error("Error creating video:", error);

@@ -323,5 +323,86 @@ export const videoApi = {
   },
 };
 
+export const productApi = {
+  getAllProducts: async (token) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/products`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+    }
+  },
+  getProductById: async (productId, token) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/products/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching product with ID ${productId}:`, error);
+      throw error;
+    }
+  },
+  createProduct: async (productData, token) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/products`,
+        productData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error creating product:", error);
+      throw error;
+    }
+  },
+  updateProduct: async (productId, productData, token) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/api/products/${productId}`,
+        productData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating product with ID ${productId}:`, error);
+      throw error;
+    }
+  },
+  deleteProduct: async (productId, token) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/api/products/${productId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting product with ID ${productId}:`, error);
+      throw error;
+    }
+  },
+};
+
 // Export getProfileApi for backward compatibility
 export const getProfileApi = authApi.getProfile;
