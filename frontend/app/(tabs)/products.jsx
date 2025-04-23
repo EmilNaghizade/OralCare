@@ -27,7 +27,7 @@ const ProductCard = ({ item }) => {
   let imageSource;
 
   if (item.image) {
-    // Case 1: If it's a local image from dummyProducts
+  
     imageSource = item.image;
   } else if (item.imageUrl) {
     // Case 2: If it's a URL from the API (needs to be converted to an object with uri)
@@ -114,12 +114,10 @@ export default function ProductsScreen() {
       } else {
         // If no products from API, use dummy data
         console.log("No products returned from API, using dummy data");
-        setProducts(dummyProducts);
       }
     } catch (err) {
       console.error("Error fetching products:", err);
       // Fall back to dummy data on error
-      setProducts(dummyProducts);
       setError(
         "Could not load products from server. Showing sample products instead."
       );
