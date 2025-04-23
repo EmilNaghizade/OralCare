@@ -286,35 +286,3 @@ export const dummyNews = [
 const defaultProfilePic = require("../assets/images/pp.png");
 
 
-
-export const dummyProducts = [
-  // Her ürüne kendi image özelliğini ekleyin
-  {
-    id: "p1",
-    name: "OroCare™ Mini toothbrush",
-    image: require("../assets/images/Product2.png"),
-    productLink:
-      "https://www.intersurgical.com/products/airway-management/igel-supraglottic-airway#8204000",
-  },
-  {
-    id: "p2",
-    name: "OroCare™ Mini toothbrush",
-    image: require("../assets/images/Product2.png"),
-    productLink:
-      "https://www.intersurgical.com/products/airway-management/igel-supraglottic-airway#8205000",
-  }, // Farklı resim kullanın
-  {
-    id: "p3",
-    name: "OroCare™ Mini toothbrush",
-    image: require("../assets/images/Product2.png"),
-    productLink:
-      "https://www.intersurgical.com/products/airway-management/igel-supraglottic-airway#8203000",
-  }, // Farklı resim kullanın
-  {
-    id: "p4",
-    name: "OroCare™ Mini toothbrush",
-    image: require("../assets/images/Product2.png"),
-    productLink:
-      "https://www.intersurgical.com/products/airway-management/igel-supraglottic-airway#8225000",
-  }, // Farklı resim kullanın
-];

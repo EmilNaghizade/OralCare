@@ -309,6 +309,7 @@ export default function HomeScreen() {
   const [firstName, setFirstName] = useState("");
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles");
+  const [articles, setArticles] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [userId, setUserId] = useState(null);
 
@@ -398,6 +399,31 @@ export default function HomeScreen() {
       }
     };
 
+    const getArticles = async () => {
+      try {
+        const data = await articleApi.getAllArticles(authToken, 1, 4);
+        if (data && data.articles) {
+          const mappedArticles = data.articles.map((article) => ({
+            _id: article._id,
+            title: article.title,
+            image: {
+              uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${article.thumbnail}`,
+            },
+            readTime: `${article.readingTime}min read`,
+            createdAt: new Date(article.createdAt).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            }),
+          }));
+          setArticles(mappedArticles);
+        }
+      } catch (error) {
+        console.error("Error fetching articles:", error);
+      }
+    };
+
+    getArticles();
     loadProfile();
     checkFirstTimeUser();
   }, [authToken]);
@@ -509,7 +535,9 @@ export default function HomeScreen() {
 
             {/* Secondary card preview */}
             <View style={styles.modalArticleWrapper}>
-              <ProceedArticleCard item={dummyArticles[0]} />
+              <ProceedArticleCard
+                item={articles.length > 0 ? articles[0] : dummyArticles[0]}
+              />
             </View>
 
             {/* Proceed button */}

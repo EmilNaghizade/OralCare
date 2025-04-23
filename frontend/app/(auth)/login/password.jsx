@@ -59,16 +59,13 @@ const PasswordScreen = () => {
     try {
       // --- Call context login function ---
       await login(email, password);
-    
+
       // --- Handle Success ---
       console.log("Login successful");
     } catch (error) {
       // --- Handle Error ---
       console.error("Login Error:", error);
-      Alert.alert(
-        "Login Failed",
-        error.message || "An unexpected error occurred."
-      );
+      Alert.alert("Login Failed", "An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
@@ -77,8 +74,8 @@ const PasswordScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.safeArea}>
-                    <StatusBar barStyle="dark-content" />
-        
+        <StatusBar barStyle="dark-content" />
+
         <BackButton />
 
         <View style={styles.container}>

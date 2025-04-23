@@ -11,7 +11,6 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
 import { ArticleCard } from "../components/ArticleCard";
 import BackButton from "../components/BackButton";
 import Typo from "../components/Typo";
@@ -31,6 +30,7 @@ export default function KnowledgeHub() {
     fetchData();
   }, [activeTab, authToken]);
 
+  console.log(activeTab, "activeTab");
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -85,7 +85,7 @@ export default function KnowledgeHub() {
   const displayData = activeTab === "Articles" ? articles : news;
 
   const renderArticleItem = ({ item }) => (
-    <ArticleCard item={item} cardWidth={"47%"} />
+    <ArticleCard item={item} cardWidth={"47%"} params={{activeTab: activeTab}} />
   );
 
   return (
