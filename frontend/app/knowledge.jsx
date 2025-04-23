@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,18 +8,81 @@ import {
   TouchableOpacity,
   StatusBar,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { dummyArticles, dummyNews } from "./data"; // Make sure this path is correct
 import { ArticleCard } from "../components/ArticleCard";
 import BackButton from "../components/BackButton";
+import Typo from "../components/Typo";
+import { articleApi, newsApi } from "../services/api";
+import { useAuth } from "./_layout";
 
 export default function KnowledgeHub() {
   const router = useRouter();
+  const { authToken } = useAuth();
   const [activeTab, setActiveTab] = useState("Articles");
+  const [articles, setArticles] = useState([]);
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const displayData = activeTab === "Articles" ? dummyArticles : dummyNews;
+  useEffect(() => {
+    fetchData();
+  }, [activeTab, authToken]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      if (activeTab === "Articles") {
+        const data = await articleApi.getAllArticles(authToken);
+        if (data && data.articles) {
+          // Map the backend data to match the expected format for ArticleCard
+          const mappedArticles = data.articles.map(article => ({
+            _id: article._id,
+            title: article.title,
+            image: { uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${article.thumbnail}` },
+            readTime: `${article.readingTime}min read`,
+            createdAt: new Date(article.createdAt).toLocaleDateString('en-US', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            })
+          }));
+          setArticles(mappedArticles);
+        }
+      } else {
+        const data = await newsApi.getAllNews(authToken);
+        if (data && data.news) {
+          // Map the backend data to match the expected format for ArticleCard
+          const mappedNews = data.news.map(item => ({
+            _id: item._id,
+            title: item.title,
+            image: { uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${item.thumbnail}` },
+            readTime: `${item.readingTime}min read`,
+            createdAt: new Date(item.createdAt).toLocaleDateString('en-US', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric'
+            })
+          }));
+          setNews(mappedNews);
+        }
+      }
+    } catch (error) {
+      console.error(`Error fetching ${activeTab.toLowerCase()}:`, error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchData();
+  };
+
+  const displayData = activeTab === "Articles" ? articles : news;
 
   const renderArticleItem = ({ item }) => (
     <ArticleCard item={item} cardWidth={"47%"} />
@@ -67,17 +130,28 @@ export default function KnowledgeHub() {
           </View>
         </View>
 
-        {/* Articles Grid */}
-
-        <FlatList
-          data={displayData}
-          renderItem={renderArticleItem}
-          keyExtractor={(item) => item._id.toString()}
-          numColumns={2}
-          contentContainerStyle={styles.articleGrid}
-          showsVerticalScrollIndicator={false}
-          columnWrapperStyle={styles.columnWrapper}
-        />
+        {/* Articles/News Grid */}
+        {loading && !refreshing ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#038565" />
+          </View>
+        ) : displayData.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Typo style={styles.emptyText}>No {activeTab.toLowerCase()} available</Typo>
+          </View>
+        ) : (
+          <FlatList
+            data={displayData}
+            renderItem={renderArticleItem}
+            keyExtractor={(item) => item._id.toString()}
+            numColumns={2}
+            contentContainerStyle={styles.articleGrid}
+            showsVerticalScrollIndicator={false}
+            columnWrapperStyle={styles.columnWrapper}
+            onRefresh={handleRefresh}
+            refreshing={refreshing}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -88,7 +162,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  scrollContainer: { paddingBottom: 30, backgroundColor: "#f0f2f5" },
+  scrollContainer: { 
+    paddingBottom: 30, 
+    backgroundColor: "#f0f2f5" 
+  },
   header: {
     height: 200, // Header yüksekliği
     justifyContent: "flex-end", // Başlığı dikeyde ortala
@@ -105,18 +182,12 @@ const styles = StyleSheet.create({
     width: "100%",
     justifyContent: "space-between",
   },
-  backButton: {
-    padding: 8,
-  },
   headerTitle: {
     fontSize: 24,
     marginVertical: 16,
     fontWeight: "bold",
     marginHorizontal: 8,
     color: "#000",
-  },
-  shareButton: {
-    padding: 8,
   },
   tabContainer: {
     flexDirection: "row",
@@ -148,5 +219,25 @@ const styles = StyleSheet.create({
   },
   columnWrapper: {
     justifyContent: "space-between",
+  },
+  loadingContainer: {
+    height: 300,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    marginTop: 20,
+    borderRadius: 20,
+  },
+  emptyContainer: {
+    height: 300,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    marginTop: 20,
+    borderRadius: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#64748B",
   },
 });

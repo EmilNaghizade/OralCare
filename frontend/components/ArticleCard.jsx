@@ -3,14 +3,19 @@ import { router } from "expo-router";
 import Typo from "../components/Typo";
 import Badge from "./Badge";
 
-export const ArticleCard = ({ item, cardWidth = 230 }) => {
-  const cardStyle= {
-    width: cardWidth
-  }
+export const ArticleCard = ({ item, cardWidth = 230, params }) => {
+  const cardStyle = {
+    width: cardWidth,
+  };
   return (
     <TouchableOpacity
-      style={[styles.card,cardStyle]}
-      onPress={() => router.push(`/(modal)/article/${item._id}`)}
+      style={[styles.card, cardStyle]}
+      onPress={() =>
+        router.push({
+          pathname: `/(modal)/article/${item._id}`,
+          params: params,
+        })
+      }
     >
       <Image source={item.image} style={styles.image} />
       <View style={styles.content}>

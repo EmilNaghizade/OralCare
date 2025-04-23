@@ -424,7 +424,7 @@ export default function ProfileScreen() {
           <ProfileListItem
             iconName="settings-outline"
             label="User settings"
-            onPress={() => router.push("/settings")}
+            onPress={() => router.push("/userSettings")}
           />
         </View>
 
