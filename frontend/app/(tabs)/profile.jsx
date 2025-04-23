@@ -13,11 +13,7 @@ import {
   PanResponder,
   Animated,
 } from "react-native";
-import {
-  SimpleLineIcons,
-  Ionicons,
-  MaterialIcons
-} from "@expo/vector-icons";
+import { SimpleLineIcons, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { GalleryRemove, Gallery, Camera } from "iconsax-react-nativejs";
 import { useAuth } from "../_layout";
 import { fetchWithAuth } from "../../services/fetchWithAuth";
@@ -44,7 +40,7 @@ const ProfileListItem = ({ iconName, label, onPress, isLogout = false }) => (
 
 export default function ProfileScreen() {
   const router = useRouter();
-  const { authToken, logout,  } = useAuth();
+  const { authToken, logout } = useAuth();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [quizCount, setQuizCount] = useState(0);
@@ -316,7 +312,6 @@ export default function ProfileScreen() {
   const navigateToRewards = () => console.log("Navigate to Rewards");
   const navigateToInvite = () => console.log("Navigate to Invite");
   const navigateToNotifications = () => router.push("/notifications");
-  const navigateToAppSettings = () => console.log("Navigate to App Settings");
   const navigateToFAQ = () => console.log("Navigate to FAQ");
 
   return (
@@ -400,19 +395,20 @@ export default function ProfileScreen() {
         {/* Profile List Section */}
         <View style={styles.listCard}>
           <Text style={styles.listHeader}>Profile</Text>
-          {isAdmin && (  
-             <TouchableOpacity style={styles.listItem} onPress={() => router.replace("/admin")}>
-             <MaterialIcons
-               name="admin-panel-settings"
-               size={22}
-               style={styles.listItemIcon}
-             />
-             <Text style={styles.listItemText}>
-               Admin Panel
-             </Text>
-           </TouchableOpacity>          
-     
+          {isAdmin && (
+            <TouchableOpacity
+              style={styles.listItem}
+              onPress={() => router.replace("/admin")}
+            >
+              <MaterialIcons
+                name="admin-panel-settings"
+                size={22}
+                style={styles.listItemIcon}
+              />
+              <Text style={styles.listItemText}>Admin Panel</Text>
+            </TouchableOpacity>
           )}
+          <View style={styles.separator} />
           <ProfileListItem
             iconName="person-add-outline"
             label="Invite a friend"
@@ -427,8 +423,8 @@ export default function ProfileScreen() {
           <View style={styles.separator} />
           <ProfileListItem
             iconName="settings-outline"
-            label="App settings"
-            onPress={navigateToAppSettings}
+            label="User settings"
+            onPress={() => router.push("/settings")}
           />
         </View>
 

@@ -7,6 +7,7 @@ import {
   FlatList,
   TouchableOpacity,
   StatusBar,
+  ScrollView,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -28,7 +29,7 @@ export default function KnowledgeHub() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
       {/* Header */}
-      <View style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.headerButtons}>
             <BackButton />
@@ -77,7 +78,7 @@ export default function KnowledgeHub() {
           showsVerticalScrollIndicator={false}
           columnWrapperStyle={styles.columnWrapper}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }

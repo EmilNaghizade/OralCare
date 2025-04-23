@@ -3,19 +3,16 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useFocusEffect } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import {StyleSheet, BackHandler, Platform } from "react-native";
+import { StyleSheet, BackHandler, Platform } from "react-native";
 import VideoManagement from "./VideoManagement";
 import ArticleManagement from "./ArticleManagement";
 import ProductManagement from "./ProductManagement";
 import AdminManagement from "./AdminManagement";
-
-
+import NewsManagement from "./NewsManagement"; // Import the NewsManagement component
 
 const Tab = createBottomTabNavigator();
 
 export default function AdminPanel() {
- 
-
   useFocusEffect(
     React.useCallback(() => {
       const onBackPress = () => {
@@ -32,7 +29,6 @@ export default function AdminPanel() {
         BackHandler.removeEventListener("hardwareBackPress", onBackPress);
     }, [])
   );
- 
 
   return (
     <Tab.Navigator
@@ -44,9 +40,12 @@ export default function AdminPanel() {
             iconName = focused ? "videocam" : "videocam-outline";
           } else if (route.name === "Articles") {
             iconName = focused ? "document-text" : "document-text-outline";
+          } else if (route.name === "News") {
+            // Add News tab
+            iconName = focused ? "newspaper" : "newspaper-outline";
           } else if (route.name === "Products") {
             iconName = focused ? "pricetag" : "pricetag-outline";
-          }else if (route.name === "Admin") {
+          } else if (route.name === "Admin") {
             iconName = focused ? "settings" : "settings-outline";
           }
 
@@ -56,13 +55,32 @@ export default function AdminPanel() {
         tabBarInactiveTintColor: "gray",
       })}
     >
-           
-      
-      <Tab.Screen name="Videos" options={{headerShown: false}}  component={VideoManagement} />
-      <Tab.Screen name="Articles" options={{headerShown: false}} component={ArticleManagement} />
-      <Tab.Screen name="Products" options={{headerShown: false}} component={ProductManagement} />
-      <Tab.Screen name="Admin" options={{headerShown: false}} component={AdminManagement} />
+      <Tab.Screen
+        name="Videos"
+        options={{ headerShown: false }}
+        component={VideoManagement}
+      />
+      <Tab.Screen
+        name="Articles"
+        options={{ headerShown: false }}
+        component={ArticleManagement}
+      />
+      <Tab.Screen
+        name="News"
+        options={{ headerShown: false }}
+        component={NewsManagement}
+      />
 
+      <Tab.Screen
+        name="Products"
+        options={{ headerShown: false }}
+        component={ProductManagement}
+      />
+      <Tab.Screen
+        name="Admin"
+        options={{ headerShown: false }}
+        component={AdminManagement}
+      />
     </Tab.Navigator>
   );
 }

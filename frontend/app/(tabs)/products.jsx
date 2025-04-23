@@ -69,8 +69,12 @@ const ProductCard = ({ item }) => {
       <View style={styles.productImageContainer}>
         <Image
           source={imageSource}
-          style={styles.productImage}
-          resizeMode="cover"
+          style={{
+            width: "100%",
+            height: "100%",
+            borderRadius: 16, 
+          }}
+          resizeMode="contain"
         />
       </View>
       {/* Product Name */}
@@ -210,6 +214,8 @@ const styles = StyleSheet.create({
     // Gölge
     borderWidth: 1,
     borderColor: "#F0F5F7",
+  
+    
   },
   productImageContainer: {
     width: "100%", // Kart genişliğini doldur
@@ -220,16 +226,27 @@ const styles = StyleSheet.create({
     alignItems: "center", // İçeriği (resmi) yatayda ortala
     overflow: "hidden", // İçerideki resmin taşmasını engelle
   },
-  productImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 16, // <<< İÇ KÖŞE YUVARLAKLIĞI (Karttan biraz az)
-  },
+
   productName: {
     fontSize: 14,
     fontWeight: "500",
     color: "#333",
     textAlign: "left",
     // marginTop kaldırıldı, padding yeterli
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#999",
   },
 });

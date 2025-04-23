@@ -47,20 +47,16 @@ export default function VideoDetailScreen() {
       try {
         setLoading(true);
         setError(null);
-        console.log("Fetching video with ID:", videoId);
 
         // Fetch the video details from the backend
         const response = await videoApi.getVideoById(videoId, authToken);
 
-        console.log("Video data fetched:", response);
         setVideoData(response);
 
         // Update video source when data is fetched
         if (response && response.videoUrl) {
           const fullUrl = `${process.env.EXPO_PUBLIC_API_BASE_URL}${response.videoUrl}`;
-          console.log("Setting video source to:", fullUrl);
           setVideoSource({ uri: fullUrl });
-
 
           // Reset video loaded state for the new video
           setVideoLoaded(false);
@@ -94,10 +90,8 @@ export default function VideoDetailScreen() {
     if (watchTrackingComplete || !videoData) return;
 
     try {
-      console.log("Marking video as watched, ID:", videoId);
 
       const response = await videoApi.markVideoAsWatched(videoId);
-      console.log("Response from marking video as watched:", response);
       setIsWatched(true);
       setWatchTrackingComplete(true);
     } catch (error) {
@@ -107,11 +101,6 @@ export default function VideoDetailScreen() {
 
   // Mark video as watched when video data is loaded
   useEffect(() => {
-    console.log("Checking markVideoAsWatched", {
-      videoData,
-      videoId,
-      watchTrackingComplete,
-    });
 
     if (videoData && !watchTrackingComplete) {
       markVideoAsWatched();
@@ -142,15 +131,42 @@ export default function VideoDetailScreen() {
     if (!videoData) return;
 
     try {
-      const shareUrl = videoData.videoUrl
-        ? `${process.env.EXPO_PUBLIC_API_BASE_URL}${videoData.videoUrl}`
-        : "";
+      // Construct a properly formatted URL
+      let shareUrl = "";
+      if (videoData.videoUrl) {
+        shareUrl = `${process.env.EXPO_PUBLIC_API_BASE_URL}${videoData.videoUrl}`;
+      }
 
-      await Share.share({
-        message: `Check out this video: ${videoData.title}!`,
-        title: videoData.title,
-        url: shareUrl,
+      // Different share options for iOS and Android
+      const shareOptions = Platform.select({
+        ios: {
+          message: `Check out this video: ${videoData.title}!`,
+          url: shareUrl,
+        },
+        android: {
+          message: `Check out this video: ${videoData.title}!\n${shareUrl}`,
+          title: videoData.title,
+        },
+        default: {
+          message: `Check out this video: ${videoData.title}!\n${shareUrl}`,
+          title: videoData.title,
+        },
       });
+
+      const result = await Share.share(shareOptions);
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+          console.log(`Shared via ${result.activityType}`);
+        } else {
+          // shared
+          console.log("Shared successfully");
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+        console.log("Share dismissed");
+      }
     } catch (error) {
       Alert.alert("Error", "Could not share this video.");
       console.error("Share error:", error.message);
@@ -248,16 +264,6 @@ export default function VideoDetailScreen() {
             <View style={styles.tagContainer}>
               <Typo size={12} style={styles.tagText}>
                 {videoData.category}
-              </Typo>
-            </View>
-          )}
-
-          {/* Show watched status if needed */}
-          {isWatched && (
-            <View style={styles.watchedBadge}>
-              <Ionicons name="checkmark-circle" size={14} color="#038565" />
-              <Typo size={12} style={styles.watchedText}>
-                Watched
               </Typo>
             </View>
           )}

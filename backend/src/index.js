@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import path from "path";
-import compression from 'compression';
+import compression from "compression";
 import { fileURLToPath } from "url";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -9,6 +9,8 @@ import quizRoutes from "./routes/quizRoutes.js";
 import videoRoutes from "./routes/videoRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
+import articleRoutes from "./routes/articleRoutes.js";
+import newsRoute from "./routes/newsRoutes.js";
 import { connectDb } from "./lib/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -48,6 +50,8 @@ app.use("/api/quizzes", quizRoutes);
 app.use("/api/videos", videoRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/articles", articleRoutes);
+app.use("/api/news", newsRoute);
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on port 3000");

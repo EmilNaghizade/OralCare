@@ -7,6 +7,7 @@ import upload from "../middleware/multer.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import ffmpeg from "fluent-ffmpeg";
 import { optimizeVideo } from "../middleware/optimizeVideo.js"; // Import the optimization function
 
 const __filename = fileURLToPath(import.meta.url);

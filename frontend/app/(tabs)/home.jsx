@@ -54,7 +54,6 @@ const WatchAndLearnSection = ({ authToken }) => {
 
       if (data && data.videos) {
         setVideos(data.videos.slice(0, 4)); // Take only the first 4 videos
-        console.log("Fetched videos:", data.videos);
       }
     } catch (error) {
       console.error("Error fetching videos:", error);
@@ -63,6 +62,7 @@ const WatchAndLearnSection = ({ authToken }) => {
     }
   };
 
+ 
   useEffect(() => {
     fetchVideos();
   }, []);
@@ -697,5 +697,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 24,
     textAlign: "center",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
   },
 });

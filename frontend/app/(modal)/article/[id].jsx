@@ -20,27 +20,14 @@ const ArticleDetailImg = require("../../../assets/images/ArticleDetail1.png");
 const ArticleDetail = () => {
   const { id: articleId } = useLocalSearchParams(); // Get ID from route param
 
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: `Check out this video! (ID: ${videoId})`, // Placeholder message
-        title: `Video ${videoId}`, // Placeholder title
-      });
-    } catch (error) {
-      Alert.alert("Error", "Could not share this video.");
-      console.error("Share error:", error.message);
-    }
-  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
             <StatusBar barStyle="dark-content" />
       <View style={styles.manualHeader}>
         {/* Back Button */}
         <BackButton />
-        {/* Share Button */}
-        <TouchableOpacity onPress={handleShare} style={styles.headerButton}>
-          <Ionicons name="share-outline" size={24} color="#333" />
-        </TouchableOpacity>
+   
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainerContent}>
