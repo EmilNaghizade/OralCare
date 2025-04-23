@@ -404,5 +404,71 @@ export const productApi = {
   },
 };
 
+export const articleApi = {
+  getAllArticles: async (token, page = 1, limit = 10) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/articles?page=${page}&limit=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching articles:", error);
+      throw error;
+    }
+  },
+
+  getArticleById: async (articleId, token) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/articles/${articleId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching article with ID ${articleId}:`, error);
+      throw error;
+    }
+  },
+};
+
+export const newsApi = {
+  getAllNews: async (token, page = 1, limit = 10) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/news?page=${page}&limit=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching news:", error);
+      throw error;
+    }
+  },
+
+  getNewsById: async (newsId, token) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/news/${newsId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching news with ID ${newsId}:`, error);
+      throw error;
+    }
+  },
+};
+
 // Export getProfileApi for backward compatibility
 export const getProfileApi = authApi.getProfile;

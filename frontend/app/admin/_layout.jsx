@@ -37,6 +37,12 @@ export default function AdminLayout() {
           headerShown: false,
         }}
       />
+       <Stack.Screen
+        name="NewsManagement"
+        options={{
+          headerShown: false,
+        }}
+      />
       <Stack.Screen
         name="ProductManagement"
         options={{

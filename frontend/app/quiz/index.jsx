@@ -113,7 +113,6 @@ export default function QuizDetailScreen() {
     questionCount: quizData ? quizData.questions.length : 0,
     gradientColors:
       quizId == 1 ? ["#663399", "#8A2BE2"] : ["#2E8B57", "#69b58a"], // Mor tonları (ayarlayabilirsiniz)
-    relatedVideos: dummyVideos.slice(0, 2), // İlgili videolar (ilk 2'sini alalım)
   };
 
   const handleStartQuiz = () => {

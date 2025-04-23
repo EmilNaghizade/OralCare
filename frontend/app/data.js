@@ -1,34 +1,5 @@
 // --- Dummy Data ---
-export const dummyVideos = [
-  {
-    _id: 1,
-    title: "Guide for in-patient oral hygiene using OroClean complete",
-    thumbnailUrl: require("../assets/images/VideoThumbnail1.png"),
-    duration: "2 min 16 sec",
-    tag: "Oral Care",
-  },
-  {
-    _id: 2,
-    title: "Guide for in-patient oral hygiene using OroClean complete 2",
-    thumbnailUrl: require("../assets/images/VideoThumbnail2.png"),
-    duration: "3 min 05 sec",
-    tag: "Oral Care",
-  },
-  {
-    _id: 3,
-    title: "Guide for in-patient oral hygiene using OroClean complete 2",
-    thumbnailUrl: require("../assets/images/VideoThumbnail2.png"),
-    duration: "3 min 05 sec",
-    tag: "Oral Care",
-  },
-  {
-    _id: 4,
-    title: "Guide for in-patient oral hygiene using OroClean complete 2",
-    thumbnailUrl: require("../assets/images/VideoThumbnail2.png"),
-    duration: "3 min 05 sec",
-    tag: "Oral Care",
-  },
-];
+
 
 export const quizzes = {
   1: {

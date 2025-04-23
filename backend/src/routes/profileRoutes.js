@@ -91,23 +91,46 @@ router.post("/upload-photo-base64-json", protectRoute, async (req, res) => {
 // (Optional) Keep your delete and get endpoints intact
 
 // Delete profile photo endpoint (unchanged)
+// Delete profile photo endpoint (fixed)
 router.delete("/delete-photo", protectRoute, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select('name email watchedVideos finishedQuizzes role');
+    // Get the full user document
+    const user = await User.findById(req.user.id);
 
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
 
     if (user.profileImage) {
+      // Attempt to delete the file from the filesystem
       const relativePath = user.profileImage;
       const filePath = path.join(__dirname, "../..", relativePath);
 
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        console.log("File deleted successfully");
-      } else {
-        console.log("File not found at path:", filePath);
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log("File deleted successfully from path:", filePath);
+        } else {
+          console.log("File not found at path:", filePath);
+          // Continue even if the file doesn't exist
+        }
+      } catch (fsError) {
+        console.error("Error deleting physical file:", fsError);
+        // Continue with database update even if file deletion fails
       }
 
-      await User.findByIdAndUpdate(req.user.id, { profileImage: "" });
+      // Update the database record - clear both fields
+      await User.findByIdAndUpdate(req.user.id, {
+        profileImage: "",
+        profileImageBase64: "",
+      });
+
+      console.log(`User ${req.user.id} profile image cleared in database`);
+    } else {
+      console.log(`User ${req.user.id} had no profile image to delete`);
     }
 
     res.status(200).json({

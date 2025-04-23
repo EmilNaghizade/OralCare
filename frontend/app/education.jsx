@@ -68,7 +68,7 @@ export default function Education() {
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
       {/* Header */}
-      <View style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.headerButtons}>
             <BackButton />
@@ -97,7 +97,7 @@ export default function Education() {
             columnWrapperStyle={styles.columnWrapper}
           />
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -166,5 +166,20 @@ const styles = StyleSheet.create({
   },
   columnWrapper: {
     justifyContent: "space-between",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#64748B",
   },
 });

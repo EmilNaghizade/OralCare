@@ -26,7 +26,7 @@ import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
 import { LinearGradient } from "expo-linear-gradient";
 import ProceedArticleCard from "../../components/ProceedArticleCard";
-import { videoApi } from "../../services/api";
+import { videoApi, articleApi, newsApi } from "../../services/api";
 
 const getUserLaunchedKey = (userId) =>
   `@OralCareApp:user_${userId}_hasLaunched`;
@@ -54,7 +54,6 @@ const WatchAndLearnSection = ({ authToken }) => {
 
       if (data && data.videos) {
         setVideos(data.videos.slice(0, 4)); // Take only the first 4 videos
-        console.log("Fetched videos:", data.videos);
       }
     } catch (error) {
       console.error("Error fetching videos:", error);
@@ -116,7 +115,7 @@ const WatchAndLearnSection = ({ authToken }) => {
           Math.floor(video.duration / 60) === 0
             ? ""
             : Math.floor(video.duration / 60) + " min"
-        }  ${video.duration  % 60} sec`
+        }  ${video.duration % 60} sec`
       : "0 min 00 sec",
     tag: video.category || "Video",
   }));
@@ -139,6 +138,167 @@ const WatchAndLearnSection = ({ authToken }) => {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.horizontalList}
       />
+    </View>
+  );
+};
+
+const KnowledgeHubSection = ({ authToken }) => {
+  const router = useRouter();
+  const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles");
+  const [articles, setArticles] = useState([]);
+  const [news, setNews] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchKnowledgeData = async () => {
+      setLoading(true);
+      try {
+        if (activeKnowledgeTab === "Articles") {
+          const data = await articleApi.getAllArticles(authToken, 1, 4);
+          if (data && data.articles) {
+            // Map the backend data to match the expected format for ArticleCard
+            const mappedArticles = data.articles.map((article) => ({
+              _id: article._id,
+              title: article.title,
+              image: {
+                uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${article.thumbnail}`,
+              },
+              readTime: `${article.readingTime}min read`,
+              createdAt: new Date(article.createdAt).toLocaleDateString(
+                "en-US",
+                {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }
+              ),
+            }));
+            setArticles(mappedArticles);
+          }
+        } else {
+          const data = await newsApi.getAllNews(authToken, 1, 4);
+          if (data && data.news) {
+            // Map the backend data to match the expected format for ArticleCard
+            const mappedNews = data.news.map((item) => ({
+              _id: item._id,
+              title: item.title,
+              image: {
+                uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${item.thumbnail}`,
+              },
+              readTime: `${item.readingTime}min read`,
+              createdAt: new Date(item.createdAt).toLocaleDateString("en-US", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              }),
+            }));
+            setNews(mappedNews);
+          }
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching ${activeKnowledgeTab.toLowerCase()}:`,
+          error
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchKnowledgeData();
+  }, [activeKnowledgeTab, authToken]);
+
+  const knowledgeItemsToShow =
+    activeKnowledgeTab === "Articles" ? articles : news;
+
+  if (loading) {
+    return (
+      <View style={styles.sectionCard}>
+        <SectionHeader
+          title="Knowledge Hub"
+          onSeeAllPress={() => router.push("/knowledge")}
+          isOnSeeAll={true}
+        />
+        <Text style={styles.sectionSubtitle}>
+          Articles and news on our industry.
+        </Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#038565" />
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.sectionCard}>
+      <SectionHeader
+        title="Knowledge Hub"
+        onSeeAllPress={() => router.push("/knowledge")}
+        isOnSeeAll={true}
+      />
+      <Text style={styles.sectionSubtitle}>
+        Articles and news on our industry.
+      </Text>
+
+      <View style={styles.knowledgeTabs}>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeKnowledgeTab === "Articles" && styles.activeTabButton,
+          ]}
+          onPress={() => setActiveKnowledgeTab("Articles")}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeKnowledgeTab === "Articles" && styles.activeTabText,
+            ]}
+          >
+            Articles
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.tabButton,
+            activeKnowledgeTab === "News" && styles.activeTabButton,
+          ]}
+          onPress={() => setActiveKnowledgeTab("News")}
+        >
+          <Text
+            style={[
+              styles.tabText,
+              activeKnowledgeTab === "News" && styles.activeTabText,
+            ]}
+          >
+            News
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      {knowledgeItemsToShow.length === 0 ? (
+        <View style={styles.emptyContainer}>
+          <Typo style={styles.emptyText}>
+            No {activeKnowledgeTab.toLowerCase()} available
+          </Typo>
+        </View>
+      ) : (
+        <FlatList
+          data={knowledgeItemsToShow}
+          renderItem={({ item }) => (
+            <ArticleCard
+              item={item}
+              params={{
+                type: activeKnowledgeTab === "news" ? "news" : "article",
+                activeTab: activeKnowledgeTab,
+              }}
+            />
+          )}
+          keyExtractor={(item) => item._id}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.horizontalList}
+        />
+      )}
     </View>
   );
 };
@@ -415,61 +575,7 @@ export default function HomeScreen() {
             />
           </View>
 
-          <View style={styles.sectionCard}>
-            <SectionHeader
-              title="Knowledge Hub"
-              isOnSeeAll={true}
-              onSeeAllPress={() => router.push("/knowledge")}
-            />
-            <Text style={styles.sectionSubtitle}>
-              Articles and news on our industry.
-            </Text>
-
-            <View style={styles.knowledgeTabs}>
-              <TouchableOpacity
-                style={[
-                  styles.tabButton,
-                  activeKnowledgeTab === "Articles" && styles.activeTabButton,
-                ]}
-                onPress={() => setActiveKnowledgeTab("Articles")} // Simpler switch
-              >
-                <Text
-                  style={[
-                    styles.tabText,
-                    activeKnowledgeTab === "Articles" && styles.activeTabText,
-                  ]}
-                >
-                  Articles
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.tabButton,
-                  activeKnowledgeTab === "News" && styles.activeTabButton,
-                ]}
-                onPress={() => setActiveKnowledgeTab("News")} // Simpler switch
-              >
-                <Text
-                  style={[
-                    styles.tabText,
-                    activeKnowledgeTab === "News" && styles.activeTabText,
-                  ]}
-                >
-                  News
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            {/* List for Articles/News */}
-            <FlatList
-              data={knowledgeItemsToShow} // Use filtered dummy data
-              renderItem={({ item }) => <ArticleCard item={item} />}
-              keyExtractor={(item) => item._id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-            />
-          </View>
+          <KnowledgeHubSection authToken={authToken} />
         </ScrollView>
       </SafeAreaView>
     </>
@@ -697,5 +803,15 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     lineHeight: 24,
     textAlign: "center",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
   },
 });

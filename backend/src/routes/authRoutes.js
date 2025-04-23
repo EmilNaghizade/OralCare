@@ -169,7 +169,17 @@ router.get("/profile", protectRoute, async (req, res) => {
 // Update user profile
 router.put("/profile", protectRoute, async (req, res) => {
   try {
-    const { name, gender, profileImage, preferences } = req.body;
+    const { name, gender, profileImage, preferences, email } = req.body;
+    // Validate input
+
+    // Basic email validation
+    if (email !== undefined) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Invalid email format" });
+      }
+    }
+
     const userId = req.user._id;
 
     const user = await User.findById(userId);
@@ -181,7 +191,8 @@ router.put("/profile", protectRoute, async (req, res) => {
     // Update fields only if they are provided in the request body
     if (name !== undefined) user.name = name;
     if (gender !== undefined) user.gender = gender;
-    if (profileImage !== undefined) user.profileImage = profileImage; // Handle image upload/storage appropriately
+    if (profileImage !== undefined) user.profileImage = profileImage;
+    if (email !== undefined) user.email = email; // Add email update functionality
     if (preferences !== undefined) {
       // Merge preferences carefully, ensuring nested objects are handled
       user.preferences = { ...user.preferences, ...preferences };
@@ -196,7 +207,7 @@ router.put("/profile", protectRoute, async (req, res) => {
     res.json({
       id: updatedUser._id,
       name: updatedUser.name,
-      email: updatedUser.email, // Email typically shouldn't be updated here
+      email: updatedUser.email,
       gender: updatedUser.gender,
       profileImage: updatedUser.profileImage,
       preferences: updatedUser.preferences,
@@ -207,6 +218,10 @@ router.put("/profile", protectRoute, async (req, res) => {
     // Handle potential validation errors from the save operation
     if (error.name === "ValidationError") {
       return res.status(400).json({ error: error.message });
+    }
+    // Handle duplicate email errors (MongoDB error code 11000)
+    if (error.code === 11000 && error.keyPattern && error.keyPattern.email) {
+      return res.status(400).json({ error: "Email address is already in use" });
     }
     res.status(500).json({ error: "Internal server error updating profile" });
   }
@@ -237,6 +252,66 @@ router.get("/check-email", async (req, res) => {
     console.error("Error checking email:", error);
     // *** IMPORTANT: Send a JSON response in the catch block ***
     res.status(500).json({ error: "Internal server error checking email" });
+  }
+});
+
+router.get("/verify-password", protectRoute, async (req, res) => {
+  try {
+    const { password } = req.query;
+
+    if (!password) {
+      return res
+        .status(400)
+        .json({ error: "Password query parameter is required" });
+    }
+
+    // Find user by email (case-insensitive)
+    const user = await User.findById(req.user._id);
+
+    if (user && (await user.matchPassword(password))) {
+      return res.status(200).json({ verified: true });
+    } else {
+      return res
+        .status(401)
+        .json({ error: "Invalid password", verified: false });
+    }
+  } catch (error) {
+    console.error("Error verifying password:", error);
+    res.status(500).json({ error: "Internal server error verifying password" });
+  }
+});
+
+// Update user password
+router.put("/update-password", protectRoute, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res
+        .status(400)
+        .json({ error: "Current and new passwords are required" });
+    }
+
+    // Find user by ID
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Check if current password matches
+    if (!(await user.matchPassword(currentPassword))) {
+      return res.status(401).json({ error: "Invalid current password" });
+    }
+
+    // Update password
+    user.password = newPassword; // Hashing should be handled by pre-save hook in User model
+    await user.save();
+
+    res.json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("Error updating password:", error);
+    res.status(500).json({ error: "Internal server error updating password" });
   }
 });
 
