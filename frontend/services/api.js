@@ -470,5 +470,78 @@ export const newsApi = {
   },
 };
 
+// frontend/services/api.js - Add to your existing api.js
+export const notificationApi = {
+  getNotifications: async (token, page = 1, limit = 20) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/notifications?page=${page}&limit=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      throw error;
+    }
+  },
+
+  markAsRead: async (token, notificationId) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/api/notifications/${notificationId}/read`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      throw error;
+    }
+  },
+
+  markAllAsRead: async (token) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/api/notifications/read-all`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      throw error;
+    }
+  },
+
+  deleteNotification: async (token, notificationId) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/api/notifications/${notificationId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting notification:", error);
+      throw error;
+    }
+  },
+};
+
 // Export getProfileApi for backward compatibility
 export const getProfileApi = authApi.getProfile;

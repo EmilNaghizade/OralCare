@@ -6,6 +6,7 @@ import upload from "../middleware/multer.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import { createContentNotification } from "../controllers/notificationController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -77,7 +78,15 @@ router.post(
         link,
       });
 
+      await createContentNotification(
+        "New Product Available",
+        "product", 
+        product
+      );
+
       await product.save();
+
+
       res.status(201).json(product);
     } catch (error) {
       console.error("Error creating product:", error);

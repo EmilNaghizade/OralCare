@@ -38,11 +38,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
     backgroundColor: "#fff", // White background
     borderRadius: 12, // Rounded corners
-    // Shadow for iOS
-    shadowColor: "#000",
-    borderWidth: 1,
-    borderColor: "#F0F5F7",
-    marginBottom: 5, // Add margin to bottom if needed for shadow
+ 
   },
   videoThumbnail: {
     width: "90%",

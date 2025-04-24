@@ -97,10 +97,9 @@ function AuthProvider({ children }) {
     const getAdmin = async () => {
       try {
         if (isLoading || hasNavigated.current) return;
-
-        if (!authToken) {
+        console.log(user,"userblin")
+        if (!authToken || !user) {
           hasNavigated.current = true;
-          console.log("Navigating to onboarding");
           router.replace("/onboarding");
         } else if (authToken && user && user?.role) {
           hasNavigated.current = true;

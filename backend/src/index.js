@@ -11,6 +11,7 @@ import profileRoutes from "./routes/profileRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import articleRoutes from "./routes/articleRoutes.js";
 import newsRoute from "./routes/newsRoutes.js";
+import notificationRoutes from "./routes/notificationRoutes.js";
 import { connectDb } from "./lib/db.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -52,6 +53,7 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/articles", articleRoutes);
 app.use("/api/news", newsRoute);
+app.use("/api/notifications", notificationRoutes)
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on port 3000");

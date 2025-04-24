@@ -8,7 +8,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
 import ffmpeg from "fluent-ffmpeg";
+import mongoose from "mongoose";
 import { optimizeVideo } from "../middleware/optimizeVideo.js"; // Import the optimization function
+import { createContentNotification } from "../controllers/notificationController.js"; // Import the notification function
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -93,16 +95,6 @@ router.post(
         fs.mkdirSync(optimizedDir, { recursive: true });
       }
 
-      ffmpeg(inputPath)
-        .outputOptions(["-movflags faststart", "-preset veryfast", "-crf 28"])
-        .save(optimizedPath)
-        .on("end", () => {
-          console.log("✅ Video optimized:", optimizedPath);
-        })
-        .on("error", (err) => {
-          console.error("❌ FFmpeg optimization error:", err.message);
-        });
-
       const video = new Video({
         title,
         description,
@@ -113,6 +105,8 @@ router.post(
         tags,
         isPublished: true,
       });
+
+      await createContentNotification("New Video Available", "video", video);
 
       await video.save();
 
@@ -310,6 +304,33 @@ router.post("/:videoId/watch", protectRoute, async (req, res) => {
   } catch (error) {
     console.error("Error marking video as watched:", error);
     res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// videoRoutes.js
+
+// Sənin mövcud GET route-unu belə dəyiş
+router.get("/shared/:videoSlug", async (req, res) => {
+  try {
+    const raw = req.params.videoSlug; // e.g. "6808b0fa6bc0671a2eeb139d-the-ultimate-..."
+    const videoId = raw.split("-")[0]; // "6808b0fa6bc0671a2eeb139d"
+
+    console.log("Extracted videoId:", videoId); // Debug log
+
+    // ID-nin düzgün BSON ObjectId formatında olub-olmadığını yoxla
+    if (!mongoose.Types.ObjectId.isValid(videoId)) {
+      return res.status(400).send("Invalid video ID");
+    }
+
+    const video = await Video.findById(videoId);
+    if (!video) return res.status(404).send("Video cannot be found");
+
+    // MP4 faylına redirect et
+    const fileUrl = `${req.protocol}://${req.get("host")}${video.videoUrl}`;
+    return res.redirect(fileUrl);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send("Server error");
   }
 });
 

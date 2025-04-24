@@ -1,4 +1,3 @@
-// --- Dummy Data ---
 
 
 export const quizzes = {
@@ -221,67 +220,6 @@ export const dummyQuizzes = [
   },
 ];
 
-export const dummyArticles = [
-  {
-    _id: "a1",
-    title: "New International Product Catalogue",
-    image: require("../assets/images/Article1.png"),
-    readTime: "5min read",
-    createdAt: "30 March, 2024",
-  },
-  {
-    _id: "a2",
-    title: "Benefits of Regular Checkups",
-    image: require("../assets/images/Article2.png"),
-    readTime: "4min read",
-    createdAt: "30 March, 2024",
-  },
-  {
-    _id: "a3",
-    title: "Benefits of Regular Checkups",
-    image: require("../assets/images/Article2.png"),
-    readTime: "4min read",
-    createdAt: "30 March, 2024",
-  },
-  {
-    _id: "a4",
-    title: "Benefits of Regular Checkups",
-    image: require("../assets/images/Article2.png"),
-    readTime: "4min read",
-    createdAt: "30 March, 2024",
-  },
-];
-
-export const dummyNews = [
-  {
-    _id: "n1",
-    title: "DuoFlow™ bi-lumen breathing system",
-    image: require("../assets/images/Article2.png"),
-    readTime: "3min read",
-    createdAt: "30 March, 2024",
-  },
-  {
-    _id: "n2",
-    title: "Community Health Initiative Update",
-    image: require("../assets/images/Article2.png"),
-    readTime: "2min read",
-    createdAt: "30 March, 2024",
-  },
-  {
-    _id: "n3",
-    title: "Community Health Initiative Update",
-    image: require("../assets/images/Article2.png"),
-    readTime: "2min read",
-    createdAt: "30 March, 2024",
-  },
-  {
-    _id: "n4",
-    title: "Community Health Initiative Update",
-    image: require("../assets/images/Article2.png"),
-    readTime: "2min read",
-    createdAt: "30 March, 2024",
-  },
-];
 
 const defaultProfilePic = require("../assets/images/pp.png");
 

@@ -74,7 +74,7 @@ const ProductCard = ({ item }) => {
             height: "100%",
             borderRadius: 16, 
           }}
-          resizeMode="contain"
+          resizeMode="cover"
         />
       </View>
       {/* Product Name */}
@@ -112,12 +112,11 @@ export default function ProductsScreen() {
       if (response.data && response.data.products) {
         setProducts(response.data.products);
       } else {
-        // If no products from API, use dummy data
-        console.log("No products returned from API, using dummy data");
+  
       }
     } catch (err) {
       console.error("Error fetching products:", err);
-      // Fall back to dummy data on error
+   
       setError(
         "Could not load products from server. Showing sample products instead."
       );
@@ -205,18 +204,18 @@ const styles = StyleSheet.create({
   productCard: {
     width: ITEM_WIDTH, // Hesaplanan genişlik
     backgroundColor: "#fff", // Kart arka planı
-    borderRadius: 24, // <<< KÖŞE YUVARLAKLIĞI ARTIRILDI
+    borderRadius: 30, // <<< KÖŞE YUVARLAKLIĞI ARTIRILDI
     marginBottom: PADDING, // Dikey boşluk (satırlar arası)
     marginHorizontal: PADDING / 2, // Yatay boşluk (sütunlar arası - toplam PADDING olur)
     padding: 12, // Kart içi boşluk (biraz azaltıldı)
     // Gölge
     borderWidth: 1,
     borderColor: "#F0F5F7",
-  
+
     
   },
   productImageContainer: {
-    width: "100%", // Kart genişliğini doldur
+    width: "90%", // Kart genişliğini doldur
     aspectRatio: 1, // Kare oranını koru
     borderRadius: 16, // <<< İÇ KÖŞE YUVARLAKLIĞI (Karttan biraz az)
     marginBottom: 12, // Resim ile yazı arası boşluk

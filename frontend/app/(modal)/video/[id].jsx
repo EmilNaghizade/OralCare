@@ -21,6 +21,10 @@ import Typo from "../../../components/Typo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { videoApi } from "../../../services/api";
 import { useAuth } from "../../_layout";
+import * as Linking from "expo-linking";
+import slugify from "slugify";
+
+const BASE_URL = "https://oralcare.fly.dev";
 
 const greenFeatureIcon = require("../../../assets/images/JasmineCircle.png");
 const localFallbackVideo = require("../../../assets/videos/Video1.mp4");
@@ -90,7 +94,6 @@ export default function VideoDetailScreen() {
     if (watchTrackingComplete || !videoData) return;
 
     try {
-
       const response = await videoApi.markVideoAsWatched(videoId);
       setIsWatched(true);
       setWatchTrackingComplete(true);
@@ -101,7 +104,6 @@ export default function VideoDetailScreen() {
 
   // Mark video as watched when video data is loaded
   useEffect(() => {
-
     if (videoData && !watchTrackingComplete) {
       markVideoAsWatched();
     }
@@ -131,45 +133,34 @@ export default function VideoDetailScreen() {
     if (!videoData) return;
 
     try {
-      // Construct a properly formatted URL
-      let shareUrl = "";
-      if (videoData.videoUrl) {
-        shareUrl = `${process.env.EXPO_PUBLIC_API_BASE_URL}${videoData.videoUrl}`;
-      }
-
-      // Different share options for iOS and Android
-      const shareOptions = Platform.select({
-        ios: {
-          message: `Check out this video: ${videoData.title}!`,
-          url: shareUrl,
-        },
-        android: {
-          message: `Check out this video: ${videoData.title}!\n${shareUrl}`,
-          title: videoData.title,
-        },
-        default: {
-          message: `Check out this video: ${videoData.title}!\n${shareUrl}`,
-          title: videoData.title,
-        },
+      // Create a slug from the video title
+      const slug = slugify(videoData.title, {
+        lower: true,
+        strict: true,
       });
 
-      const result = await Share.share(shareOptions);
+      // Build the share URL - use /api/videos/shared/ path to match our backend route
+      const sharePath = `/api/videos/shared/${videoId}-${slug}`;
 
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          // shared with activity type of result.activityType
-          console.log(`Shared via ${result.activityType}`);
-        } else {
-          // shared
-          console.log("Shared successfully");
-        }
-      } else if (result.action === Share.dismissedAction) {
-        // dismissed
-        console.log("Share dismissed");
-      }
+      // Deep link for mobile app (if opened in the app)
+      const deepLink = Linking.createURL(`video/${videoId}`);
+
+      // Web link for browsers and sharing outside the app
+      const webLink = `${BASE_URL}${sharePath}`;
+
+      // Create a share message that includes appropriate link based on platform
+      const shareMessage = `Check out this video: ${videoData.title}!\n\n${webLink}`;
+
+
+
+      await Share.share({
+        message: shareMessage,
+        title: videoData.title,
+        url: webLink, // iOS specific - may be used instead of message in some cases
+      });
     } catch (error) {
       Alert.alert("Error", "Could not share this video.");
-      console.error("Share error:", error.message);
+      console.error("Share error:", error);
     }
   };
 

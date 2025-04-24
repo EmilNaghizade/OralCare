@@ -15,7 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import BackButton from "../../components/BackButton"; // Kendi BackButton'unuz
 import { VideoCard } from "../../components/VideoCard"; // Kendi VideoCard'ınız
 import Typo from "../../components/Typo"; // Kendi Typo'nuz
-import { dummyVideos, quizzes } from "../data"; // Örnek videoları alalım
+import {  quizzes } from "../data"; // Örnek videoları alalım
 import { videoApi } from "../../services/api";
 import { useAuth } from "../_layout";
 
