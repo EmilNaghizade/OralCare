@@ -4,6 +4,7 @@ import Article from "../models/Article.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import { createContentNotification } from "./notificationController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -72,6 +73,12 @@ export const createArticle = async (req, res) => {
       thumbnail: thumbnailUrl,
       readingTime: Number(readingTime) || 5,
     });
+
+    await createContentNotification(
+      "New Article Available",
+      "article", 
+      article
+    );
     
     await article.save();
     res.status(201).json(article);

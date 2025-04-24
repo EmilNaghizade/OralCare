@@ -16,7 +16,6 @@ import {
 } from "react-native";
 import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { dummyContacts } from "../data";
 import Typo from "../../components/Typo";
 import BackButton from "../../components/BackButton";
 
@@ -30,9 +29,7 @@ export default function ContactDetailScreen() {
 
   useEffect(() => {
     // ID'ye göre kişiyi bul (gerçek uygulamada burada API isteği olur)
-    const foundContact = dummyContacts.find((c) => c.id === id);
     if (foundContact) {
-      // Gerçekçi bir "About" metni ekleyelim (dummy data'da yoksa)
       const contactWithDetails = {
         ...foundContact,
         phone: foundContact.phone || "+994501234567", // Örnek telefon no ekle

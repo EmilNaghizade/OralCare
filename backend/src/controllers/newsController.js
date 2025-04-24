@@ -3,6 +3,7 @@ import News from "../models/News.js";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import { createContentNotification } from "./notificationController.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -71,6 +72,12 @@ export const createNews = async (req, res) => {
       thumbnail: thumbnailUrl,
       readingTime: Number(readingTime) || 3,
     });
+
+    await createContentNotification(
+      "New News Available",
+      "news", 
+      newsItem
+    );
 
     await newsItem.save();
     res.status(201).json(newsItem);

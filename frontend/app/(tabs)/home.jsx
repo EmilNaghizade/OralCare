@@ -21,12 +21,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../_layout"; // Adjust path if needed
 import Typo from "../../components/Typo"; // Adjust path if needed
 import { fetchWithAuth } from "../../services/fetchWithAuth";
-import { dummyArticles, dummyNews, dummyQuizzes } from "../data";
+import { dummyQuizzes } from "../data";
 import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
 import { LinearGradient } from "expo-linear-gradient";
 import ProceedArticleCard from "../../components/ProceedArticleCard";
-import { videoApi, articleApi, newsApi } from "../../services/api";
+import {
+  videoApi,
+  articleApi,
+  newsApi,
+  notificationApi,
+} from "../../services/api";
 
 const getUserLaunchedKey = (userId) =>
   `@OralCareApp:user_${userId}_hasLaunched`;
@@ -312,6 +317,7 @@ export default function HomeScreen() {
   const [articles, setArticles] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
 
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
@@ -423,13 +429,28 @@ export default function HomeScreen() {
       }
     };
 
+    const fetchUnreadNotifications = async () => {
+      if (!authToken) return;
+
+      try {
+        const data = await notificationApi.getNotifications(authToken, 1, 1);
+        setUnreadNotifications(data.unreadCount || 0);
+      } catch (error) {
+        console.error("Error fetching notification count:", error);
+        setUnreadNotifications(0);
+      }
+    };
+    fetchUnreadNotifications();
+
+    // Optional: Set up interval to refresh notification count
+    const interval = setInterval(fetchUnreadNotifications, 60000); // Every minute
+
+    return () => clearInterval(interval);
+
     getArticles();
     loadProfile();
     checkFirstTimeUser();
   }, [authToken]);
-
-  const knowledgeItemsToShow =
-    activeKnowledgeTab === "Articles" ? dummyArticles : dummyNews;
 
   const SectionHeader = ({ title, onSeeAllPress, isOnSeeAll }) => (
     <View style={styles.sectionHeader}>
@@ -536,7 +557,7 @@ export default function HomeScreen() {
             {/* Secondary card preview */}
             <View style={styles.modalArticleWrapper}>
               <ProceedArticleCard
-                item={articles.length > 0 ? articles[0] : dummyArticles[0]}
+                item={articles.length > 0 ? articles[0] : {}}
               />
             </View>
 
@@ -582,6 +603,13 @@ export default function HomeScreen() {
             </Typo>
             <TouchableOpacity onPress={() => router.push("/notifications")}>
               <Ionicons name="notifications-outline" size={28} color="#333" />
+              {unreadNotifications > 0 && (
+                <View style={styles.notificationBadge}>
+                  <Text style={styles.notificationCount}>
+                    {unreadNotifications > 99 ? "99+" : unreadNotifications}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
           </View>
 
@@ -633,12 +661,6 @@ const styles = StyleSheet.create({
     paddingTop: 40, // Internal padding
     paddingHorizontal: 20,
     paddingBottom: 24, // Internal padding (adjust as needed)
-    // Add shadows/elevation
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
   },
   section: { marginTop: 25 },
   sectionCard: {
@@ -648,12 +670,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingTop: 15, // Padding above section header
     paddingBottom: 20, // Padding below horizontal list
-    // Add shadows/elevation
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 3,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -707,6 +723,26 @@ const styles = StyleSheet.create({
     // Add overlay if needed (e.g., if background image is too busy)
     // backgroundColor: 'rgba(0,0,0,0.1)',
     zIndex: 2, // Above center icon
+  },
+  notificationButton: {
+    position: "relative",
+  },
+  notificationBadge: {
+    position: "absolute",
+    right: -6,
+    top: -6,
+    backgroundColor: "#FF3B30",
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 4,
+  },
+  notificationCount: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "bold",
   },
   quizTagContainer: {
     flexDirection: "row",
@@ -762,13 +798,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20, // <-- only top corners
     borderTopRightRadius: 20,
     overflow: "hidden",
-    // shadow for iOS
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    // elevation for Android
-    elevation: 6,
   },
 
   // top image stretches full width & keeps aspect

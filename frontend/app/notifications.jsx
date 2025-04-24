@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+// frontend/app/notifications.jsx (update your existing notifications screen)
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -6,102 +7,253 @@ import {
   SafeAreaView,
   FlatList,
   TouchableOpacity,
-  StatusBar // For potential status bar styling
-} from 'react-native';
-import { Stack, useRouter } from 'expo-router'; // Import Stack for header options
-import { Ionicons } from '@expo/vector-icons';
-import Typo from '../components/Typo'; // Varsa Typo bileşeninizi ekleyin
-import BackButton from "../components/BackButton"
-
-// Örnek Bildirim Verileri (Backend olmadığında kullanılır)
-const dummyNotifications = [
-  { id: '1', title: 'Yeni makale yayınlandı: "Gelişmiş Teknikler..."', timestamp: '2s önce', read: false, icon: 'document-text-outline' },
-  { id: '2', title: 'Quiz "Solunum Filtreleri" sonuçları hazır!', timestamp: '1g önce', read: false, icon: 'checkmark-circle-outline' },
-  { id: '3', title: 'Video "Ağız Bakım Rehberi" İzle & Öğren\'e eklendi.', timestamp: '3g önce', read: true, icon: 'play-circle-outline' },
-  { id: '4', title: 'Platforma hoş geldiniz!', timestamp: '1h önce', read: true, icon: 'sparkles-outline' },
-  // Daha fazla örnek bildirim eklenebilir
-];
+  StatusBar,
+  RefreshControl,
+  ActivityIndicator,
+} from "react-native";
+import { Stack, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import Typo from "../components/Typo";
+import BackButton from "../components/BackButton";
+import { useAuth } from "./_layout";
+import { notificationApi } from "../services/api";
 
 export default function NotificationsScreen() {
   const router = useRouter();
-  const [notifications, setNotifications] = useState(dummyNotifications);
+  const { authToken } = useAuth();
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
 
-  // Bildirimi okundu olarak işaretleme (şimdilik sadece state günceller)
-  const markAsRead = (id) => {
-    setNotifications(prevNotifications =>
-      prevNotifications.map(notif =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
-    );
-    // İleride buraya backend isteği eklenebilir
+  // Fetch notifications on mount
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  // Fetch notifications function
+  const fetchNotifications = async (pageNum = 1, shouldRefresh = false) => {
+    if (shouldRefresh) setRefreshing(true);
+    if (pageNum === 1) setLoading(true);
+
+    try {
+      const data = await notificationApi.getNotifications(authToken, pageNum);
+
+      const notificationsList = data.notifications || [];
+
+      if (pageNum === 1) {
+        setNotifications(notificationsList);
+      } else {
+        setNotifications((prev) => [...prev, ...notificationsList]);
+      }
+
+      setUnreadCount(data.unreadCount || 0);
+      setHasMore(notificationsList.length > 0 && pageNum < data.totalPages);
+      setPage(pageNum);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoading(false);
+      if (shouldRefresh) setRefreshing(false);
+    }
   };
 
-  // Her bir bildirim satırını render eden fonksiyon
+  // Mark as read function
+  const markAsRead = async (id) => {
+    try {
+      await notificationApi.markAsRead(authToken, id);
+
+      // Update local state to mark notification as read
+      setNotifications((prev) =>
+        prev.map((notif) =>
+          notif._id === id ? { ...notif, read: true } : notif
+        )
+      );
+
+      setUnreadCount((prev) => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+    }
+  };
+
+  // Mark all as read
+  const markAllAsRead = async () => {
+    try {
+      await notificationApi.markAllAsRead(authToken);
+
+      // Update local state
+      setNotifications((prev) =>
+        prev.map((notif) => ({ ...notif, read: true }))
+      );
+
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+  };
+
+  // Handle notification click - navigate to appropriate content
+  const handleNotificationClick = (notification) => {
+    if (!notification.read) {
+      markAsRead(notification._id);
+    }
+
+    // Navigate based on notification type
+    switch (notification.type) {
+      case "video":
+        router.push("/education"); // Navigate to videos section
+        break;
+      case "article":
+        router.push({
+          pathname: "/knowledge",
+          params: { activeTab: "Articles" },
+        });
+        break;
+      case "news":
+        router.push({
+          pathname: "/knowledge",
+          params: { activeTab: "News" },
+        });
+        break;
+      case "product":
+        router.push("/(tabs)/products");
+        break;
+      default:
+        router.push("/(tabs)/home");
+        break;
+    }
+  };
+
+  // Get icon based on notification type
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case "video":
+        return "videocam-outline";
+      case "article":
+        return "document-text-outline";
+      case "news":
+        return "newspaper-outline";
+      case "product":
+        return "cube-outline";
+      default:
+        return "notifications-outline";
+    }
+  };
+
+  // Format timestamp
+  const formatTimestamp = (timestamp) => {
+    const now = new Date();
+    const notifDate = new Date(timestamp);
+    const diffMs = now - notifDate;
+    const diffSec = Math.floor(diffMs / 1000);
+    const diffMin = Math.floor(diffSec / 60);
+    const diffHour = Math.floor(diffMin / 60);
+    const diffDay = Math.floor(diffHour / 24);
+
+    if (diffSec < 60) return `${diffSec}s ago`;
+    if (diffMin < 60) return `${diffMin}m ago`;
+    if (diffHour < 24) return `${diffHour}h ago`;
+    if (diffDay < 7) return `${diffDay}d ago`;
+
+    return notifDate.toLocaleDateString();
+  };
+
+  // Render each notification item
   const renderNotificationItem = ({ item }) => (
-  
     <TouchableOpacity
       style={[styles.notificationItem, !item.read && styles.unreadItem]}
-      onPress={() => {
-        console.log('Bildirime tıklandı:', item.id);
-        markAsRead(item.id);
-        // Burada ilgili içeriğe yönlendirme yapılabilir (örn: makale, quiz sonucu vb.)
-        // router.push(`/articles/${item.relatedId}`); // Örnek yönlendirme
-      }}
+      onPress={() => handleNotificationClick(item)}
     >
-      {/* Okunmadıysa sol başta nokta göster */}
+      {/* Unread dot indicator */}
       {!item.read && <View style={styles.unreadDot} />}
 
-
       <Ionicons
-        name={item.icon || 'notifications-outline'} // İkon varsa onu, yoksa varsayılanı kullan
+        name={getNotificationIcon(item.type)}
         size={28}
-        color={!item.read ? "#038565" : "#555"} // Okunmadıysa farklı renk
+        color={!item.read ? "#038565" : "#555"}
         style={styles.notificationIcon}
       />
+
       <View style={styles.notificationTextContainer}>
-        <Typo style={[styles.notificationTitle, !item.read && styles.unreadText]}>
-          {item.title}
+        <Typo
+          style={[styles.notificationTitle, !item.read && styles.unreadText]}
+        >
+          {item.message}
         </Typo>
-        <Typo style={styles.notificationTimestamp}>{item.timestamp}</Typo>
+        <Typo style={styles.notificationTimestamp}>
+          {formatTimestamp(item.createdAt)}
+        </Typo>
       </View>
+
       <Ionicons
-          name="chevron-forward-outline"
-          size={18}
-          color="#aaa"
-          style={styles.chevronIcon}
-        />
+        name="chevron-forward-outline"
+        size={18}
+        color="#aaa"
+        style={styles.chevronIcon}
+      />
     </TouchableOpacity>
   );
 
-  // Bildirim yoksa gösterilecek bileşen
-  const renderEmptyListComponent = () => (
+  // Empty notifications view
+  const renderEmptyList = () => (
     <View style={styles.emptyContainer}>
       <Ionicons name="notifications-off-outline" size={60} color="#ccc" />
-      <Typo style={styles.emptyText}>Henüz bildiriminiz yok.</Typo>
+      <Typo style={styles.emptyText}>You have no notifications yet.</Typo>
     </View>
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Expo Router'ın Stack'i ile başlığı ayarlama */}
-      <BackButton/>
+      <BackButton />
+
       <Stack.Screen
-          options={{
-              title: 'Bildirimler',
-              headerShadowVisible: false, // İsteğe bağlı: Başlık altı çizgiyi kaldır
-              headerTitleAlign: 'center', // Başlığı ortala
-              // Geri butonu Expo Router tarafından otomatik eklenir
-          }}
+        options={{
+          title: "Notifications",
+          headerShadowVisible: false,
+          headerTitleAlign: "center",
+        }}
       />
+
       <StatusBar barStyle="dark-content" />
+
+      {unreadCount > 0 && (
+        <TouchableOpacity
+          style={styles.markAllReadButton}
+          onPress={markAllAsRead}
+        >
+          <Typo style={styles.markAllReadText}>Mark all as read</Typo>
+        </TouchableOpacity>
+      )}
 
       <FlatList
         data={notifications}
         renderItem={renderNotificationItem}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={renderEmptyListComponent}
+        keyExtractor={(item) => item._id}
+        ListEmptyComponent={!loading && renderEmptyList()}
         contentContainerStyle={styles.listContainer}
-        ItemSeparatorComponent={() => <View style={styles.separator} />} // Satırlar arasına çizgi ekle
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => fetchNotifications(1, true)}
+            colors={["#038565"]}
+          />
+        }
+        onEndReached={() => {
+          if (hasMore && !loading && !refreshing) {
+            fetchNotifications(page + 1);
+          }
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          loading && !refreshing ? (
+            <View style={styles.footerLoader}>
+              <ActivityIndicator size="small" color="#038565" />
+            </View>
+          ) : null
+        }
       />
     </SafeAreaView>
   );
@@ -110,71 +262,85 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#fff', // Arka plan rengi
+    backgroundColor: "#fff",
   },
   listContainer: {
+    flexGrow: 1,
     paddingVertical: 10,
   },
   notificationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 15,
     paddingVertical: 15,
-    backgroundColor: '#fff', // Varsayılan arka plan
+    backgroundColor: "#fff",
   },
   unreadItem: {
-    backgroundColor: '#f0f8ff', // Okunmamış öğeler için hafif farklı arka plan (isteğe bağlı)
+    backgroundColor: "#f0f8ff",
   },
   unreadDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#038565', // Okunmadı işaretçisi rengi
-    marginRight: 10, // İkon ile arasında boşluk
-    position: 'absolute', // Mutlak konumlandırma
-    left: 15, // Soldan boşluk
-    top: '50%', // Dikeyde ortala
-    transform: [{ translateY: -4 }], // Tam ortalamak için yarım yükseklik kadar yukarı kaydır
+    backgroundColor: "#038565",
+    marginRight: 10,
+    position: "absolute",
+    left: 15,
+    top: "50%",
+    transform: [{ translateY: -4 }],
   },
   notificationIcon: {
     marginRight: 15,
-    marginLeft: 15, // Okunmadı noktası için yer aç
+    marginLeft: 15,
   },
   notificationTextContainer: {
-    flex: 1, // Kalan tüm alanı kapla
-    marginRight: 10, // Sağdaki chevron ikonu için boşluk
+    flex: 1,
+    marginRight: 10,
   },
   notificationTitle: {
     fontSize: 15,
-    // fontWeight: 'normal', // Typo bileşeni kendi ağırlığını yönetebilir
-    color: '#333',
+    color: "#333",
     marginBottom: 3,
   },
   unreadText: {
-    fontWeight: '600', // Okunmamış metni kalın yap (isteğe bağlı)
-    color: '#000',
+    fontWeight: "600",
+    color: "#000",
   },
   notificationTimestamp: {
     fontSize: 12,
-    color: '#888',
+    color: "#888",
   },
   chevronIcon: {
-     // Sağ taraftaki ikon için stil (şu an sadece renk var)
+    // Style for forward chevron
   },
   separator: {
     height: 1,
-    backgroundColor: '#eee', // Ayırıcı çizgi rengi
-    marginLeft: 65, // İkon ve noktanın solundan başlasın
+    backgroundColor: "#eee",
+    marginLeft: 65,
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 100, // Üstten biraz boşluk
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 100,
   },
   emptyText: {
     marginTop: 10,
     fontSize: 16,
-    color: '#aaa',
+    color: "#aaa",
+  },
+  footerLoader: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  markAllReadButton: {
+    alignSelf: "flex-end",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+  },
+  markAllReadText: {
+    color: "#038565",
+    fontSize: 14,
+    fontWeight: "500",
   },
 });

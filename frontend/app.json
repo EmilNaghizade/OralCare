@@ -2,10 +2,10 @@
   "expo": {
     "name": "Oral Care",
     "slug": "oral-care",
-    "version": "3.2.0",
+    "version": "3.2.1",
     "orientation": "portrait",
     "icon": "./assets/images/IconOralCare2.png",
-    "scheme": "myapp",
+    "scheme": "oralcare",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
