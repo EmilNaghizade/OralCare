@@ -173,3 +173,15 @@ export const deleteNotification = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+
+export const deleteAllNotifications = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    await Notification.deleteMany({ userId });
+    res.json({ message: "All notifications deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting all notifications:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

@@ -35,6 +35,12 @@ router.post(
   notificationController.createContentNotification
 );
 
+router.delete(
+  "/all",
+  protectRoute,
+  notificationController.deleteAllNotifications
+);
+
 router.delete("/:id", protectRoute, notificationController.deleteNotification);
 
 export default router;

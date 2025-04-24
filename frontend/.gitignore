@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+/android
+/ios
+
 # Expo
 .expo/
 dist/
@@ -37,4 +40,3 @@ yarn-error.*
 
 app-example
 
-/ios
