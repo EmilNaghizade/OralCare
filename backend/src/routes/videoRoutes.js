@@ -47,7 +47,6 @@ router.post(
   videoController.markVideoAsWatched
 );
 
-// Video sharing
-router.get("/shared/:videoSlug", videoController.shareVideo);
+
 
 export default router;

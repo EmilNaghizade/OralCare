@@ -131,36 +131,18 @@ export default function VideoDetailScreen() {
 
   const handleShare = async () => {
     if (!videoData) return;
-
+    const videoUrl = `${BASE_URL}/video/${videoId}`;
+    const title = `Check out this video: ${videoData.title}`;
+    const message = `${title}\n\n${videoUrl}`;
     try {
-      // Create a slug from the video title
-      const slug = slugify(videoData.title, {
-        lower: true,
-        strict: true,
-      });
-
-      // Build the share URL - use /api/videos/shared/ path to match our backend route
-      const sharePath = `/api/videos/shared/${videoId}-${slug}`;
-
-      // Deep link for mobile app (if opened in the app)
-      const deepLink = Linking.createURL(`video/${videoId}`);
-
-      // Web link for browsers and sharing outside the app
-      const webLink = `${BASE_URL}${sharePath}`;
-
-      // Create a share message that includes appropriate link based on platform
-      const shareMessage = `Check out this video: ${videoData.title}!\n\n${webLink}`;
-
-
-
       await Share.share({
-        message: shareMessage,
-        title: videoData.title,
-        url: webLink, // iOS specific - may be used instead of message in some cases
+        message,
+        url: videoUrl,
+        title,
       });
     } catch (error) {
-      Alert.alert("Error", "Could not share this video.");
-      console.error("Share error:", error);
+      console.error("Error sharing video:", error);
+      Alert.alert("Error", "Failed to share the video.");
     }
   };
 
@@ -180,21 +162,21 @@ export default function VideoDetailScreen() {
     );
   }
 
-    // If no video data
-    if (!videoData) {
-      return (
-        <SafeAreaView style={styles.safeArea}>
-          <StatusBar barStyle="dark-content" />
-          <View style={styles.manualHeader}>
-            <BackButton />
-          </View>
-          <View style={styles.errorContainer}>
-            <Ionicons name="videocam-off-outline" size={48} color="#999" />
-            <Typo style={styles.errorText}>Video not found</Typo>
-          </View>
-        </SafeAreaView>
-      );
-    }
+  // If no video data
+  if (!videoData) {
+    return (
+      <SafeAreaView style={styles.safeArea}>
+        <StatusBar barStyle="dark-content" />
+        <View style={styles.manualHeader}>
+          <BackButton />
+        </View>
+        <View style={styles.errorContainer}>
+          <Ionicons name="videocam-off-outline" size={48} color="#999" />
+          <Typo style={styles.errorText}>Video not found</Typo>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // If error, show error message
   if (error) {
@@ -219,8 +201,6 @@ export default function VideoDetailScreen() {
       </SafeAreaView>
     );
   }
-
-
 
   return (
     <SafeAreaView style={styles.safeArea}>

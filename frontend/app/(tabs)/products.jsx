@@ -16,7 +16,6 @@ import {
 import { useAuth } from "../_layout";
 import Typo from "../../components/Typo";
 import axios from "axios";
-import FastImage from "react-native-fast-image";
 
 const PADDING = 16; // Yeni padding/gap değeri
 const { width } = Dimensions.get("window");
@@ -67,14 +66,14 @@ const ProductCard = ({ item }) => {
     >
       {/* Image Area */}
       <View style={styles.productImageContainer}>
-        <FastImage
+        <Image
+          source={imageSource}
           style={{
             width: "100%",
             height: "100%",
             borderRadius: 16,
           }}
-          source={imageSource}
-          resizeMode={FastImage.resizeMode.cover}
+          resizeMode="cover"
         />
       </View>
       {/* Product Name */}
@@ -212,7 +211,7 @@ const styles = StyleSheet.create({
     borderColor: "#F0F5F7",
   },
   productImageContainer: {
-    width: "90%", // Kart genişliğini doldur
+    width: "100%", // Kart genişliğini doldur
     aspectRatio: 1, // Kare oranını koru
     borderRadius: 16, // <<< İÇ KÖŞE YUVARLAKLIĞI (Karttan biraz az)
     marginBottom: 12, // Resim ile yazı arası boşluk
