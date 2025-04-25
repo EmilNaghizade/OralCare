@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import FastImage from "react-native-fast-image";
 
 
 export const VideoCard = ({ item, style, styleThumbnail }) => {
@@ -28,10 +27,10 @@ export const VideoCard = ({ item, style, styleThumbnail }) => {
             <ActivityIndicator size="small" color="#038565" />
           </View>
         )}
-        <FastImage
+        <Image
           style={[styles.videoThumbnail, styleThumbnail]}
           source={item?.thumbnailUrl}
-          resizeMode={FastImage.resizeMode.cover}
+          resizeMode={"cover"}
         />
       </View>
 

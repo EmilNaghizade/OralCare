@@ -280,27 +280,3 @@ export const markVideoAsWatched = async (req, res) => {
   }
 };
 
-// Video sharing
-export const shareVideo = async (req, res) => {
-  try {
-    const raw = req.params.videoSlug; // e.g. "6808b0fa6bc0671a2eeb139d-the-ultimate-..."
-    const videoId = raw.split("-")[0]; // "6808b0fa6bc0671a2eeb139d"
-
-    console.log("Extracted videoId:", videoId); // Debug log
-
-    // ID-nin düzgün BSON ObjectId formatında olub-olmadığını yoxla
-    if (!mongoose.Types.ObjectId.isValid(videoId)) {
-      return res.status(400).send("Invalid video ID");
-    }
-
-    const video = await Video.findById(videoId);
-    if (!video) return res.status(404).send("Video cannot be found");
-
-    // MP4 faylına redirect et
-    const fileUrl = `${req.protocol}://${req.get("host")}${video.videoUrl}`;
-    return res.redirect(fileUrl);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send("Server error");
-  }
-};

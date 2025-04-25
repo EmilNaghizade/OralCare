@@ -26,7 +26,6 @@ import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
 import { LinearGradient } from "expo-linear-gradient";
 import ProceedArticleCard from "../../components/ProceedArticleCard";
-import FastImage from "react-native-fast-image";
 import {
   videoApi,
   articleApi,
