@@ -166,6 +166,20 @@ router.get("/profile", protectRoute, async (req, res) => {
   }
 });
 
+// get all users
+router.get("/all", protectRoute, async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    if (!users) {
+      return res.status(404).json({ error: "No users found" });
+    }
+    res.json(users);
+  } catch (error) {
+    console.error("Error fetching all users:", error);
+    res.status(500).json({ error: "Internal server error fetching users" });
+  }
+});
+
 // Update user profile
 router.put("/profile", protectRoute, async (req, res) => {
   try {
@@ -312,6 +326,44 @@ router.put("/update-password", protectRoute, async (req, res) => {
   } catch (error) {
     console.error("Error updating password:", error);
     res.status(500).json({ error: "Internal server error updating password" });
+  }
+});
+
+// delete user account
+
+router.delete("/delete-user", protectRoute, async (req, res) => {
+  try {
+    const userId = req.user._id;
+    // Validate user ID
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+    // Check if user exists
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    // Check if the user is an admin
+    if (user.role === "admin") {
+      return res
+        .status(403)
+        .json({ error: "Admin accounts cannot be deleted" });
+    }
+    // Optionally, you can check if the user has any associated data that needs to be handled before deletion
+
+    // Find and delete the user
+    const deletedUser = await User.findByIdAndDelete(userId);
+
+    if (!deletedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({ message: "Account deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    res.status(500).json({ error: "Internal server error deleting account" });
   }
 });
 

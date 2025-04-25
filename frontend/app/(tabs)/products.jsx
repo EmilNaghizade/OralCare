@@ -16,6 +16,7 @@ import {
 import { useAuth } from "../_layout";
 import Typo from "../../components/Typo";
 import axios from "axios";
+import FastImage from "react-native-fast-image";
 
 const PADDING = 16; // Yeni padding/gap değeri
 const { width } = Dimensions.get("window");
@@ -27,7 +28,6 @@ const ProductCard = ({ item }) => {
   let imageSource;
 
   if (item.image) {
-  
     imageSource = item.image;
   } else if (item.imageUrl) {
     // Case 2: If it's a URL from the API (needs to be converted to an object with uri)
@@ -67,14 +67,14 @@ const ProductCard = ({ item }) => {
     >
       {/* Image Area */}
       <View style={styles.productImageContainer}>
-        <Image
-          source={imageSource}
+        <FastImage
           style={{
             width: "100%",
             height: "100%",
-            borderRadius: 16, 
+            borderRadius: 16,
           }}
-          resizeMode="cover"
+          source={imageSource}
+          resizeMode={FastImage.resizeMode.cover}
         />
       </View>
       {/* Product Name */}
@@ -112,11 +112,10 @@ export default function ProductsScreen() {
       if (response.data && response.data.products) {
         setProducts(response.data.products);
       } else {
-  
       }
     } catch (err) {
       console.error("Error fetching products:", err);
-   
+
       setError(
         "Could not load products from server. Showing sample products instead."
       );
@@ -211,8 +210,6 @@ const styles = StyleSheet.create({
     // Gölge
     borderWidth: 1,
     borderColor: "#F0F5F7",
-
-    
   },
   productImageContainer: {
     width: "90%", // Kart genişliğini doldur

@@ -1,84 +1,118 @@
-import { Image, Text, TouchableOpacity, View,StyleSheet } from "react-native";
+import React, { useState } from "react";
+import {
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import FastImage from "react-native-fast-image";
 
-export const VideoCard = ({ item, style,styleThumbnail }) => (
-  // Use TouchableOpacity for press handling
-  <TouchableOpacity
-    style={[styles.videoCard, style]}
-    onPress={() => {
-      router.push(`/(modal)/video/${item._id}`); // Use router to navigate
-    }}
-  >
-    <Image source={item.thumbnailUrl} style={[styles.videoThumbnail,styleThumbnail]} />
-    {/* Container View for content below image */}
-    <View style={styles.videoInfoContainer}>
-      {item.tag && ( // Only show tag if item.tag exists
-        <View style={styles.videoTagContainer}>
-          <Ionicons name="leaf-outline" size={12} color="#038565" />
-          <Text style={styles.videoTagText}>{item.tag}</Text>
-        </View>
-      )}
-      {/* Title */}
-      <Text style={styles.videoTitle} numberOfLines={2}>
-        {item.title || "Video Title Placeholder"}
-      </Text>
-      {/* Duration */}
-      <Text style={styles.videoDuration}>
-        {item.duration || "0 min 00 sec"}
-      </Text>
-    </View>
-  </TouchableOpacity>
-  
-);
+
+export const VideoCard = ({ item, style, styleThumbnail }) => {
+  const [isLoading, setIsLoading] = useState(true);
+
+  return (
+    <TouchableOpacity
+      style={[styles.videoCard, style]}
+      onPress={() => {
+        router.push(`/(modal)/video/${item._id}`);
+      }}
+    >
+      <View style={[styles.thumbnailContainer, styleThumbnail]}>
+        {isLoading && (
+          <View style={styles.loaderContainer}>
+            <ActivityIndicator size="small" color="#038565" />
+          </View>
+        )}
+        <FastImage
+          style={[styles.videoThumbnail, styleThumbnail]}
+          source={item?.thumbnailUrl}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+      </View>
+
+      <View style={styles.videoInfoContainer}>
+        {item.tag && (
+          <View style={styles.videoTagContainer}>
+            <Ionicons name="leaf-outline" size={12} color="#038565" />
+            <Text style={styles.videoTagText}>{item.tag}</Text>
+          </View>
+        )}
+        <Text style={styles.videoTitle} numberOfLines={2}>
+          {item.title || "Video Title Placeholder"}
+        </Text>
+        <Text style={styles.videoDuration}>
+          {item.duration || "0 min 00 sec"}
+        </Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const styles = StyleSheet.create({
   videoCard: {
-    width: 210, // Adjust width as needed to fit design/screen
+    width: 210,
     marginRight: 16,
-    backgroundColor: "#fff", // White background
-    borderRadius: 12, // Rounded corners
- 
+    backgroundColor: "#fff",
+    borderRadius: 12,
   },
-  videoThumbnail: {
+  thumbnailContainer: {
     width: "90%",
     alignSelf: "center",
-    height: 110, // Adjust height as needed
+    height: 110,
     marginTop: 10,
-    borderRadius: 16, 
-    backgroundColor: "#eee", // Background color while image loads
+    borderRadius: 16,
+    backgroundColor: "#eee",
+    overflow: "hidden",
+    position: "relative",
+  },
+  videoThumbnail: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 16,
+  },
+  loaderContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(238, 238, 238, 0.7)",
   },
   videoInfoContainer: {
-    // Container for text elements below image
-    padding: 12, // Padding inside the card below the image
+    padding: 12,
   },
   videoTagContainer: {
-    // Pill shape tag container
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#E0F2F7", // Light green/cyan background - ADJUST COLOR
-    borderRadius: 15, // High value for pill shape
+    backgroundColor: "#E0F2F7",
+    borderRadius: 15,
     paddingVertical: 4,
     paddingHorizontal: 8,
-    alignSelf: "flex-start", // Don't stretch full width
-    marginBottom: 8, // Space below tag
+    alignSelf: "flex-start",
+    marginBottom: 8,
   },
   videoTagText: {
-    // Renamed from videoTag
     fontSize: 11,
     fontWeight: "500",
-    color: "#038565", // Darker green text - ADJUST COLOR
-    marginLeft: 4, // Space between icon and text
+    color: "#038565",
+    marginLeft: 4,
   },
   videoTitle: {
     fontWeight: "600",
-    fontSize: 14, // Slightly smaller maybe
+    fontSize: 14,
     color: "#333",
-    marginBottom: 4, // Space below title
-    lineHeight: 18, // Adjust line height for multi-line titles
+    marginBottom: 4,
+    lineHeight: 18,
   },
   videoDuration: {
     fontSize: 12,
-    color: "#038565", // Gray color for duration
+    color: "#038565",
   },
 });
