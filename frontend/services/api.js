@@ -145,8 +145,7 @@ export const quizApi = {
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching completed quizzes:", error);
-      throw error;
+
     }
   },
 };

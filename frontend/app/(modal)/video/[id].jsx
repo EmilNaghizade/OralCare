@@ -180,6 +180,22 @@ export default function VideoDetailScreen() {
     );
   }
 
+    // If no video data
+    if (!videoData) {
+      return (
+        <SafeAreaView style={styles.safeArea}>
+          <StatusBar barStyle="dark-content" />
+          <View style={styles.manualHeader}>
+            <BackButton />
+          </View>
+          <View style={styles.errorContainer}>
+            <Ionicons name="videocam-off-outline" size={48} color="#999" />
+            <Typo style={styles.errorText}>Video not found</Typo>
+          </View>
+        </SafeAreaView>
+      );
+    }
+
   // If error, show error message
   if (error) {
     return (
@@ -204,21 +220,7 @@ export default function VideoDetailScreen() {
     );
   }
 
-  // If no video data
-  if (!videoData) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <StatusBar barStyle="dark-content" />
-        <View style={styles.manualHeader}>
-          <BackButton />
-        </View>
-        <View style={styles.errorContainer}>
-          <Ionicons name="videocam-off-outline" size={48} color="#999" />
-          <Typo style={styles.errorText}>Video not found</Typo>
-        </View>
-      </SafeAreaView>
-    );
-  }
+
 
   return (
     <SafeAreaView style={styles.safeArea}>

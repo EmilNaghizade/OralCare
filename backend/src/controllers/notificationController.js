@@ -82,7 +82,7 @@ export const createGlobalNotification = async (req, res) => {
       return res.status(403).json({ error: "Not authorized" });
     }
 
-    const { title, message, type } = req.body;
+    const { title, message, type,contentId } = req.body;
 
     if (!title || !message || !type) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -97,6 +97,7 @@ export const createGlobalNotification = async (req, res) => {
       title,
       message,
       type,
+      contentId: contentId || "", // Optional content ID
     }));
 
     await Notification.insertMany(notifications);
@@ -120,21 +121,34 @@ export const createContentNotification = async (
     const users = await User.find({}, "_id");
 
     let message;
+    let contentId;
     switch (contentType) {
       case "video":
+        contentId = contentItem._id;
         message = `New video added: ${contentItem.title}`;
         break;
       case "news":
+        contentId = contentItem._id;
         message = `New news: ${contentItem.title}`;
         break;
       case "article":
+        contentId = contentItem._id;
         message = `New article published: ${contentItem.title}`;
         break;
       case "product":
+        contentId = contentItem._id;
         message = `New product available: ${contentItem.name}`;
         break;
       default:
+        contentId = contentItem._id || "";
         message = `New content added`;
+    }
+
+    if (!contentId) {
+      console.warn(
+        "Content ID is missing, notifications will lack direct links"
+      );
+      contentId = ""; // Set empty string as fallback
     }
 
     const notifications = users.map((user) => ({
@@ -142,6 +156,7 @@ export const createContentNotification = async (
       title,
       message,
       type: contentType,
+      contentId: contentId.toString(), // Convert to string to ensure compatibility
     }));
 
     await Notification.insertMany(notifications);

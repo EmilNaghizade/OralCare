@@ -100,29 +100,56 @@ export default function NotificationsScreen() {
       markAsRead(notification._id);
     }
 
-    // Navigate based on notification type
-    switch (notification.type) {
-      case "video":
-        router.push("/education"); // Navigate to videos section
-        break;
-      case "article":
-        router.push({
-          pathname: "/knowledge",
-          params: { activeTab: "Articles" },
-        });
-        break;
-      case "news":
-        router.push({
-          pathname: "/knowledge",
-          params: { activeTab: "News" },
-        });
-        break;
-      case "product":
-        router.push("/(tabs)/products");
-        break;
-      default:
-        router.push("/(tabs)/home");
-        break;
+    if (notification.contentId) {
+      switch (notification.type) {
+        case "video":
+          router.push(`/(modal)/video/${notification.contentId}`); // Navigate to specific video
+          break;
+        case "article":
+          router.push({
+            pathname: `/(modal)/article/${notification.contentId}`,
+            params: { type: "article", activeTab: "Articles" },
+          });
+          break;
+        case "news":
+          router.push({
+            pathname: `/(modal)/article/${notification.contentId}`,
+            params: { type: "news", activeTab: "News" },
+          });
+          break;
+        case "product":
+          // For products, we'll still go to the products page as there may not be a detail view
+          router.push("/(tabs)/products");
+          break;
+        default:
+          router.push("/(tabs)/home");
+          break;
+      }
+    } else {
+      // Fallback to section pages if no contentId (for backward compatibility)
+      switch (notification.type) {
+        case "video":
+          router.push("/education");
+          break;
+        case "article":
+          router.push({
+            pathname: "/knowledge",
+            params: { activeTab: "Articles" },
+          });
+          break;
+        case "news":
+          router.push({
+            pathname: "/knowledge",
+            params: { activeTab: "News" },
+          });
+          break;
+        case "product":
+          router.push("/(tabs)/products");
+          break;
+        default:
+          router.push("/(tabs)/home");
+          break;
+      }
     }
   };
 

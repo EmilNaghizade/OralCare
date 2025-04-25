@@ -143,7 +143,7 @@ export default function ProfileScreen() {
             setQuizCount(quizData.count || quizData.finishedQuizIds.length);
           }
         } catch (error) {
-          console.error("Error fetching completed quizzes:", error);
+     
           // Set default values on error
           setCompletedQuizzes([]);
           setQuizCount(0);

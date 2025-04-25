@@ -8,7 +8,6 @@ import {
   Image,
   StatusBar,
   ActivityIndicator,
-  Share,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -20,7 +19,7 @@ import { articleApi, newsApi } from "../../../services/api";
 import { useAuth } from "../../_layout";
 
 const ArticleDetail = () => {
-  const { id: contentId, type,activeTab } = useLocalSearchParams(); // Get ID and type from route param
+  const { id: contentId,  activeTab } = useLocalSearchParams(); // Get ID and type from route param
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,9 +27,8 @@ const ArticleDetail = () => {
   const router = useRouter();
 
   // Determine if we're looking at an article or news item
-  
-  const isArticle = type !== "news";
-  console.log(isArticle,"yey")
+
+
   console.log(activeTab, "activeTab");
 
   useEffect(() => {
@@ -45,7 +43,10 @@ const ArticleDetail = () => {
         }
         setData(result);
       } catch (err) {
-        console.error(`Error fertching ${isArticle ? "article" : "news"}:`, err);
+        console.error(
+          `Error fertching ${isArticle ? "article" : "news"}:`,
+          err
+        );
         setError(`Failed to load ${isArticle ? "article" : "news"}`);
       } finally {
         setLoading(false);
@@ -55,8 +56,7 @@ const ArticleDetail = () => {
     if (contentId) {
       fetchData();
     }
-  }, [contentId, authToken, isArticle]);
-
+  }, [contentId, authToken]);
 
   if (loading) {
     return (
@@ -109,7 +109,6 @@ const ArticleDetail = () => {
       <View style={styles.manualHeader}>
         {/* Back Button */}
         <BackButton />
-
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContainerContent}>
@@ -126,9 +125,7 @@ const ArticleDetail = () => {
             uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${data.thumbnail}`,
           }}
           style={styles.coverImage}
-          onError={(e) =>
-            console.error("Image loading error:", e.nativeEvent.error)
-          }
+      
         />
 
         <View style={styles.bodyTextContainer}>
