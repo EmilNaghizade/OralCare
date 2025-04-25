@@ -1,9 +1,7 @@
-import express from "express";
 import Quiz from "../models/Quiz.js";
 import User from "../models/User.js";
 import protectRoute from "../middleware/auth.middleware.js";
 
-const router = express.Router();
 
 export const getFinishedQuizzes = async (req, res) => {
   try {
