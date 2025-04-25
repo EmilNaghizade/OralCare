@@ -2,59 +2,18 @@
 import express from "express";
 import User from "../models/User.js";
 import protectRoute from "../middleware/auth.middleware.js";
+import * as quizController from "../controllers/quizController.js";
 
 const router = express.Router();
 
 // GET endpoint to retrieve all finished quizzes for the authenticated user
-router.get('/finished', protectRoute, async (req, res) => {
-  try {
-    // Get the user without attempting to populate
-    const user = await User.findById(req.user.id).select('name email watchedVideos finishedQuizzes role');
-
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    
-
-    
-    res.json({ 
-      finishedQuizIds: user.finishedQuizzes || [],
-      count: (user.finishedQuizzes || []).length 
-    });
-  } catch (err) {
-    console.error('Error fetching finished quizzes:', err.message);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
+router.get("/finished", protectRoute, quizController.getFinishedQuizzes);
 
 // POST endpoint to mark a quiz as finished by a user
-router.post('/:quizId/finish', protectRoute, async (req, res) => {
-  try {
-    const quizId = req.params.quizId;
-    
+router.post(
+  "/:quizId/finish",
+  protectRoute,
+  async (req, res) => quizController.markQuizAsFinished
+);
 
-    // Update user document to add quiz to finishedQuizzes if not already there
-    const user = await User.findById(req.user.id).select('name email watchedVideos finishedQuizzes role');
-
-    
-    // Check if quiz is already marked as finished
-    if (user.finishedQuizzes.includes(quizId)) {
-      return res.json({ message: 'Quiz already marked as finished' });
-    }
-    
-    // Add quiz to finishedQuizzes array
-    user.finishedQuizzes.push(quizId);
-    await user.save();
-    
-    res.json({ 
-      message: 'Quiz marked as finished successfully',
-      finishedCount: user.finishedQuizzes.length
-    });
-  } catch (err) {
-    console.error('Error marking quiz as finished:', err.message);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-export default router
+export default router;

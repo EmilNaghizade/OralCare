@@ -313,7 +313,6 @@ export default function HomeScreen() {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
-  const [activeKnowledgeTab, setActiveKnowledgeTab] = useState("Articles");
   const [articles, setArticles] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -350,8 +349,8 @@ export default function HomeScreen() {
       try {
         const profileData = await getProfile(authToken);
         if (profileData?.user) {
-          setFirstName(profileData.user.name.split(" ")[0]);
-
+          setFirstName(profileData?.user?.name?.split(" ")[0]);
+          console.log("Profile data: 354", profileData.user.name);
           if (profileData.user._id) {
             setUserId(profileData.user._id);
           }
@@ -441,15 +440,14 @@ export default function HomeScreen() {
       }
     };
     fetchUnreadNotifications();
+    getArticles();
+    loadProfile();
+    checkFirstTimeUser();
 
     // Optional: Set up interval to refresh notification count
     const interval = setInterval(fetchUnreadNotifications, 60000); // Every minute
 
     return () => clearInterval(interval);
-
-    getArticles();
-    loadProfile();
-    checkFirstTimeUser();
   }, [authToken]);
 
   const SectionHeader = ({ title, onSeeAllPress, isOnSeeAll }) => (

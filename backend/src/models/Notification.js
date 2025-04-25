@@ -23,6 +23,10 @@ const NotificationSchema = new mongoose.Schema(
       enum: ["video", "news", "article", "product"],
       required: true,
     },
+    contentId: {
+      type: String, // Store the ID of the related content
+      default: "", // Make it optional for backward compatibility
+    },
     read: {
       type: Boolean,
       default: false,
@@ -34,6 +38,7 @@ const NotificationSchema = new mongoose.Schema(
 // Create indexes for faster queries
 NotificationSchema.index({ userId: 1, createdAt: -1 });
 NotificationSchema.index({ userId: 1, read: 1 });
+NotificationSchema.index({ type: 1, contentId: 1 }); // Add index for looking up by type and content ID
 
 const Notification = mongoose.model("Notification", NotificationSchema);
 
