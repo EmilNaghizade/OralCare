@@ -58,6 +58,8 @@ const styles = StyleSheet.create({
     marginRight: 16,
     backgroundColor: "#fff",
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#F0F5F7",
   },
   thumbnailContainer: {
     width: "90%",

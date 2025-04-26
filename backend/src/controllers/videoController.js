@@ -70,15 +70,6 @@ export const createVideo = async (req, res) => {
     const videoUrl = `/uploads/videos/${videoFile.filename}`;
     const thumbnailUrl = `/uploads/thumbnails/${thumbnailFile.filename}`;
 
-    // --- FFmpeg ilə OPTIMIZE ET ---
-    const inputPath = videoFile.path;
-    const optimizedDir = path.join(__dirname, "../../uploads/optimized");
-    const optimizedPath = path.join(optimizedDir, videoFile.filename);
-
-    // Qovluq yoxdursa, yarat
-    if (!fs.existsSync(optimizedDir)) {
-      fs.mkdirSync(optimizedDir, { recursive: true });
-    }
 
     const video = new Video({
       title,

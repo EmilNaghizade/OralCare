@@ -21,10 +21,6 @@ import Typo from "../../../components/Typo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { videoApi } from "../../../services/api";
 import { useAuth } from "../../_layout";
-import * as Linking from "expo-linking";
-import slugify from "slugify";
-
-const BASE_URL = "https://oralcare.fly.dev";
 
 const greenFeatureIcon = require("../../../assets/images/JasmineCircle.png");
 const localFallbackVideo = require("../../../assets/videos/Video1.mp4");
@@ -94,6 +90,7 @@ export default function VideoDetailScreen() {
     if (watchTrackingComplete || !videoData) return;
 
     try {
+
       const response = await videoApi.markVideoAsWatched(videoId);
       setIsWatched(true);
       setWatchTrackingComplete(true);
@@ -104,6 +101,7 @@ export default function VideoDetailScreen() {
 
   // Mark video as watched when video data is loaded
   useEffect(() => {
+
     if (videoData && !watchTrackingComplete) {
       markVideoAsWatched();
     }
@@ -131,18 +129,47 @@ export default function VideoDetailScreen() {
 
   const handleShare = async () => {
     if (!videoData) return;
-    const videoUrl = `${BASE_URL}/video/${videoId}`;
-    const title = `Check out this video: ${videoData.title}`;
-    const message = `${title}\n\n${videoUrl}`;
+
     try {
-      await Share.share({
-        message,
-        url: videoUrl,
-        title,
+      // Construct a properly formatted URL
+      let shareUrl = "";
+      if (videoData.videoUrl) {
+        shareUrl = `${process.env.EXPO_PUBLIC_API_BASE_URL}${videoData.videoUrl}`;
+      }
+
+      // Different share options for iOS and Android
+      const shareOptions = Platform.select({
+        ios: {
+          message: `Check out this video: ${videoData.title}!`,
+          url: shareUrl,
+        },
+        android: {
+          message: `Check out this video: ${videoData.title}!\n${shareUrl}`,
+          title: videoData.title,
+        },
+        default: {
+          message: `Check out this video: ${videoData.title}!\n${shareUrl}`,
+          title: videoData.title,
+        },
       });
+
+      const result = await Share.share(shareOptions);
+
+      if (result.action === Share.sharedAction) {
+        if (result.activityType) {
+          // shared with activity type of result.activityType
+          console.log(`Shared via ${result.activityType}`);
+        } else {
+          // shared
+          console.log("Shared successfully");
+        }
+      } else if (result.action === Share.dismissedAction) {
+        // dismissed
+        console.log("Share dismissed");
+      }
     } catch (error) {
-      console.error("Error sharing video:", error);
-      Alert.alert("Error", "Failed to share the video.");
+      Alert.alert("Error", "Could not share this video.");
+      console.error("Share error:", error.message);
     }
   };
 
@@ -173,6 +200,18 @@ export default function VideoDetailScreen() {
         <View style={styles.errorContainer}>
           <Ionicons name="videocam-off-outline" size={48} color="#999" />
           <Typo style={styles.errorText}>Video not found</Typo>
+          <Typo style={styles.errorText}>
+            The video you are looking for does not exist.
+          </Typo>
+  
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => router.back()}
+          >
+            <Typo color="#fff" fontWeight="600">
+              Go Back
+            </Typo>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -201,6 +240,8 @@ export default function VideoDetailScreen() {
       </SafeAreaView>
     );
   }
+
+  
 
   return (
     <SafeAreaView style={styles.safeArea}>

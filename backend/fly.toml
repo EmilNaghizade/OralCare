@@ -11,6 +11,7 @@ primary_region = 'fra'
 [mounts]
   source = "oralcare_data"
   destination = "/app/src/uploads"
+  initial_size = "10gb"
 
 [processes]
   app = "node src/index.js"
@@ -18,15 +19,22 @@ primary_region = 'fra'
 [http_service]
   internal_port = 8080
   force_https = true
-  auto_stop_machines = true
-  concurrency = { soft_limit = 25, hard_limit = 50 }
+  auto_stop_machines = false
+  concurrency = {type= "connections" , soft_limit = 200,  hard_limit = 250 }
   auto_start_machines = true
-  min_machines_running = 4
-  max_machines_count = 6
+  min_machines_running = 1
   processes = ['app']
+
+[http_service.check]
+  interval = "10s"
+  timeout = "5s"
+  grace_period = "5s"
+  method = "get"
+  path = "/health"
+  protocol = "http"
 
 
 [[vm]]
   memory = '2gb'
   cpu_kind = 'shared'
-  cpus = 1
+  cpus = 2

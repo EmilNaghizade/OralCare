@@ -77,7 +77,8 @@ const UserSettings = () => {
         }
 
         const userData = await response.json();
-        setName(userData.user.name || "");
+        console.log(userData, "userData 89");
+        setName(userData?.user?.name || "");
         setEmail(userData.user.email || "");
       } catch (error) {
         console.error("Error fetching profile:", error);

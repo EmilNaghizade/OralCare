@@ -144,9 +144,7 @@ export const quizApi = {
         },
       });
       return response.data;
-    } catch (error) {
-
-    }
+    } catch (error) {}
   },
 };
 
@@ -321,7 +319,6 @@ export const videoApi = {
     }
   },
 };
-
 export const productApi = {
   getAllProducts: async (token) => {
     try {

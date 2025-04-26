@@ -143,7 +143,6 @@ export default function ProfileScreen() {
             setQuizCount(quizData.count || quizData.finishedQuizIds.length);
           }
         } catch (error) {
-     
           // Set default values on error
           setCompletedQuizzes([]);
           setQuizCount(0);
@@ -369,80 +368,82 @@ export default function ProfileScreen() {
         </View>
 
         {/* Stats Section */}
-        <View style={styles.statsSection}>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{profileData.videoCount}</Text>
-            <Text style={styles.statLabel}>Videos</Text>
-            <Ionicons
-              name="videocam-outline"
-              size={24}
-              color="#6B7280"
-              style={styles.statIcon}
-            />
-          </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statNumber}>{profileData.quizCount}</Text>
-            <Text style={styles.statLabel}>Quizzes</Text>
-            <Ionicons
-              name="book-outline"
-              size={24}
-              color="#6B7280"
-              style={styles.statIcon}
-            />
-          </View>
-        </View>
-
-        {/* Profile List Section */}
-        <View style={styles.listCard}>
-          <Text style={styles.listHeader}>Profile</Text>
-          {isAdmin && (
-            <TouchableOpacity
-              style={styles.listItem}
-              onPress={() => router.replace("/admin")}
-            >
-              <MaterialIcons
-                name="admin-panel-settings"
-                size={22}
-                style={styles.listItemIcon}
+        <View style={styles.statsSectionContainer}>
+          <View style={styles.statsSection}>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{profileData.videoCount}</Text>
+              <Text style={styles.statLabel}>Videos</Text>
+              <Ionicons
+                name="videocam-outline"
+                size={24}
+                color="#6B7280"
+                style={styles.statIcon}
               />
-              <Text style={styles.listItemText}>Admin Panel</Text>
-            </TouchableOpacity>
-          )}
-          <View style={styles.separator} />
-          <ProfileListItem
-            iconName="person-add-outline"
-            label="Invite a friend"
-            onPress={navigateToInvite}
-          />
-          <View style={styles.separator} />
-          <ProfileListItem
-            iconName="notifications-outline"
-            label="Notifications"
-            onPress={navigateToNotifications}
-          />
-          <View style={styles.separator} />
-          <ProfileListItem
-            iconName="settings-outline"
-            label="User settings"
-            onPress={() => router.push("/userSettings")}
-          />
-        </View>
+            </View>
+            <View style={styles.statCard}>
+              <Text style={styles.statNumber}>{profileData.quizCount}</Text>
+              <Text style={styles.statLabel}>Quizzes</Text>
+              <Ionicons
+                name="book-outline"
+                size={24}
+                color="#6B7280"
+                style={styles.statIcon}
+              />
+            </View>
+          </View>
 
-        {/* Support List Section */}
-        <View style={styles.listCard}>
-          <Text style={styles.listHeader}>Support & Feedback</Text>
-          <ProfileListItem
-            iconName="chatbubble-ellipses-outline"
-            label="Chat with us"
-            onPress={navigateToFAQ}
-          />
-          <View style={styles.separator} />
-          <ProfileListItem
-            iconName="log-out-outline"
-            label="Log out"
-            onPress={handleLogout}
-            isLogout={true}
-          />
+          {/* Profile List Section */}
+          <View style={styles.listCard}>
+            <Text style={styles.listHeader}>Profile</Text>
+            {isAdmin && (
+              <TouchableOpacity
+                style={styles.listItem}
+                onPress={() => router.replace("/admin")}
+              >
+                <Ionicons
+                  name="business-outline"
+                  size={22}
+                  style={styles.listItemIcon}
+                />
+                <Text style={styles.listItemText}>Admin Panel</Text>
+              </TouchableOpacity>
+            )}
+            <View style={styles.separator} />
+            <ProfileListItem
+              iconName="person-add-outline"
+              label="Invite a friend"
+              onPress={navigateToInvite}
+            />
+            <View style={styles.separator} />
+            <ProfileListItem
+              iconName="notifications-outline"
+              label="Notifications"
+              onPress={navigateToNotifications}
+            />
+            <View style={styles.separator} />
+            <ProfileListItem
+              iconName="settings-outline"
+              label="User settings"
+              onPress={() => router.push("/userSettings")}
+            />
+          </View>
+
+          {/* Support List Section */}
+          <View style={styles.listCard}>
+            <Text style={styles.listHeader}>Support & Feedback</Text>
+            <ProfileListItem
+              iconName="chatbubble-ellipses-outline"
+              label="Chat with us"
+              onPress={navigateToFAQ}
+            />
+            <View style={styles.separator} />
+            <ProfileListItem
+              iconName="log-out-outline"
+              label="Log out"
+              onPress={handleLogout}
+              isLogout={true}
+            />
+          </View>
         </View>
       </ScrollView>
 
@@ -544,7 +545,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     borderColor: "#fff",
-
   },
   userName: {
     fontSize: 20,
@@ -568,11 +568,17 @@ const styles = StyleSheet.create({
   },
 
   rewardCardImage: { width: 350, height: 112, resizeMode: "" },
+  statsSectionContainer: {
+    backgroundColor: "#fff",
+    borderRadius: 24,
+ 
+  },
   statsSection: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginHorizontal: 15,
     marginBottom: 15,
+    paddingVertical: 15,
   },
   statCard: {
     flex: 1,
@@ -580,8 +586,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 15,
     marginHorizontal: 5,
+
     alignItems: "flex-start",
     position: "relative",
+    borderWidth: 1,
+    borderColor: "#F0F5F7",
   },
   statNumber: {
     fontSize: 24,
@@ -603,7 +612,8 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     paddingHorizontal: 15,
     paddingVertical: 10,
-
+    borderWidth: 1,
+    borderColor: "#F0F5F7",
   },
   listHeader: {
     fontSize: 16,
@@ -703,7 +713,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-
   },
   toastSuccess: {
     borderLeftWidth: 5,

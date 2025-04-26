@@ -44,7 +44,11 @@ app.use(express.urlencoded({ extended: true, limit: "100mb" }));
 app.use(express.json({ limit: "100mb" }));
 app.use(compression());
 
+// Configure static file serving with caching
+// Regular uploads - shorter cache duration since they may change
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Optimized media - longer cache duration since they rarely change after creation
 
 app.use("/api/auth", authRoutes);
 app.use("/api/quizzes", quizRoutes);
@@ -53,7 +57,12 @@ app.use("/api/profile", profileRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/articles", articleRoutes);
 app.use("/api/news", newsRoute);
-app.use("/api/notifications", notificationRoutes)
+app.use("/api/notifications", notificationRoutes);
+
+// Add a healthcheck endpoint
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server is running on port 3000");

@@ -141,11 +141,25 @@ export const logoutUser = async (req, res) => {
 // Get user profile
 export const getUserProfile = async (req, res) => {
   try {
-    console.log(`User ${req.user._id} logging out.`); // Optional logging
-    res.json({ message: "Logged out successfully" });
+    const userProfile = await User.findById(req.user._id).select("-password");
+
+    if (!userProfile) {
+      // This case should be rare if protectRoute middleware works correctly
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json({
+      user: {
+        id: userProfile._id,
+        name: userProfile.name,
+        email: userProfile.email,
+        gender: userProfile.gender,
+        profileImage: userProfile.profileImage,
+        role: userProfile.role,
+      },
+    });
   } catch (error) {
-    console.error("Logout error:", error);
-    res.status(500).json({ error: "Internal server error during logout" });
+    console.error("Error fetching user profile:", error);
+    res.status(500).json({ error: "Internal server error fetching profile" });
   }
 };
 
