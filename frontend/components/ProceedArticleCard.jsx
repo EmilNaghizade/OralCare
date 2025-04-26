@@ -6,7 +6,12 @@ import Badge from "./Badge";
 export const ProceedArticleCard = ({ item, cardStyle }) => (
   <TouchableOpacity
     style={[styles.container, cardStyle]}
-    onPress={() => router.push(`/(modal)/article/${item._id}`)}
+    onPress={() => {
+      router.push({
+        pathname: `/article/${item._id}`,
+        params: { activeTab: "Articles" }, // Pass the activeTab parameter
+      });
+    }}
   >
     {/* Left side - Image */}
     <Image source={item.image} style={styles.image} />
@@ -37,14 +42,17 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: "hidden",
     width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 10,
-
   },
   image: {
-    width: "50%",
+    width: "55%",
     height: "auto",
-    aspectRatio: 1.2,
-    padding: 10,
+    aspectRatio: 1.5,
+    padding: 16,
+    // --- DEĞİŞİKLİK ---
+    borderTopLeftRadius: 12,
     borderRadius: 12,
   },
   contentContainer: {

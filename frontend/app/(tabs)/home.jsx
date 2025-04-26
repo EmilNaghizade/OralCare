@@ -422,6 +422,7 @@ export default function HomeScreen() {
             }),
           }));
           setArticles(mappedArticles);
+        
         }
       } catch (error) {
         console.error("Error fetching articles:", error);
