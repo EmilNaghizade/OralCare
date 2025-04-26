@@ -231,9 +231,7 @@ export default function QuizQuestionScreen() {
             );
             textStyle.push(styles.selectedOptionText);
           } else if (isAnswered && isCorrect) {
-            // Optionally show the correct answer even if not selected
-            // optionStyle.push(styles.correctOption);
-            // textStyle.push(styles.selectedOptionText);
+
           }
 
           return (
@@ -244,18 +242,6 @@ export default function QuizQuestionScreen() {
               disabled={isAnswered}
             >
               <Typo style={textStyle}>{option}</Typo>
-              {isAnswered && isSelected && (
-                <Ionicons
-                  name={isCorrect ? "checkmark-circle" : "close-circle"}
-                  size={24}
-                  color={
-                    isCorrect
-                      ? styles.correctOption.borderColor
-                      : styles.incorrectOption.borderColor
-                  }
-                  style={styles.feedbackIcon}
-                />
-              )}
             </TouchableOpacity>
           );
         })}
@@ -289,9 +275,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingTop: Platform.OS === "android" ? 15 : 10,
     paddingBottom: 10,
-    backgroundColor: "#fff",
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+
   },
   timerContainer: {
     flexDirection: "row",
@@ -345,12 +329,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#ffffff",
+    backgroundColor: "#E4E9EB",
     paddingVertical: 18,
     paddingHorizontal: 20,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#dee2e6",
 
   },
   optionText: {
@@ -360,11 +342,11 @@ const styles = StyleSheet.create({
     color: "#343a40",
   },
   correctOption: {
-    backgroundColor: "#e7f5ec",
+    borderWidth:1,
     borderColor: "#28a745",
   },
   incorrectOption: {
-    backgroundColor: "#fdecef",
+    borderWidth: 1,
     borderColor: "#dc3545",
   },
   selectedOptionText: {

@@ -422,7 +422,6 @@ export default function HomeScreen() {
             }),
           }));
           setArticles(mappedArticles);
-        
         }
       } catch (error) {
         console.error("Error fetching articles:", error);
@@ -820,6 +819,7 @@ const styles = StyleSheet.create({
   // body paragraph
   modalDescription: {
     fontSize: 14,
+    fontWeight: "500",
     lineHeight: 20,
     color: "#666",
     marginHorizontal: 16,

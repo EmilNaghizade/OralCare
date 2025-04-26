@@ -7,7 +7,6 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
-  SafeAreaView,
   Platform,
   Linking,
   ActivityIndicator,
@@ -16,6 +15,7 @@ import {
 import { useAuth } from "../_layout";
 import Typo from "../../components/Typo";
 import axios from "axios";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const PADDING = 16; // Yeni padding/gap değeri
 const { width } = Dimensions.get("window");
@@ -124,9 +124,16 @@ export default function ProductsScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    // Yalnızca üst boşluğu yakalayıp arka planı boyayan SafeAreaView
+    <SafeAreaView edges={["top"]} style={{ backgroundColor: "white", flex: 1 }}>
+      <StatusBar
+        translucent={false}
+        backgroundColor="white"
+        barStyle="dark-content"
+      />
       <View
-        contentContainerStyle={styles.scrollContent}
+        style={styles.scrollContainer}
+        contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
         {/* Custom Header */}
@@ -179,7 +186,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end", // Başlığı dikeyde ortala
     backgroundColor: "#fff", // Beyaz header arka planı
     paddingTop: Platform.OS === "android" ? 20 : 15, // Üst boşluk (statusBar'a göre)
-    paddingBottom: 20, // Alt boşluk
+    paddingBottom: 16 , // Alt boşluk
     paddingHorizontal: PADDING, // Yan boşluklar
     // Alt köşeleri yuvarlatma
     borderBottomLeftRadius: 24, // <<< YUVARLAK KÖŞE
@@ -195,7 +202,7 @@ const styles = StyleSheet.create({
     paddingTop: 20, // Header ile liste arası boşluk
     paddingBottom: 20, // Listenin altındaki boşluk
     backgroundColor: "#fff",
-    marginTop: 30,
+    marginTop: 10,
     borderRadius: 20,
     minHeight: 200, // Ensure container has minimum height
   },
@@ -229,6 +236,7 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
   },

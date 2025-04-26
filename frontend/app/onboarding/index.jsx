@@ -19,8 +19,8 @@ const { width } = Dimensions.get("window");
 const slides = [
   {
     image: require("../../assets/images/Graduation.png"),
-    title: "Welcome to OralCare",
-    subtitle: "Learn with Video Tutorials!",
+    title: "Learn with Video Tutorials !",
+    subtitle: "Follow video guides for effective oral care practices.",
   },
   {
     image: require("../../assets/images/Trophy.png"),
@@ -38,11 +38,10 @@ const OnboardingScreen = () => {
   const carouselRef = useRef(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const router = useRouter();
-  const auth = useAuth(); 
+  const auth = useAuth();
   const markOnboardingComplete = auth?.markOnboardingComplete;
   // Ensure this is correctly imported from your context
   const handleGetStarted = async () => {
-    console.log("--- Onboarding: handleGetStarted triggered! ---");
     if (typeof markOnboardingComplete !== "function") {
       console.error(
         "Onboarding Error: markOnboardingComplete function not found. Check useAuth import and AuthProvider export."
@@ -129,7 +128,7 @@ const OnboardingScreen = () => {
       <View style={styles.buttonContainer}>
         <Button
           style={styles.getStartedButton} // Renamed style for clarity
-          onPress={()=> router.push( "/(auth)/register")} // Use the new function
+          onPress={() => router.push("/(auth)/register")} // Use the new function
         >
           <Typo color={"#fff"} fontWeight="600" size={16}>
             Get started
@@ -198,14 +197,17 @@ const styles = StyleSheet.create({
     marginLeft: 4, // Space if an icon is present before text
   },
   title: {
-    fontSize: 24,
-    fontWeight: "bold",
+    fontSize: 32,
+    lineHeight: 40, // Adjusted for better readability
+    fontWeight: "600",
     textAlign: "center",
     color: "#1F2937", // Darker text color
     // Removed marginTop, spacing controlled by contentArea/badge margin
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 18,
+    lineHeight: 24, // Adjusted for better readability
+    fontWeight: "400",
     textAlign: "center",
     color: "#6B7280", // Slightly darker gray
     marginTop: 8, // Reduced space

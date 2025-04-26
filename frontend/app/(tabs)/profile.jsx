@@ -132,9 +132,7 @@ export default function ProfileScreen() {
               setProfileImage({ uri: imageUri });
             }
           }
-        } catch (error) {
-          console.error("Error fetching profile:", error);
-        }
+        } catch (error) {}
 
         try {
           const quizData = await quizApi.getCompletedQuizzes(authToken);
@@ -403,6 +401,7 @@ export default function ProfileScreen() {
                 <Ionicons
                   name="business-outline"
                   size={22}
+                  color={"#6B7280"}
                   style={styles.listItemIcon}
                 />
                 <Text style={styles.listItemText}>Admin Panel</Text>
@@ -571,7 +570,6 @@ const styles = StyleSheet.create({
   statsSectionContainer: {
     backgroundColor: "#fff",
     borderRadius: 24,
- 
   },
   statsSection: {
     flexDirection: "row",
@@ -603,6 +601,9 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 15,
     top: "50%",
+    backgroundColor: "#F0F5F7",
+    borderRadius: 30,
+    padding: 8,
     transform: [{ translateY: -12 }],
   },
   listCard: {

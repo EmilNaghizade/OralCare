@@ -170,7 +170,7 @@ const styles = StyleSheet.create({
   rewardsLabel: {
     fontSize: 15,
     fontWeight: "500",
-    color: "#495057",
+    color: "#000",
     marginBottom: 15,
   },
   rewardBar: {
@@ -191,6 +191,7 @@ const styles = StyleSheet.create({
   rewardText: {
     fontSize: 16,
     fontWeight: "600",
+    color: "#000", // Koyu renk
     lineHeight: 24,
   },
   homeButton: {

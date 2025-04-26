@@ -16,6 +16,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Typo from "../components/Typo";
 import { useAuth } from "./_layout";
+import * as SecureStore from "expo-secure-store";
+
 
 // Custom Input Component
 const FormInput = ({
@@ -217,6 +219,16 @@ const UserSettings = () => {
           "Your password has been successfully changed. Please use your new password next time you log in.",
           [{ text: "OK" }]
         );
+
+        // Optionally, you can log the user out or redirect them to the login screen after alert
+        // we can do this by removing the auth token from local storage
+        // we can use setTimeout to delay the logout process
+        // to give the user time to read the alert
+        setTimeout(async () => {
+          await SecureStore.deleteItemAsync("authToken");
+          router.push("/onboarding");
+        }, 2000);
+        return;
       }
 
       setSuccessMessage("Profile updated successfully");

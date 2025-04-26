@@ -49,8 +49,9 @@ const styles = StyleSheet.create({
   image: {
     width: "55%",
     height: "auto",
-    aspectRatio: 1.5,
+    aspectRatio: 1.3,
     padding: 16,
+    marginLeft: 16,
     // --- DEĞİŞİKLİK ---
     borderTopLeftRadius: 12,
     borderRadius: 12,
