@@ -22,6 +22,9 @@ router.get("/all", protectRoute, authController.getAllUsers);
 // Update user profile
 router.put("/profile", protectRoute, authController.updateUserProfile);
 
+// Update user role
+router.put("/profile/:userId", protectRoute, authController.updateUserRole);
+
 // Check if email exists
 router.get("/check-email", authController.checkUserEmail);
 
@@ -32,6 +35,6 @@ router.get("/verify-password", protectRoute, authController.verifyPassword);
 router.put("/update-password", protectRoute, authController.updateUserPassword);
 
 // Delete user account
-router.delete("/delete-user", protectRoute, authController.deleteUserAccount);
+router.delete("/delete-user/:userId", protectRoute, authController.deleteUserAccount);
 
 export default router;

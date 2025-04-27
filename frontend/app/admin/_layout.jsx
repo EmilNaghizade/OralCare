@@ -55,6 +55,12 @@ export default function AdminLayout() {
         }}
       />
       <Stack.Screen
+        name="UserManagement"
+        options={{
+          headerShown: false,
+        }}
+      />
+      <Stack.Screen
         name="Admin"
         options={{
           headerShown: false,
