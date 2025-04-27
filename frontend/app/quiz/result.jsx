@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef,useState } from "react";
 import {
   View,
   StyleSheet,
@@ -7,6 +7,8 @@ import {
   Dimensions,
   StatusBar,
   Image,
+  Text,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,13 +16,14 @@ import ConfettiCannon from "react-native-confetti-cannon"; // <-- Konfeti kütü
 import Typo from "../../components/Typo"; // Kendi Typo bileşeniniz
 import { useAuth } from "../_layout"; // Auth context'inizi import edin
 import { quizApi } from "../../services/api";
+
 const POINTS_PER_QUESTION = 10; // Her doğru cevap için puan
 const resultImage = require("../../assets/images/Result.png");
 
 export default function QuizResultsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { updateUserPoints, markQuizCompleted } = useAuth(); // Context'ten puan güncelleme fonksiyonunu alın
+  const { updateUserPoints } = useAuth(); // Context'ten puan güncelleme fonksiyonunu alın
 
   // Parametreleri al ve number'a çevir (string gelebilirler)
   const score = parseInt(params.score?.toString() || "0", 10);
@@ -29,25 +32,42 @@ export default function QuizResultsScreen() {
 
   const earnedPoints = score * POINTS_PER_QUESTION;
   const confettiRef = useRef(null); // Konfeti için ref (opsiyonel, manuel tetikleme için)
+  const [loading, setLoading] = useState(false);
 
   // Call API to mark video as watched
-  const markQuizAsCompleted = async () => {
-    try {
-      await quizApi.markQuizCompleted(quizId);
-    } catch (error) {
-      console.error("Error marking video as watched:", error);
-      // Don't show error to user, just log it
-    }
-  };
-
-  // Puanları context/storage üzerinden güncelle (sadece component mount olduğunda bir kere çalışır)
   useEffect(() => {
-    markQuizAsCompleted();
-  }, [quizId]); // Boş dependency array, sadece bir kere çalışmasını sağlar
+    const markQuizCompleted = async () => {
+      try {
+        setLoading(true);
+        await quizApi.markQuizCompleted(quizId);
+
+ 
+      } catch (error) {
+        console.error("Error marking quiz as completed:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    markQuizCompleted();
+  }, [quizId]);
 
   const handleGoHome = () => {
     router.replace("/(tabs)/home"); // replace kullanarak geri tuşuyla buraya dönülmesini engelle
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" />
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#038565" />
+          <Text style={styles.loadingText}>Saving your results...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -119,6 +139,16 @@ const styles = StyleSheet.create({
     justifyContent: "center", // İçeriği dikeyde ortala
     paddingHorizontal: 30, // Yanlardan boşluk
     paddingBottom: 50, // Buton için altta yer
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
   },
   iconContainer: {
     width: 90,

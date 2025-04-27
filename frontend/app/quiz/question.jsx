@@ -7,18 +7,23 @@ import {
   Platform,
   StatusBar,
   Animated,
+  Text,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import BackButton from "../../components/BackButton";
 import Typo from "../../components/Typo";
-import { quizzes } from "../data";
 import FeedbackToast from "../../components/QuizFeedback"; // Import the FeedbackToast component
+import { quizApi } from "../../services/api";
+import { useAuth } from "../_layout";
 
 const TOTAL_TIME = 120; // 2 minutes in seconds
 
 export default function QuizQuestionScreen() {
   const router = useRouter();
+  const { authToken } = useAuth();
   const params = useLocalSearchParams();
   const quizId = params.quizId;
   const initialQuestionIndex = parseInt(
@@ -26,13 +31,15 @@ export default function QuizQuestionScreen() {
     10
   );
 
-  const [quizData, setQuizData] = useState(null);
+  const [quiz, setQuiz] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] =
     useState(initialQuestionIndex);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [score, setScore] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // State for feedback toast
   const [showFeedback, setShowFeedback] = useState(false);
@@ -49,31 +56,39 @@ export default function QuizQuestionScreen() {
 
   // Load quiz data
   useEffect(() => {
-    const data = getQuizDataById(quizId?.toString());
-    if (data?.questions?.length) {
-      setQuizData(data);
-    } else {
-      console.error("Quiz data not found or empty:", quizId);
-      if (router.canGoBack()) router.back();
+    const fetchQuizData = async () => {
+      try {
+        setLoading(true);
+        const quizData = await quizApi.getQuizById(quizId, authToken);
+        setQuiz(quizData);
+      } catch (error) {
+        console.error("Error fetching quiz:", error);
+        setError("Failed to load quiz. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (quizId) {
+      fetchQuizData();
     }
-  }, [quizId, router]);
+  }, [quizId, authToken]);
 
   // Update progress bar animation
   useEffect(() => {
-    if (quizData?.questions?.length) {
-      const newProgress =
-        (currentQuestionIndex + 1) / quizData.questions.length;
+    if (quiz?.questions?.length) {
+      const newProgress = (currentQuestionIndex + 1) / quiz.questions.length;
       Animated.timing(progressAnim, {
         toValue: newProgress,
         duration: 300,
         useNativeDriver: false,
       }).start();
     }
-  }, [currentQuestionIndex, quizData, progressAnim]);
+  }, [currentQuestionIndex, quiz, progressAnim]);
 
   // Start/stop timer
   useEffect(() => {
-    if (quizData) {
+    if (quiz) {
       timerIntervalRef.current = setInterval(() => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
@@ -91,7 +106,7 @@ export default function QuizQuestionScreen() {
         clearInterval(timerIntervalRef.current);
       }
     };
-  }, [quizData]);
+  }, [quiz]);
 
   const navigateToResults = (finalScore) => {
     if (timerIntervalRef.current) {
@@ -102,16 +117,18 @@ export default function QuizQuestionScreen() {
       params: {
         quizId: quizId,
         score: finalScore !== undefined ? finalScore : score,
-        totalQuestions: quizData?.questions?.length || 0,
+        totalQuestions: quiz?.questions?.length || 0,
       },
     });
   };
 
-  const handleAnswerSelect = (option) => {
+  const handleAnswerSelect = (option,index) => {
     if (isAnswered) return;
 
-    const correct = option === currentQuestion?.correctAnswer;
-    setSelectedAnswer(option);
+    const currentQuestion = quiz.questions[currentQuestionIndex];
+    const correct = index === currentQuestion.correctAnswer;
+
+    setSelectedAnswer(index);
     setIsAnswered(true);
 
     // Show the feedback toast
@@ -126,7 +143,7 @@ export default function QuizQuestionScreen() {
         // Store the new score for later use
         setTimeout(() => {
           const nextIndex = currentQuestionIndex + 1;
-          if (nextIndex < quizData.questions.length) {
+          if (nextIndex < quiz?.questions?.length) {
             // Move to next question
             setCurrentQuestionIndex(nextIndex);
             setSelectedAnswer(null);
@@ -144,7 +161,7 @@ export default function QuizQuestionScreen() {
       // If the answer is incorrect, we don't update the score but still need to continue
       setTimeout(() => {
         const nextIndex = currentQuestionIndex + 1;
-        if (nextIndex < quizData.questions.length) {
+        if (nextIndex < quiz?.questions?.length) {
           // Move to next question
           setCurrentQuestionIndex(nextIndex);
           setSelectedAnswer(null);
@@ -165,26 +182,88 @@ export default function QuizQuestionScreen() {
     return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
   };
 
-  const currentQuestion = quizData?.questions?.[currentQuestionIndex];
-  const totalQuestions = quizData?.questions?.length || 0;
+  // Handle back button press
+  const handleBackPress = () => {
+    Alert.alert(
+      "Quit Quiz?",
+      "Are you sure you want to quit? Your progress will be lost.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Quit",
+          style: "destructive",
+          onPress: () => {
+            if (timerIntervalRef.current) {
+              clearInterval(timerIntervalRef.current);
+            }
+            router.back();
+          },
+        },
+      ]
+    );
+    return true;
+  };
 
-  // Loading screen
-  if (!quizData || !currentQuestion) {
+  if (loading) {
     return (
       <SafeAreaView style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.loadingContainer}>
-          <Typo>Loading Quiz...</Typo>
+          <ActivityIndicator size="large" color="#038565" />
+          <Text style={styles.loadingText}>Loading quiz questions...</Text>
         </View>
       </SafeAreaView>
     );
   }
+
+  if (error || !quiz) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={48} color="#FF3B30" />
+          <Text style={styles.errorText}>{error || "Quiz not found"}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => router.back()}
+          >
+            <Typo color="#fff" fontWeight="600">
+              Go Back
+            </Typo>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  const currentQuestion = quiz?.questions[currentQuestionIndex];
+  const totalQuestions = quiz?.questions?.length;
 
   // Calculate progress bar width
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ["0%", "100%"],
   });
+
+  if (!currentQuestion) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.errorContainer}>
+          <Ionicons name="help-circle-outline" size={48} color="#FF3B30" />
+          <Text style={styles.errorText}>Question not found</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => router.back()}
+          >
+            <Typo color="#fff" fontWeight="600">
+              Go Back
+            </Typo>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -211,15 +290,15 @@ export default function QuizQuestionScreen() {
       {/* Question */}
       <View style={styles.questionContainer}>
         <Typo size={22} fontWeight="600" style={styles.questionText}>
-          {currentQuestion.text}
+          {currentQuestion.question}
         </Typo>
       </View>
 
       {/* Answer Options */}
       <View style={styles.optionsContainer}>
         {currentQuestion.options.map((option, index) => {
-          const isSelected = selectedAnswer === option;
-          const isCorrect = currentQuestion.correctAnswer === option;
+          const isSelected = selectedAnswer === index;
+          const isCorrect = currentQuestion.correctAnswer === index;
 
           // Dynamic styles for feedback
           let optionStyle = [styles.optionButton];
@@ -231,14 +310,13 @@ export default function QuizQuestionScreen() {
             );
             textStyle.push(styles.selectedOptionText);
           } else if (isAnswered && isCorrect) {
-
           }
 
           return (
             <TouchableOpacity
               key={index}
               style={optionStyle}
-              onPress={() => handleAnswerSelect(option)}
+              onPress={() => handleAnswerSelect(option,index)}
               disabled={isAnswered}
             >
               <Typo style={textStyle}>{option}</Typo>
@@ -275,7 +353,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingTop: Platform.OS === "android" ? 15 : 10,
     paddingBottom: 10,
-
   },
   timerContainer: {
     flexDirection: "row",
@@ -333,7 +410,6 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     paddingHorizontal: 20,
     borderRadius: 16,
-
   },
   optionText: {
     flex: 1,
@@ -342,7 +418,7 @@ const styles = StyleSheet.create({
     color: "#343a40",
   },
   correctOption: {
-    borderWidth:1,
+    borderWidth: 1,
     borderColor: "#28a745",
   },
   incorrectOption: {
@@ -354,5 +430,36 @@ const styles = StyleSheet.create({
   },
   feedbackIcon: {
     marginLeft: 10,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  errorText: {
+    marginTop: 10,
+    marginBottom: 20,
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: "#038565",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
   },
 });

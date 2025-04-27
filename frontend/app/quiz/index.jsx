@@ -15,8 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import BackButton from "../../components/BackButton"; // Kendi BackButton'unuz
 import { VideoCard } from "../../components/VideoCard"; // Kendi VideoCard'ınız
 import Typo from "../../components/Typo"; // Kendi Typo'nuz
-import {  quizzes } from "../data"; // Örnek videoları alalım
-import { videoApi } from "../../services/api";
+import { videoApi, quizApi } from "../../services/api";
 import { useAuth } from "../_layout";
 
 const RelatedVideos = ({ quizId }) => {
@@ -76,7 +75,7 @@ const RelatedVideos = ({ quizId }) => {
             : Math.floor(video.duration / 60) + " min"
         }  ${video.duration % 60} sec`
       : "0 min 00 sec",
-    
+
     tag: video.category || "Video",
   }));
 
@@ -97,33 +96,94 @@ const RelatedVideos = ({ quizId }) => {
 export default function QuizDetailScreen() {
   const router = useRouter();
   const { id: quizId } = useLocalSearchParams(); // Gelen quiz ID'sini al
-  const numericQuizId = parseInt(quizId, 10); // Convert to number since IDs in data.js are numbers
-  const getQuizDataById = (quizId) => {
-    return quizzes[quizId] || null; // Quiz'i bulamazsa null döndür
-  };
-  // Get quiz data from data.js using the imported function
-  const quizData = getQuizDataById(numericQuizId);
+  const { authToken } = useAuth();
+  const [quiz, setQuiz] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [finishedQuizzes, setFinishedQuizzes] = useState([]);
 
-  // Örnek Quiz Verisi (Normalde ID'ye göre API'den veya önceki ekrandan gelir)
-  const quizDetails = {
-    // ID'ye göre farklı veri döndürmek için genişletilebilir
-    id: quizId,
-    title: quizData ? quizData.title : "Quiz Title",
-    subtitle: quizData ? quizData.subtitle : "Quiz Subtitle",
-    questionCount: quizData ? quizData.questions.length : 0,
-    gradientColors:
-      quizId == 1 ? ["#663399", "#8A2BE2"] : ["#2E8B57", "#69b58a"], // Mor tonları (ayarlayabilirsiniz)
+  // Fetch quiz data
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        // Fetch the specific quiz
+        const quizData = await quizApi.getQuizById(quizId, authToken);
+        setQuiz(quizData);
+        console.log("Fetched quiz data:", quizData);
+
+        // Also fetch completed quizzes to check if this one is completed
+        const completedData = await quizApi.getCompletedQuizzes(authToken);
+        if (completedData && completedData.finishedQuizIds) {
+          setFinishedQuizzes(completedData.finishedQuizIds);
+        }
+      } catch (error) {
+        console.error("Error fetching quiz:", error);
+        setError("Failed to load quiz. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (quizId) {
+      fetchQuizData();
+    }
+  }, [quizId, authToken]);
+
+  const isQuizCompleted = () => {
+  
+    return finishedQuizzes.includes(quizId);
+  };
+
+  const getGradientColors = () => {
+    if (!quiz) return ["#2E8B57", "#69b58a"];
+
+    switch (quiz?.colorScheme) {
+      case "purple":
+        return ["#663399", "#8A2BE2"];
+      case "blue":
+        return ["#1E5799", "#3498db"];
+      case "orange":
+        return ["#FF8C00", "#FFA500"];
+      case "green":
+      default:
+        return ["#2E8B57", "#69b58a"];
+    }
   };
 
   const handleStartQuiz = () => {
-    console.log("Starting quiz:", quizDetails.id);
     // Burada quiz'i başlatan sayfaya yönlendirme yapılabilir
     // router.push(`/quiz/${quizDetails.id}/question/1`);
     router.push({
-      // Rota adının doğru olduğundan emin olun (app/quiz/question.jsx ise /quiz/question)
       pathname: `/quiz/question`,
-      params: { quizId: quizId, questionIndex: 0 }, // İlk soru için index 0
+      params: { quizId: quizId, questionIndex: 0 },
     });
+
+    if (loading) {
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#038565" />
+          <Text style={styles.loadingText}>Loading quiz...</Text>
+        </View>
+      );
+    }
+
+    if (error || !quiz) {
+      return (
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={60} color="#FF3B30" />
+          <Text style={styles.errorText}>{error || "Quiz not found"}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => router.back()}
+          >
+            <Text style={styles.retryButtonText}>Go Back</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
   };
 
   return (
@@ -141,7 +201,7 @@ export default function QuizDetailScreen() {
       >
         {/* Üst Gradient Alan */}
         <LinearGradient
-          colors={quizDetails.gradientColors}
+          colors={getGradientColors()}
           style={styles.gradientContainer}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
@@ -152,24 +212,45 @@ export default function QuizDetailScreen() {
           </View>
 
           {/* Rozetler (Badges) */}
-          <View style={styles.badgeRow}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.badgeRowContainer}
+            style={styles.badgeScrollView}
+          >
             <View style={styles.badge}>
               <Ionicons name="help-circle-outline" size={14} color="#fff" />
               <Typo style={styles.badgeText}>Quiz</Typo>
             </View>
+
             <View style={styles.badge}>
               <Typo style={styles.badgeText}>
-                {quizDetails.questionCount} questions
+                {quiz?.questions?.length || 0} questions
               </Typo>
             </View>
-          </View>
+
+            {quiz?.category && (
+              <View style={styles.badge}>
+                <Typo style={styles.badgeText}>{quiz?.category}</Typo>
+              </View>
+            )}
+
+            {isQuizCompleted() && (
+              <View style={[styles.badge, styles.completedBadge]}>
+                <Ionicons name="checkmark-circle" size={14} color="#fff" />
+                <Typo style={styles.badgeText}>Completed</Typo>
+              </View>
+            )}
+
+            {/* Add more badges as needed */}
+          </ScrollView>
 
           {/* Quiz Başlık ve Altbaşlık */}
           <Typo fontWeight="600" size={28} style={styles.quizTitle}>
-            {quizDetails.title}
+            {quiz?.title}
           </Typo>
           <Typo size={16} style={styles.quizSubtitle}>
-            {quizDetails.subtitle}
+            {quiz?.description}
           </Typo>
 
           {/* Quiz Başlat Butonu */}
@@ -178,7 +259,7 @@ export default function QuizDetailScreen() {
             onPress={handleStartQuiz}
           >
             <Typo fontWeight="600" size={16} style={styles.startButtonText}>
-              Start quiz
+              {isQuizCompleted() ? "Retake Quiz" : "Start Quiz"}
             </Typo>
           </TouchableOpacity>
         </LinearGradient>
@@ -190,7 +271,7 @@ export default function QuizDetailScreen() {
           </Typo>
 
           {/* Video Kartları */}
-          <RelatedVideos quizId={numericQuizId} />
+          <RelatedVideos quizId={quizId} />
         </View>
       </ScrollView>
     </View>
@@ -216,26 +297,42 @@ const styles = StyleSheet.create({
     zIndex: 1, // Diğer içeriklerin üzerinde
     paddingTop: 25,
   },
-  badgeRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 30, // Geri butonuna göre boşluk
-    gap: 8, // Rozetler arası boşluk
+  badgeScrollView: {
+    // This allows the scroll view to take the full width while clipping content
+    width: '100%',
+    // Optional settings for better UX
+    flexGrow: 0,
+    marginVertical: 10,
   },
+  
+  badgeRowContainer: {
+    // This will make your badges space out correctly inside the ScrollView
+    flexDirection: 'row',
+    paddingLeft: 10,
+    paddingRight: 20, // Add extra padding at the end for better UX
+    alignItems: 'center',
+    // Don't use 'justifyContent: space-between' here as it would break scrolling
+  },
+  
   badge: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.2)", // Yarı saydam beyaz
-    borderRadius: 15, // Pill shape
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 15,
     paddingVertical: 6,
-    marginTop: Platform.OS === "android" ? 8 : 0,
     paddingHorizontal: 12,
+    marginRight: 8, // Space between badges
   },
+  
   badgeText: {
-    color: "#fff",
+    color: '#fff',
     fontSize: 12,
-    fontWeight: "500",
-    marginLeft: 4, // İkon varsa boşluk
+    fontWeight: '500',
+    marginLeft: 4,
+  },
+  
+  completedBadge: {
+    backgroundColor: 'rgba(46, 204, 113, 0.3)',
   },
   quizTitle: {
     color: "#fff",
@@ -275,5 +372,44 @@ const styles = StyleSheet.create({
   },
   videoList: {
     gap: 15, // Video kartları arası dikey boşluk
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  errorText: {
+    marginTop: 10,
+    marginBottom: 20,
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: "#038565",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+  },
+  retryButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  completedBadge: {
+    backgroundColor: "rgba(46, 204, 113, 0.3)",
   },
 });

@@ -9,6 +9,7 @@ import ArticleManagement from "./ArticleManagement";
 import ProductManagement from "./ProductManagement";
 import AdminManagement from "./AdminManagement";
 import NewsManagement from "./NewsManagement"; // Import the NewsManagement component
+import QuizManagement from "./QuizManagement"; // Add quiz management import
 
 const Tab = createBottomTabNavigator();
 
@@ -45,6 +46,8 @@ export default function AdminPanel() {
             iconName = focused ? "newspaper" : "newspaper-outline";
           } else if (route.name === "Products") {
             iconName = focused ? "pricetag" : "pricetag-outline";
+          } else if (route.name === "Quizzes") {
+            iconName = focused ? "help-circle" : "help-circle-outline";
           } else if (route.name === "Admin") {
             iconName = focused ? "settings" : "settings-outline";
           }
@@ -75,6 +78,11 @@ export default function AdminPanel() {
         name="Products"
         options={{ headerShown: false }}
         component={ProductManagement}
+      />
+      <Tab.Screen
+        name="Quizzes"
+        options={{ headerShown: false }}
+        component={QuizManagement}
       />
       <Tab.Screen
         name="Admin"

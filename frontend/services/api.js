@@ -102,6 +102,147 @@ export const authApi = {
 };
 
 export const quizApi = {
+  // Get all quizzes (for admin)
+  getAllQuizzes: async (token, page = 1, limit = 10) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/quizzes?page=${page}&limit=${limit}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching quizzes:", error);
+      throw error;
+    }
+  },
+
+  // Get a specific quiz
+  getQuizById: async (quizId, token) => {
+    try {
+      const response = await axios.get(`${API_URL}/api/quizzes/${quizId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching quiz with ID ${quizId}:`, error);
+      throw error;
+    }
+  },
+
+  // Create a new quiz
+  createQuiz: async (quizData, token) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/quizzes`, quizData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error creating quiz:", error);
+      throw error;
+    }
+  },
+
+  // Update an existing quiz
+  updateQuiz: async (quizId, quizData, token) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/api/quizzes/${quizId}`,
+        quizData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating quiz with ID ${quizId}:`, error);
+      throw error;
+    }
+  },
+
+  // Delete a quiz
+  deleteQuiz: async (quizId, token) => {
+    try {
+      const response = await axios.delete(`${API_URL}/api/quizzes/${quizId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting quiz with ID ${quizId}:`, error);
+      throw error;
+    }
+  },
+
+  // Add a question to a quiz
+  addQuestion: async (quizId, questionData, token) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/quizzes/${quizId}/questions`,
+        questionData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error adding question:", error);
+      throw error;
+    }
+  },
+
+  // Update a question
+  updateQuestion: async (quizId, questionId, questionData, token) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/api/quizzes/${quizId}/questions/${questionId}`,
+        questionData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating question:", error);
+      throw error;
+    }
+  },
+
+  // Delete a question
+  deleteQuestion: async (quizId, questionId, token) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/api/quizzes/${quizId}/questions/${questionId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting question:", error);
+      throw error;
+    }
+  },
   // In your quizApi.js, make sure you're sending the token correctly
   markQuizCompleted: async (quizId) => {
     try {
@@ -143,6 +284,7 @@ export const quizApi = {
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log("Completed quizzes API response:", response.data);
       return response.data;
     } catch (error) {}
   },

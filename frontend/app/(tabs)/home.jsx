@@ -21,7 +21,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../_layout"; // Adjust path if needed
 import Typo from "../../components/Typo"; // Adjust path if needed
 import { fetchWithAuth } from "../../services/fetchWithAuth";
-import { dummyQuizzes } from "../data";
 import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
 import { LinearGradient } from "expo-linear-gradient";
@@ -31,6 +30,7 @@ import {
   articleApi,
   newsApi,
   notificationApi,
+  quizApi,
 } from "../../services/api";
 
 const getUserLaunchedKey = (userId) =>
@@ -47,6 +47,158 @@ const SectionHeader = ({ title, onSeeAllPress, isOnSeeAll }) => (
     )}
   </View>
 );
+
+const QuizCard = ({ item }) => {
+  const router = useRouter();
+  // Determine color scheme based on the quiz's colorScheme property
+  let gradientColors;
+  let centerIconName;
+
+  switch (item.colorScheme) {
+    case "purple":
+      gradientColors = ["#8A2BE2", "#fff"];
+      centerIconName = "git-network-outline";
+      break;
+    case "blue":
+      gradientColors = ["#1E90FF", "#fff"];
+      centerIconName = "cloud-outline";
+      break;
+    case "orange":
+      gradientColors = ["#FF8C00", "#fff"];
+      centerIconName = "flame-outline";
+      break;
+    case "green":
+    default:
+      gradientColors = ["#2E8B57", "#fff"];
+      centerIconName = "leaf-outline";
+      break;
+  }
+
+  return (
+    <TouchableOpacity
+      style={styles.quizCard}
+      onPress={() =>
+        router.push({ pathname: "/quiz", params: { id: item._id } })
+      }
+      activeOpacity={0.8}
+    >
+      <LinearGradient
+        colors={gradientColors}
+        style={styles.quizGradient}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+      >
+        <Ionicons
+          name={centerIconName}
+          size={80}
+          color="#fff"
+          style={styles.quizCenterIcon}
+        />
+
+        <View style={styles.quizContentContainer}>
+          {/* Top Tag */}
+          <View style={styles.quizTagContainer}>
+            <Ionicons name="help-circle-outline" size={16} color="#fff" />
+            <Typo fontWeight={"600"} size={11} style={styles.quizQuestionsText}>
+              {item.questions?.length || 0} questions
+            </Typo>
+          </View>
+
+          <Typo
+            fontWeight={"600"}
+            size={15}
+            style={styles.quizTitle}
+            numberOfLines={3}
+          >
+            {item.title}
+          </Typo>
+        </View>
+      </LinearGradient>
+    </TouchableOpacity>
+  );
+};
+
+const QuizSection = ({ authToken }) => {
+  const router = useRouter();
+  const [quizzes, setQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchQuizzes();
+  }, []);
+
+  const fetchQuizzes = async () => {
+    try {
+      setLoading(true);
+      const data = await quizApi.getAllQuizzes(authToken);
+      if (data && data.quizzes) {
+        // Filter to only published quizzes and limit to 4 for display
+        const publishedQuizzes = data.quizzes
+          .filter((quiz) => quiz.isPublished)
+          .slice(0, 4);
+        setQuizzes(publishedQuizzes);
+      } else {
+        setQuizzes([]);
+      }
+    } catch (error) {
+      console.error("Error fetching quizzes:", error);
+      setQuizzes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.sectionCard}>
+        <SectionHeader
+          title="Test your knowledge"
+          isOnSeeAll={false}
+        />
+        <Text style={styles.sectionSubtitle}>
+          Take quizzes based on videos and articles
+        </Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#038565" />
+        </View>
+      </View>
+    );
+  }
+
+  if (quizzes.length === 0) {
+    return (
+      <View style={styles.sectionCard}>
+        <SectionHeader title="Test your knowledge" isOnSeeAll={false} />
+        <Text style={styles.sectionSubtitle}>
+          Take quizzes based on videos and articles
+        </Text>
+        <View style={styles.emptyContainer}>
+          <Typo style={styles.emptyText}>No quizzes available</Typo>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.sectionCard}>
+      <SectionHeader
+        title="Test your knowledge"
+        isOnSeeAll={false}
+      />
+      <Text style={styles.sectionSubtitle}>
+        Take quizzes based on videos and articles
+      </Text>
+      <FlatList
+        data={quizzes}
+        renderItem={({ item }) => <QuizCard item={item} />}
+        keyExtractor={(item) => item._id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.horizontalList}
+      />
+    </View>
+  );
+};
 
 const WatchAndLearnSection = ({ authToken }) => {
   const router = useRouter();
@@ -461,61 +613,7 @@ export default function HomeScreen() {
     </View>
   );
 
-  const QuizCard = ({ item }) => {
-    const isPurple = item._id === 1;
-    const gradientColors = isPurple ? ["#8A2BE2", "#fff"] : ["#2E8B57", "#fff"];
-
-    const centerIconName = isPurple
-      ? "git-network-outline"
-      : "share-social-outline";
-
-    return (
-      <TouchableOpacity
-        style={styles.quizCard}
-        onPress={() =>
-          router.push({ pathname: "/quiz", params: { id: item._id } })
-        } // YENİ
-        activeOpacity={0.8}
-      >
-        <LinearGradient
-          colors={gradientColors}
-          style={styles.quizGradient}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-        >
-          <Ionicons
-            name={centerIconName}
-            size={80}
-            color="#fff"
-            style={styles.quizCenterIcon}
-          />
-
-          <View style={styles.quizContentContainer}>
-            {/* Top Tag */}
-            <View style={styles.quizTagContainer}>
-              <Ionicons name="help-circle-outline" size={16} color="#fff" />
-              <Typo
-                fontWeight={"600"}
-                size={11}
-                style={styles.quizQuestionsText}
-              >
-                {item.questionCount || 0} questions
-              </Typo>
-            </View>
-
-            <Typo
-              fontWeight={"600"}
-              size={15}
-              style={styles.quizTitle}
-              numberOfLines={3}
-            >
-              {item.title}
-            </Typo>
-          </View>
-        </LinearGradient>
-      </TouchableOpacity>
-    );
-  };
+  
   return (
     <>
       {/* 1‑time “first login” modal */}
@@ -614,20 +712,7 @@ export default function HomeScreen() {
           {/* Watch & Learn Section */}
           <WatchAndLearnSection authToken={authToken} />
 
-          <View style={styles.sectionCard}>
-            <SectionHeader title="Test your knowledge" isOnSeeAll={false} />
-            <Text style={styles.sectionSubtitle}>
-              Take quizzes based on videos and articles
-            </Text>
-            <FlatList
-              data={dummyQuizzes} // Use dummy data
-              renderItem={({ item }) => <QuizCard item={item} />}
-              keyExtractor={(item) => item._id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-            />
-          </View>
+          <QuizSection authToken={authToken} />
 
           <KnowledgeHubSection authToken={authToken} />
         </ScrollView>
@@ -691,12 +776,13 @@ const styles = StyleSheet.create({
   horizontalList: { paddingHorizontal: 20, paddingVertical: 5 },
   // --- Card Styles (Keep from previous version or enhance) ---
   quizCard: {
-    width: 200,
+    width: 240,
     height: 258,
     marginRight: 16,
     borderRadius: 20,
-    elevation: 3,
     overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#F0F5F7",
     backgroundColor: "#eee", // White background
   },
   quizGradient: {

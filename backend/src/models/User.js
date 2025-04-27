@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema(
     ],
     finishedQuizzes: [
       {
-        type: Number,
+        type: String,
         ref: "Quiz",
       },
     ],
