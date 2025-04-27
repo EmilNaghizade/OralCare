@@ -20,7 +20,7 @@ const NotificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ["video", "news", "article", "product"],
+      enum: ["video", "news", "article", "product", "quiz"],
       required: true,
     },
     contentId: {

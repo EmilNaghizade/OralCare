@@ -133,7 +133,6 @@ export default function QuizDetailScreen() {
   }, [quizId, authToken]);
 
   const isQuizCompleted = () => {
-  
     return finishedQuizzes.includes(quizId);
   };
 
@@ -153,6 +152,7 @@ export default function QuizDetailScreen() {
     }
   };
 
+
   const handleStartQuiz = () => {
     // Burada quiz'i başlatan sayfaya yönlendirme yapılabilir
     // router.push(`/quiz/${quizDetails.id}/question/1`);
@@ -170,7 +170,7 @@ export default function QuizDetailScreen() {
       );
     }
 
-    if (error || !quiz) {
+    if (error || !quiz ) {
       return (
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={60} color="#FF3B30" />
@@ -185,6 +185,22 @@ export default function QuizDetailScreen() {
       );
     }
   };
+
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Ionicons name="alert-circle-outline" size={60} color="#FF3B30" />
+        <Typo style={styles.errorText}>{error}</Typo>
+        <TouchableOpacity
+          style={styles.retryButton}
+          onPress={() => router.back()}
+        >
+          <Typo style={styles.retryButtonText}>Go Back</Typo>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.safeArea} edges={["bottom", "left", "right"]}>
@@ -299,40 +315,40 @@ const styles = StyleSheet.create({
   },
   badgeScrollView: {
     // This allows the scroll view to take the full width while clipping content
-    width: '100%',
+    width: "100%",
     // Optional settings for better UX
     flexGrow: 0,
     marginVertical: 10,
   },
-  
+
   badgeRowContainer: {
     // This will make your badges space out correctly inside the ScrollView
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingLeft: 10,
     paddingRight: 20, // Add extra padding at the end for better UX
-    alignItems: 'center',
+    alignItems: "center",
     // Don't use 'justifyContent: space-between' here as it would break scrolling
   },
-  
+
   badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 15,
     paddingVertical: 6,
     paddingHorizontal: 12,
     marginRight: 8, // Space between badges
   },
-  
+
   badgeText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: "500",
     marginLeft: 4,
   },
-  
+
   completedBadge: {
-    backgroundColor: 'rgba(46, 204, 113, 0.3)',
+    backgroundColor: "rgba(46, 204, 113, 0.3)",
   },
   quizTitle: {
     color: "#fff",

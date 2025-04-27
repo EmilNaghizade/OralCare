@@ -29,6 +29,7 @@ export default function QuizForm({ route, navigation }) {
     category: "",
     colorScheme: "green",
     isPublished: true,
+    time: 0,
   });
 
   const colorSchemes = [
@@ -43,12 +44,14 @@ export default function QuizForm({ route, navigation }) {
     const fetchQuizData = async () => {
       try {
         const quizData = await quizApi.getQuizById(quizId, authToken);
+        console.log("Fetched quiz data:", quizData.time);
         setFormData({
           title: quizData.title || "",
           description: quizData.description || "",
           category: quizData.category || "",
           colorScheme: quizData.colorScheme || "green",
           isPublished: quizData.isPublished !== false, // Default to true if undefined
+          time: quizData.time || 120,
         });
       } catch (error) {
         console.error("Error fetching quiz:", error);
@@ -100,16 +103,17 @@ export default function QuizForm({ route, navigation }) {
       if (isEditing) {
         await quizApi.updateQuiz(quizId, formData, authToken);
         Alert.alert("Success", "Quiz updated successfully", [
-          { text: "OK", onPress: () => navigation.goBack() }
+          { text: "OK", onPress: () => navigation.goBack() },
         ]);
       } else {
         const result = await quizApi.createQuiz(formData, authToken);
         Alert.alert("Success", "Quiz created successfully", [
-          { 
-            text: "Add Questions Now", 
-            onPress: () => navigation.navigate("ManageQuestions", { quizId: result._id }) 
+          {
+            text: "Add Questions Now",
+            onPress: () =>
+              navigation.navigate("ManageQuestions", { quizId: result._id }),
           },
-          { text: "Later", onPress: () => navigation.goBack() }
+          { text: "Later", onPress: () => navigation.goBack() },
         ]);
       }
     } catch (error) {
@@ -132,7 +136,7 @@ export default function QuizForm({ route, navigation }) {
     <ScrollView style={styles.container}>
       <View style={styles.formContainer}>
         <BackButton onPress={() => navigation.goBack()} />
-        
+
         <Text style={styles.formTitle}>
           {isEditing ? "Edit Quiz" : "Create New Quiz"}
         </Text>
@@ -166,6 +170,16 @@ export default function QuizForm({ route, navigation }) {
           placeholder="Enter quiz category"
         />
 
+        {/* Time Input */}
+        <Text style={styles.label}>Time (in seconds)</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.time.toString()}
+          onChangeText={(text) => handleInputChange("time", text)}
+          placeholder="Enter time limit"
+          keyboardType="numeric"
+        />
+
         {/* Color Scheme Selection */}
         <Text style={styles.label}>Color Scheme</Text>
         <View style={styles.colorSchemeContainer}>
@@ -175,7 +189,8 @@ export default function QuizForm({ route, navigation }) {
               style={[
                 styles.colorOption,
                 { backgroundColor: scheme.color },
-                formData.colorScheme === scheme.name && styles.selectedColorOption
+                formData.colorScheme === scheme.name &&
+                  styles.selectedColorOption,
               ]}
               onPress={() => selectColorScheme(scheme.name)}
             >
@@ -206,7 +221,11 @@ export default function QuizForm({ route, navigation }) {
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, styles.saveButton, loading && styles.disabledButton]}
+            style={[
+              styles.button,
+              styles.saveButton,
+              loading && styles.disabledButton,
+            ]}
             onPress={handleSave}
             disabled={loading}
           >

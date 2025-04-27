@@ -139,8 +139,12 @@ export const createContentNotification = async (
         contentId = contentItem._id;
         message = `New product available: ${contentItem.name}`;
         break;
+      case "quiz":
+        contentId = contentItem._id;
+        message = `New quiz available: ${contentItem.title}`;
+        break;
       default:
-        contentId = contentItem._id || "";
+        contentId = contentItem._id;
         message = `New content added`;
     }
 

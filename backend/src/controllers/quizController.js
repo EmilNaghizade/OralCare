@@ -1,6 +1,7 @@
 import Quiz from "../models/Quiz.js";
 import User from "../models/User.js";
 import mongoose from "mongoose";
+import { createContentNotification } from "./notificationController.js";
 
 // Get all quizzes with pagination and filtering
 export const getAllQuizzes = async (req, res) => {
@@ -98,6 +99,9 @@ export const createQuiz = async (req, res) => {
     });
 
     await quiz.save();
+
+    // Create a notification for all users
+    await createContentNotification("New Quiz Available", "quiz", quiz);
     res.status(201).json(quiz);
   } catch (error) {
     console.error("Error creating quiz:", error);
@@ -116,7 +120,8 @@ export const updateQuiz = async (req, res) => {
         .json({ error: "Not authorized to update quizzes" });
     }
 
-    const { title, description, category, colorScheme, isPublished, time } = req.body;
+    const { title, description, category, colorScheme, isPublished, time } =
+      req.body;
     const quizId = req.params.id;
 
     // Find the existing quiz

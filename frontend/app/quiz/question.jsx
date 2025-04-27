@@ -19,8 +19,6 @@ import FeedbackToast from "../../components/QuizFeedback"; // Import the Feedbac
 import { quizApi } from "../../services/api";
 import { useAuth } from "../_layout";
 
-const TOTAL_TIME = 120; // 2 minutes in seconds
-
 export default function QuizQuestionScreen() {
   const router = useRouter();
   const { authToken } = useAuth();
@@ -36,7 +34,7 @@ export default function QuizQuestionScreen() {
     useState(initialQuestionIndex);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
+  const [timeLeft, setTimeLeft] = useState(null);
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -50,10 +48,6 @@ export default function QuizQuestionScreen() {
   // Progress bar animation
   const progressAnim = useRef(new Animated.Value(0)).current;
 
-  const getQuizDataById = (quizId) => {
-    return quizzes[quizId] || null;
-  };
-
   // Load quiz data
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -61,6 +55,7 @@ export default function QuizQuestionScreen() {
         setLoading(true);
         const quizData = await quizApi.getQuizById(quizId, authToken);
         setQuiz(quizData);
+        setTimeLeft(quizData.time);
       } catch (error) {
         console.error("Error fetching quiz:", error);
         setError("Failed to load quiz. Please try again later.");
@@ -122,7 +117,7 @@ export default function QuizQuestionScreen() {
     });
   };
 
-  const handleAnswerSelect = (option,index) => {
+  const handleAnswerSelect = (option, index) => {
     if (isAnswered) return;
 
     const currentQuestion = quiz.questions[currentQuestionIndex];
@@ -316,7 +311,7 @@ export default function QuizQuestionScreen() {
             <TouchableOpacity
               key={index}
               style={optionStyle}
-              onPress={() => handleAnswerSelect(option,index)}
+              onPress={() => handleAnswerSelect(option, index)}
               disabled={isAnswered}
             >
               <Typo style={textStyle}>{option}</Typo>

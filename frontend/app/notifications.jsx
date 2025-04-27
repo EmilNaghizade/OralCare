@@ -121,6 +121,12 @@ export default function NotificationsScreen() {
           // For products, we'll still go to the products page as there may not be a detail view
           router.push("/(tabs)/products");
           break;
+        case "quiz":
+          router.push({
+            pathname: `/quiz`,
+            params: { id: notification.contentId }
+          });
+          break;
         default:
           router.push("/(tabs)/home");
           break;
@@ -146,6 +152,11 @@ export default function NotificationsScreen() {
         case "product":
           router.push("/(tabs)/products");
           break;
+        case "quiz":
+          router.push({
+            pathname: "/(tabs)/home",
+          });
+          break;
         default:
           router.push("/(tabs)/home");
           break;
@@ -164,6 +175,8 @@ export default function NotificationsScreen() {
         return "newspaper-outline";
       case "product":
         return "cube-outline";
+      case "quiz":
+        return "help-circle-outline";
       default:
         return "notifications-outline";
     }
