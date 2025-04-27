@@ -12,6 +12,8 @@ import {
   Alert,
   PanResponder,
   Animated,
+  Share,
+  Linking,
 } from "react-native";
 import { SimpleLineIcons, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { GalleryRemove, Gallery, Camera } from "iconsax-react-nativejs";
@@ -21,6 +23,7 @@ import { useRouter } from "expo-router";
 import { profileApi } from "../../services/profileApi";
 import * as ImagePicker from "expo-image-picker";
 import { quizApi, videoApi } from "../../services/api";
+import SupportModal from "../../components/SupportModal";
 
 const getProfile = (token) => fetchWithAuth("/api/profile/profile", token);
 
@@ -38,6 +41,8 @@ const ProfileListItem = ({ iconName, label, onPress, isLogout = false }) => (
   </TouchableOpacity>
 );
 
+
+
 export default function ProfileScreen() {
   const router = useRouter();
   const { authToken, logout } = useAuth();
@@ -48,6 +53,7 @@ export default function ProfileScreen() {
   const [watchedVideos, setWatchedVideos] = useState([]);
   const [videoCount, setVideoCount] = useState(0);
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
   const [cameraPermission, setCameraPermission] = useState(null);
   const [galleryPermission, setGalleryPermission] = useState(null);
@@ -306,10 +312,25 @@ export default function ProfileScreen() {
   };
 
   // Navigation functions remain unchanged...
-  const navigateToRewards = () => console.log("Navigate to Rewards");
-  const navigateToInvite = () => console.log("Navigate to Invite");
+  const navigateToInvite = async () => {
+    try {
+      const result = await Share.share({
+        title: "Invite a friend",
+        url: "https://expo.dev/accounts/xalturwik/projects/oral-care/builds/160dd9ab-a376-4c6c-a292-7c71f926e373",
+        message:
+          "Oral Care uygulamasını indir! 📲 Link: https://expo.dev/accounts/xalturwik/projects/oral-care/builds/160dd9ab-a376-4c6c-a292-7c71f926e373",
+      });
+      if (result.action === Share.sharedAction) {
+        console.log("Shared successfully!");
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
   const navigateToNotifications = () => router.push("/notifications");
-  const navigateToFAQ = () => console.log("Navigate to FAQ");
+  const navigateToFAQ = () => {
+    Linking.openURL("mailto:support@oralcareapp.com?subject=Support Needed");
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -356,7 +377,7 @@ export default function ProfileScreen() {
           <Text style={styles.userName}>{profileData.name}</Text>
 
           {/* Reward Card */}
-          <TouchableOpacity onPress={navigateToRewards}>
+          <TouchableOpacity onPress={navigateToInvite}>
             <Image
               source={require("../../assets/images/banner3.png")}
               style={styles.rewardCardImage}

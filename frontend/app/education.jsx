@@ -92,7 +92,7 @@ export default function Education() {
             renderItem={renderVideos}
             keyExtractor={(item) => item._id.toString()}
             numColumns={2}
-            contentContainerStyle={styles.articleGrid}
+            contentContainerStyle={styles.videoGrid}
             showsVerticalScrollIndicator={false}
             columnWrapperStyle={styles.columnWrapper}
           />
@@ -133,9 +133,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     color: "#000",
   },
-  shareButton: {
-    padding: 8,
-  },
   tabContainer: {
     flexDirection: "row",
     paddingVertical: 12,
@@ -146,6 +143,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     marginRight: 8,
     borderRadius: 8,
+   
   },
   activeTab: {
     backgroundColor: "#E3ECF0",
@@ -158,14 +156,16 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: "#000",
   },
-  articleGrid: {
+  videoGrid: {
     padding: 8,
     marginTop: 20,
     borderRadius: 20,
     backgroundColor: "#fff",
+   
   },
   columnWrapper: {
     justifyContent: "space-between",
+    marginBottom: 16,
   },
   loadingContainer: {
     flex: 1,
