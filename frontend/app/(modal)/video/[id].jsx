@@ -23,7 +23,7 @@ import { videoApi } from "../../../services/api";
 import { useAuth } from "../../_layout";
 
 const greenFeatureIcon = require("../../../assets/images/JasmineCircle.png");
-const localFallbackVideo = require("../../../assets/videos/Video1.mp4");
+
 
 export default function VideoDetailScreen() {
   const { authToken } = useAuth();

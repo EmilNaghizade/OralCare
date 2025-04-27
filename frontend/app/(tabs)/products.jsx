@@ -47,7 +47,7 @@ const ProductCard = ({ item }) => {
     }
   } else {
     // Fallback to default image if no image is provided
-    imageSource = require("../../assets/images/Product2.png");
+  
   }
 
   // Get the product link based on available properties
@@ -185,14 +185,17 @@ const styles = StyleSheet.create({
     height: 100, // Header yüksekliği
     justifyContent: "flex-end", // Başlığı dikeyde ortala
     backgroundColor: "#fff", // Beyaz header arka planı
-    paddingTop: Platform.OS === "android" ? 20 : 15, // Üst boşluk (statusBar'a göre)
-    paddingBottom: 16 , // Alt boşluk
-    paddingHorizontal: PADDING, // Yan boşluklar
+    paddingTop: 40, // Internal padding
+    paddingHorizontal: 20,
+    paddingBottom: 24, // Internal padding (adjust as needed)
     // Alt köşeleri yuvarlatma
     borderBottomLeftRadius: 24, // <<< YUVARLAK KÖŞE
     borderBottomRightRadius: 24, // <<< YUVARLAK KÖŞE
   },
   headerTitle: {
+    fontSize: 24, // Başlık boyutu
+    fontWeight: "600", // Başlık kalınlığı
+    lineHeight: 32, // Başlık satır yüksekliği
     color: "#1c1c1c", // Koyu başlık rengi
     textAlign: "left", // Başlığı ortala
   },
