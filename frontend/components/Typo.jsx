@@ -16,7 +16,7 @@ const Typo = ({
     fontWeight,
   };
   return (
-    <Text {...textProps} style={[textStyle, style]}>
+    <Text {...textProps} style={[textStyle, style]} numberOfLines={3} ellipsizeMode="tail">
       {children}
     </Text>
   );

@@ -105,20 +105,6 @@ export default function QuizResultsScreen() {
       </View>
       <Typo style={styles.scoreLabel}>Answered Correctly</Typo>
 
-      {/* Ödüller Bölümü */}
-      <View style={styles.rewardsSection}>
-        <Typo style={styles.rewardsLabel}>Rewards</Typo>
-        <View style={styles.rewardBar}>
-          {/* Ödül ikonu */}
-          <View style={styles.rewardIconContainer}>
-            {/* Basit bir daire ikonu veya özel bir ikon */}
-            <Ionicons name="ellipse" size={28} color="#038565" />
-            {/* Veya <Ionicons name="star" size={20} color="#FFD700" /> */}
-          </View>
-          {/* Ödül Metni */}
-          <Typo style={styles.rewardText}>{earnedPoints} Reward</Typo>
-        </View>
-      </View>
 
       {/* Anasayfaya Dön Butonu */}
       <TouchableOpacity style={styles.homeButton} onPress={handleGoHome}>

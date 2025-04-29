@@ -59,6 +59,14 @@ export default function AdminPanel() {
         },
         tabBarActiveTintColor: "#007AFF",
         tabBarInactiveTintColor: "gray",
+        tabBarStyle: {
+          height: 100,
+          paddingTop: 8, // Add padding at the top
+          paddingBottom: 8, // Add padding at the bottom
+        },
+        tabBarLabelStyle: {
+          marginTop: 4, // Add space between icon and label
+        },
       })}
     >
       <Tab.Screen

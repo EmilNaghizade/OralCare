@@ -81,7 +81,7 @@ export default function VideoDetailScreen() {
     };
   }, [videoId, authToken]);
 
-  const player = useVideoPlayer(videoSource || localFallbackVideo, (player) => {
+  const player = useVideoPlayer(videoSource , (player) => {
     player.loop = false;
     player.staysActiveInBackground = true;
   });

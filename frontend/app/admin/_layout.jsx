@@ -11,6 +11,7 @@ export default function AdminLayout() {
     <Stack
       screenOptions={{
         headerShown: true,
+        
         headerTitle: () => (
           <View style={styles.headerContainer}>
             <Text style={styles.headerTitle}>Admin Panel</Text>

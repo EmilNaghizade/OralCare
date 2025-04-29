@@ -316,7 +316,7 @@ export default function ProfileScreen() {
         title: "Invite a friend",
         url: "https://expo.dev/accounts/emilnaghizade/projects/oral-care/builds/160dd9ab-a376-4c6c-a292-7c71f926e373",
         message:
-          "Oral Care uygulamasını indir! 📲 Link: https://expo.dev/accounts/emilnaghizade/projects/oral-care/builds/160dd9ab-a376-4c6c-a292-7c71f926e373",
+          "Download Oral Care App! 📲 Link: https://expo.dev/accounts/emilnaghizade/projects/oral-care/builds/160dd9ab-a376-4c6c-a292-7c71f926e373",
       });
       if (result.action === Share.sharedAction) {
         console.log("Shared successfully!");

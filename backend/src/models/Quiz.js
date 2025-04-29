@@ -33,7 +33,7 @@ const QuizSchema = new mongoose.Schema({
   },
   time: {
     type: Number,
-    default: 120, // Time in seconds
+    default: 2, // Time in minutes
   },
   createdAt: {
     type: Date,

@@ -29,7 +29,7 @@ export default function QuizForm({ route, navigation }) {
     category: "",
     colorScheme: "green",
     isPublished: true,
-    time: 0,
+    time: 2,
   });
 
   const colorSchemes = [
@@ -51,7 +51,7 @@ export default function QuizForm({ route, navigation }) {
           category: quizData.category || "",
           colorScheme: quizData.colorScheme || "green",
           isPublished: quizData.isPublished !== false, // Default to true if undefined
-          time: quizData.time || 120,
+          time: quizData.time || 2,
         });
       } catch (error) {
         console.error("Error fetching quiz:", error);
@@ -97,6 +97,12 @@ export default function QuizForm({ route, navigation }) {
   // Save the quiz
   const handleSave = async () => {
     if (!validateForm()) return;
+
+    const time = Number(formData.time);
+    if (isNaN(time) || time <= 0) {
+      Alert.alert("Invalid Time", "Time must be a positive number of minutes");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -171,15 +177,15 @@ export default function QuizForm({ route, navigation }) {
         />
 
         {/* Time Input */}
-        <Text style={styles.label}>Time (in seconds)</Text>
+        <Text style={styles.label}>Time (in minutes) *</Text>
         <TextInput
           style={styles.input}
-          value={formData.time.toString()}
+          value={String(formData.time)}
           onChangeText={(text) => handleInputChange("time", text)}
-          placeholder="Enter time limit"
+          placeholder="Enter time in minutes"
           keyboardType="numeric"
         />
-
+        
         {/* Color Scheme Selection */}
         <Text style={styles.label}>Color Scheme</Text>
         <View style={styles.colorSchemeContainer}>

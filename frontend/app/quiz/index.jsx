@@ -32,8 +32,15 @@ const RelatedVideos = ({ quizId }) => {
       const data = await videoApi.getAllVideos(authToken);
       if (data && data.videos) {
         // In a real app, you might have a way to fetch videos related to the specific quiz
+        // fetch videos that match quizzes category
+        const quizData = await quizApi.getQuizById(quizId, authToken);
+        const relatedVideos = data.videos.filter((video) =>
+          video.category.includes(quizData.category)
+        );
+        console.log("Fetched related videos:", relatedVideos);
+
         // For now, we'll just take the first 2 videos
-        setVideos(data.videos.slice(0, 2));
+        setVideos(relatedVideos.slice(0, 2));
       } else {
         setVideos([]);
       }
@@ -152,7 +159,6 @@ export default function QuizDetailScreen() {
     }
   };
 
-
   const handleStartQuiz = () => {
     // Burada quiz'i başlatan sayfaya yönlendirme yapılabilir
     // router.push(`/quiz/${quizDetails.id}/question/1`);
@@ -170,7 +176,7 @@ export default function QuizDetailScreen() {
       );
     }
 
-    if (error || !quiz ) {
+    if (error || !quiz) {
       return (
         <View style={styles.errorContainer}>
           <Ionicons name="alert-circle-outline" size={60} color="#FF3B30" />
@@ -185,7 +191,6 @@ export default function QuizDetailScreen() {
       );
     }
   };
-
 
   if (error) {
     return (
@@ -427,5 +432,18 @@ const styles = StyleSheet.create({
   },
   completedBadge: {
     backgroundColor: "rgba(46, 204, 113, 0.3)",
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#64748B",
+  },
+  videoList: {
+    gap: 15, // Video kartları arası dikey boşluk
   },
 });

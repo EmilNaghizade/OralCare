@@ -16,6 +16,11 @@ import BackButton from "../components/BackButton";
 import Typo from "../components/Typo";
 import { articleApi, newsApi } from "../services/api";
 import { useAuth } from "./_layout";
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs([
+  'VirtualizedLists should never be nested'  // disable specific warning
+]);
 
 export default function KnowledgeHub() {
   const router = useRouter();
@@ -30,7 +35,6 @@ export default function KnowledgeHub() {
     fetchData();
   }, [activeTab, authToken]);
 
-  console.log(activeTab, "activeTab");
   const fetchData = async () => {
     setLoading(true);
     try {

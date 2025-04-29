@@ -4,13 +4,17 @@ import React, {
   useEffect,
   createContext,
   useContext,
-  ueseRef,
+  useCallback,
 } from "react";
 import { Slot, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import * as SplashScreen from "expo-splash-screen";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, View,Text } from "react-native";
 import { authApi } from "../services/api";
+
+SplashScreen.preventAutoHideAsync().catch((err) => {
+  console.log("Error preventing splash screen auto-hide:", err);
+});
 
 // --- Authentication Context ---
 const AuthContext = createContext(null);
@@ -31,65 +35,95 @@ function AuthProvider({ children }) {
   const [userPoints, setUserPoints] = useState(0); // <<< YENİ: Quiz Puanları State'i
   const router = useRouter();
   const hasNavigated = React.useRef(false);
+  const [appIsReady, setAppIsReady] = useState(false);
+  const [isLayoutReady, setIsLayoutReady] = useState(false);
 
   useEffect(() => {
-    const loadInitialState = async () => {
-      let token = null;
+    async function prepare() {
       try {
-        token = await SecureStore.getItemAsync("authToken");
-        if (token) {
-          setAuthToken(token);
-        }
-      } catch (e) {
-        console.error("[AuthProvider] Başlangıç state yükleme hatası:", e);
-      }
-    };
-    const loadInitialPoints = async () => {
-      try {
-        const storedPoints = await SecureStore.getItemAsync("userTotalPoints");
-        setUserPoints(parseInt(storedPoints || "0", 10));
-      } catch (e) {
-        console.error("Failed to load points from AsyncStorage", e);
-      }
-    };
-    const getProfile = async () => {
-      try {
-        const storedToken = await SecureStore.getItemAsync("authToken");
-        if (storedToken) {
-          setAuthToken(storedToken);
-          const storedUser = await SecureStore.getItemAsync("user");
-          if (storedUser) {
-            setUser(JSON.parse(storedUser));
+        console.log("Starting to load initial data...");
+
+        // Load token
+        let token = null;
+        try {
+          token = await SecureStore.getItemAsync("authToken");
+          if (token) {
+            setAuthToken(token);
+            console.log("Auth token loaded successfully");
           }
-          const response = await authApi.getProfile(storedToken);
-          setUser(response);
-          await SecureStore.setItemAsync("user", JSON.stringify(response));
+        } catch (e) {
+          console.error("[AuthProvider] Initial state loading error:", e);
         }
-      } catch (error) {
-        console.error("[AuthProvider getProfile] HATA:", error);
+
+        // Load user points
+        try {
+          const storedPoints = await SecureStore.getItemAsync(
+            "userTotalPoints"
+          );
+          setUserPoints(parseInt(storedPoints || "0", 10));
+          console.log("User points loaded successfully");
+        } catch (e) {
+          console.error("Failed to load points from secure storage:", e);
+        }
+
+        // Get user profile
+        try {
+          const storedToken = await SecureStore.getItemAsync("authToken");
+          if (storedToken) {
+            setAuthToken(storedToken);
+            const storedUser = await SecureStore.getItemAsync("user");
+            if (storedUser) {
+              setUser(JSON.parse(storedUser));
+              console.log("User loaded from secure storage");
+            }
+
+            // Try to get fresh user data from API
+            try {
+              const response = await authApi.getProfile(storedToken);
+              setUser(response);
+              await SecureStore.setItemAsync("user", JSON.stringify(response));
+              console.log("Fresh user profile loaded from API");
+            } catch (profileError) {
+              console.log(
+                "Using cached user data instead of API due to error:",
+                profileError
+              );
+              // We'll continue with the cached user data
+            }
+          }
+        } catch (error) {
+          console.error("[AuthProvider getProfile] ERROR:", error);
+        }
+
+        // Load completed quizzes
+        try {
+          const storedQuizzes = await SecureStore.getItemAsync(
+            "completedQuizzes"
+          );
+          if (storedQuizzes) {
+            setCompletedQuizzes(JSON.parse(storedQuizzes));
+            console.log("Completed quizzes loaded successfully");
+          }
+        } catch (e) {
+          console.error("Failed to load completed quizzes:", e);
+        }
+
+        // Add a small artificial delay for smoother experience
+        // This gives time for React Native to initialize properly
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        console.log("Initial data loading complete");
+      } catch (e) {
+        console.warn("Error during app preparation:", e);
       } finally {
+        console.log("Setting app as ready");
+        // Mark app as ready to render
+        setAppIsReady(true);
         setIsLoading(false);
       }
-    };
+    }
 
-    const loadCompletedQuizzes = async () => {
-      try {
-        const storedQuizzes = await SecureStore.getItemAsync(
-          "completedQuizzes"
-        );
-        if (storedQuizzes) {
-          setCompletedQuizzes(JSON.parse(storedQuizzes));
-        }
-      } catch (e) {
-        console.error("Failed to load completed quizzes", e);
-      }
-    };
-
-    // Call this in your useEffect
-    loadCompletedQuizzes();
-    loadInitialState();
-    loadInitialPoints();
-    getProfile();
+    prepare();
   }, []); // Sadece component mount edildiğinde çalışır
 
   // Modified getAdmin useEffect
@@ -97,7 +131,7 @@ function AuthProvider({ children }) {
     const getAdmin = async () => {
       try {
         if (isLoading || hasNavigated.current) return;
-        console.log(user,"userblin")
+        console.log(user, "userblin");
         if (!authToken || !user) {
           hasNavigated.current = true;
           router.replace("/onboarding");
@@ -108,7 +142,6 @@ function AuthProvider({ children }) {
             console.log("Navigating to /admin");
             router.replace("/admin");
           } else {
-
             router.replace("/(tabs)/home");
           }
         } else {
@@ -121,6 +154,32 @@ function AuthProvider({ children }) {
 
     getAdmin();
   }, [isLoading, authToken, user?.role]); // Add router and user to dependencies isLoading, authToken ve user değiştiğinde çalışır
+
+  const hideSplashScreen = useCallback(async () => {
+    if (appIsReady && isLayoutReady) {
+      console.log("App and layout both ready, hiding splash screen...");
+      try {
+        await SplashScreen.hideAsync();
+        console.log("Splash screen hidden successfully");
+      } catch (e) {
+        console.warn("Error hiding splash screen:", e);
+      }
+    } else {
+      console.log("Not ready to hide splash yet:", {
+        appIsReady,
+        isLayoutReady,
+      });
+    }
+  }, [appIsReady, isLayoutReady]);
+
+  useEffect(() => {
+    hideSplashScreen();
+  }, [hideSplashScreen, appIsReady, isLayoutReady]);
+
+  const onLayoutRootView = useCallback(() => {
+    console.log("Root view layout completed");
+    setIsLayoutReady(true);
+  }, []);
 
   // Login fonksiyonu: token ve user objesini alır (API response'dan)
   // Login function without routing
@@ -211,15 +270,23 @@ function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {isLoading ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <ActivityIndicator size="large" color="#007AFF" />
-        </View>
-      ) : (
-        children
-      )}
+      <View
+        style={{ flex: 1, backgroundColor: "#ffffff" }}
+        onLayout={onLayoutRootView}
+      >
+        {isLoading ? (
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <ActivityIndicator size="large" color="#007AFF" />
+            <Text style={{ marginTop: 10, color: "#666" }}>
+              Loading your app...
+            </Text>
+          </View>
+        ) : (
+          children
+        )}
+      </View>
     </AuthContext.Provider>
   );
 }

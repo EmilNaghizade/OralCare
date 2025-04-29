@@ -140,7 +140,7 @@ export default function QuizListScreen({ navigation }) {
                   ]} 
                 />
                 <View style={styles.textContainer}>
-                  <Text style={styles.quizTitle}>{item.title}</Text>
+                  <Text style={styles.quizTitle} numberOfLines={3} ellipsizeMode="tail">{item.title}</Text>
                   <Text style={styles.quizCategory}>
                     {item.category || "Uncategorized"} • {item.questions?.length || 0} questions
                   </Text>

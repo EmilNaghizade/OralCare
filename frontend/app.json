@@ -2,12 +2,17 @@
   "expo": {
     "name": "Oral Care",
     "slug": "oral-care",
-    "version": "3.3.1",
+    "version": "3.3.2",
     "orientation": "portrait",
     "icon": "./assets/images/IconOralCare2.png",
     "scheme": "oralcare",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.test.oralcare",
@@ -35,12 +40,13 @@
       "bundler": "metro",
       "output": "static"
     },
+
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/IconOralCare2.png",
+          "image": "./assets/images/splash.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"

@@ -55,7 +55,10 @@ export default function QuizQuestionScreen() {
         setLoading(true);
         const quizData = await quizApi.getQuizById(quizId, authToken);
         setQuiz(quizData);
-        setTimeLeft(quizData.time);
+        const timeInMinutes = quizData.time || 2;
+        const timeInSeconds = timeInMinutes * 60;
+        setTimeLeft(timeInSeconds);
+
       } catch (error) {
         console.error("Error fetching quiz:", error);
         setError("Failed to load quiz. Please try again later.");
@@ -82,8 +85,9 @@ export default function QuizQuestionScreen() {
   }, [currentQuestionIndex, quiz, progressAnim]);
 
   // Start/stop timer
+  // Timer effect
   useEffect(() => {
-    if (quiz) {
+    if (quiz && timeLeft > 0) {
       timerIntervalRef.current = setInterval(() => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
@@ -101,7 +105,7 @@ export default function QuizQuestionScreen() {
         clearInterval(timerIntervalRef.current);
       }
     };
-  }, [quiz]);
+  }, [quiz, timeLeft]);
 
   const navigateToResults = (finalScore) => {
     if (timerIntervalRef.current) {

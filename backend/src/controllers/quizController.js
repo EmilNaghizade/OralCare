@@ -95,7 +95,7 @@ export const createQuiz = async (req, res) => {
       colorScheme: colorScheme || "green",
       isPublished: isPublished === undefined ? true : isPublished,
       questions: questions || [],
-      time: time || 120, // Default time is 120 seconds
+      time: time || 2, // Default time is 120 seconds
     });
 
     await quiz.save();
