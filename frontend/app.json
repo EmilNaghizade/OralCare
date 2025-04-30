@@ -2,14 +2,14 @@
   "expo": {
     "name": "Oral Care",
     "slug": "oral-care",
-    "version": "3.3.2",
+    "version": "3.3.3",
     "orientation": "portrait",
     "icon": "./assets/images/IconOralCare2.png",
     "scheme": "oralcare",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./assets/images/SplashSon2.png",
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
@@ -24,7 +24,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/IconOralCare2.png",
+        "foregroundImage": "./assets/images/SplashSon2.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
