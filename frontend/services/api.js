@@ -99,6 +99,23 @@ export const authApi = {
     );
     return handleResponse(response);
   },
+
+  resetPasswordWithOtp: async ({ email, otp, newPassword }) => {
+    const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, otp, newPassword }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Password reset failed");
+    }
+
+    return response.json(); // Success message
+  },
 };
 
 export const quizApi = {

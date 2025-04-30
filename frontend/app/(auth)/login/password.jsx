@@ -111,6 +111,14 @@ const PasswordScreen = () => {
                 />
               </TouchableOpacity>
             </View>
+            <TouchableOpacity
+              onPress={() => router.push("/(auth)/login/forgot")}
+              style={styles.forgotWrapper}
+            >
+              <Typo fontWeight="500" size={16} color="#038565">
+                Forgot your password?
+              </Typo>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.buttonContainer}>
@@ -186,6 +194,14 @@ const styles = StyleSheet.create({
   disabledButton: {
     // Style for loading state
     backgroundColor: "#a5d6a7",
+  },
+  forgotWrapper: {
+    marginTop: 20,
+    alignSelf: "center",
+    backgroundColor: "#E0F4EE", // Açıq yaşıl fon
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
   },
   // buttonText style likely handled by Typo component
 });

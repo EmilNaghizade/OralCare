@@ -91,8 +91,22 @@ const EmailScreen = () => {
         );
       } else {
         // E-posta veritabanında yoksa bir sonraki ekrana geç
+        const otpResponse = await fetch(`${BACKEND_URL}/api/auth/send-otp`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: trimmedEmail, isReset: false }),
+        });
+        console.log("OTP response:", otpResponse);
+
+        if (!otpResponse.ok) {
+          throw new Error("Failed to send OTP.");
+        }
+
+        // 2. Go to OTP screen
         router.push({
-          pathname: NEXT_SCREEN_ROUTE,
+          pathname: "/(auth)/register/otp",
           params: { name, gender, email: trimmedEmail },
         });
       }
@@ -109,8 +123,8 @@ const EmailScreen = () => {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-                  <StatusBar barStyle="dark-content" />
-      
+      <StatusBar barStyle="dark-content" />
+
       <BackButton />
       <View style={styles.container}>
         <View style={styles.content}>

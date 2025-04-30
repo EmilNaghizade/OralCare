@@ -5,12 +5,16 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: true,
+      required: function () {
+        return this.isVerified !== false; // Sadəcə doğrulanmış istifadəçilər üçün tələb olunur
+      },
       trim: true,
     },
     gender: {
       type: String,
-      required: true,
+      required: function () {
+        return this.isVerified !== false;
+      },
       trim: true,
     },
     email: {
@@ -21,7 +25,9 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: function () {
+        return this.isVerified !== false;
+      },
       trim: true,
       minlength: 6,
     },
@@ -37,6 +43,18 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["user", "admin"],
       default: "user",
+    },
+    otp: {
+      code: String,
+      expiresAt: Date,
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
+    },
+    resetPasswordOtp: {
+      code: String,
+      expiresAt: Date,
     },
     watchedVideos: [
       {

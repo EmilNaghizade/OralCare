@@ -35,6 +35,14 @@ router.get("/verify-password", protectRoute, authController.verifyPassword);
 router.put("/update-password", protectRoute, authController.updateUserPassword);
 
 // Delete user account
-router.delete("/delete-user/:userId", protectRoute, authController.deleteUserAccount);
+router.delete(
+  "/delete-user/:userId",
+  protectRoute,
+  authController.deleteUserAccount
+);
+
+router.post("/send-otp", authController.sendOtpToEmail); // body: { email, isReset }
+router.post("/verify-email-otp", authController.verifyEmailOtp); // body: { email, otp }
+router.post("/reset-password", authController.resetPasswordWithOtp); // body: { email, otp, newPassword }
 
 export default router;

@@ -1,5 +1,69 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
+import otpGenerator from "otp-generator";
+import { sendEmail } from "../utils/sendEmail.js";
+import Otp from "../models/Otp.js"; // yeni model
+
+export const sendOtpToEmail = async (req, res) => {
+  const { email } = req.body;
+  const otpCode = otpGenerator.generate(6, {
+    digits: true,
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
+    specialChars: false,
+  });
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+  // Əgər eyni email üçün OTP varsa, sil
+  await Otp.findOneAndDelete({ email });
+
+  // Yeni OTP saxla
+  await Otp.create({ email, code: otpCode, expiresAt });
+
+  await sendEmail({
+    to: email,
+    subject: "Your Verification Code",
+    text: `Your verification code is: ${otpCode}\nIt will expire in 10 minutes.`,
+  });
+
+  res.json({ message: "OTP sent to email" });
+};
+
+// Verify OTP for signup or reset
+export const verifyEmailOtp = async (req, res) => {
+  const { email, otp } = req.body;
+
+  const record = await Otp.findOne({ email });
+
+  if (!record || record.code !== otp)
+    return res.status(400).json({ error: "Invalid OTP" });
+
+  if (record.expiresAt < new Date())
+    return res.status(400).json({ error: "OTP expired" });
+
+  // OTP doğrulandı, artıq istəyə uyğun davam et
+  await Otp.deleteOne({ email });
+
+  res.json({ verified: true });
+};
+
+// Reset password using OTP
+export const resetPasswordWithOtp = async (req, res) => {
+  const { email, otp, newPassword } = req.body;
+
+  const user = await User.findOne({ email: email.toLowerCase() });
+  if (!user || !user.resetPasswordOtp || user.resetPasswordOtp.code !== otp)
+    return res.status(400).json({ error: "Invalid OTP" });
+
+  if (user.resetPasswordOtp.expiresAt < new Date())
+    return res.status(400).json({ error: "OTP expired" });
+
+  user.password = newPassword;
+  user.resetPasswordOtp = undefined;
+  await user.save();
+
+  res.json({ message: "Password reset successful" });
+};
 
 // Generate JWT token
 const generateToken = (userId) => {
