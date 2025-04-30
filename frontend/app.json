@@ -8,11 +8,6 @@
     "scheme": "oralcare",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/SplashSon2.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.test.oralcare",
@@ -24,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/SplashSon2.png",
+        "foregroundImage": "./assets/images/IconOralCare2.png",
         "backgroundColor": "#ffffff"
       },
       "permissions": [
@@ -46,7 +41,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash.png",
+          "image": "./assets/images/SplashSon.png",
           "resizeMode": "cover",
           "backgroundColor": "#ffffff"
         }
