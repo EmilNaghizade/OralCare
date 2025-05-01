@@ -400,22 +400,19 @@ export default function HomeScreen() {
 
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        if (Platform.OS === "android") {
-          BackHandler.exitApp(); // exits the app
-          return true; // prevent default behavior
-        }
-        return false;
-      };
+  useEffect(() => {
+    const handler = () => {
+      // whatever you want on back press
+      return Platform.OS === "android"; // true to swallow it
+    };
 
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handler
+    );
 
-      return () =>
-        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
-    }, [])
-  );
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -618,7 +615,7 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.welcomeHeader}>
-            <Typo size={26} fontWeight="600" >
+            <Typo size={26} fontWeight="600">
               👋 Welcome,{" "}
               <Typo size={26} fontWeight="600" color="#92999C">
                 {firstName}
@@ -722,7 +719,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
   },
- 
+
   // --- Knowledge Hub Tabs ---
   knowledgeTabs: {
     flexDirection: "row",

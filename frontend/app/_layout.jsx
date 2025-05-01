@@ -8,13 +8,10 @@ import React, {
 } from "react";
 import { Slot, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import * as SplashScreen from "expo-splash-screen";
 import { ActivityIndicator, View,Text } from "react-native";
 import { authApi } from "../services/api";
 
-SplashScreen.preventAutoHideAsync().catch((err) => {
-  console.log("Error preventing splash screen auto-hide:", err);
-});
+
 
 // --- Authentication Context ---
 const AuthContext = createContext(null);
@@ -155,31 +152,10 @@ function AuthProvider({ children }) {
     getAdmin();
   }, [isLoading, authToken, user?.role]); // Add router and user to dependencies isLoading, authToken ve user değiştiğinde çalışır
 
-  const hideSplashScreen = useCallback(async () => {
-    if (appIsReady && isLayoutReady) {
-      console.log("App and layout both ready, hiding splash screen...");
-      try {
-        await SplashScreen.hideAsync();
-        console.log("Splash screen hidden successfully");
-      } catch (e) {
-        console.warn("Error hiding splash screen:", e);
-      }
-    } else {
-      console.log("Not ready to hide splash yet:", {
-        appIsReady,
-        isLayoutReady,
-      });
-    }
-  }, [appIsReady, isLayoutReady]);
 
-  useEffect(() => {
-    hideSplashScreen();
-  }, [hideSplashScreen, appIsReady, isLayoutReady]);
 
-  const onLayoutRootView = useCallback(() => {
-    console.log("Root view layout completed");
-    setIsLayoutReady(true);
-  }, []);
+
+
 
   // Login fonksiyonu: token ve user objesini alır (API response'dan)
   // Login function without routing
@@ -272,7 +248,6 @@ function AuthProvider({ children }) {
     <AuthContext.Provider value={value}>
       <View
         style={{ flex: 1, backgroundColor: "#ffffff" }}
-        onLayout={onLayoutRootView}
       >
         {isLoading ? (
           <View
@@ -294,10 +269,9 @@ function AuthProvider({ children }) {
 
 // --- Kök Layout Component ---
 export default function RootLayout() {
-  SplashScreen.preventAutoHideAsync();
+
   return (
     <AuthProvider>
-      {/* Yüklenirken hiçbir şey gösterme (Splash screen görünür) */}
       <Slot />
     </AuthProvider>
   );

@@ -16,14 +16,13 @@ import {
   Linking,
 } from "react-native";
 import { SimpleLineIcons, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import { GalleryRemove, Gallery, Camera } from "iconsax-react-nativejs";
+import { GalleryRemove, Gallery, Camera } from "iconsax-react-native";
 import { useAuth } from "../_layout";
 import { fetchWithAuth } from "../../services/fetchWithAuth";
 import { useRouter } from "expo-router";
 import { profileApi } from "../../services/profileApi";
 import * as ImagePicker from "expo-image-picker";
 import { quizApi, videoApi } from "../../services/api";
-import SupportModal from "../../components/SupportModal";
 
 const getProfile = (token) => fetchWithAuth("/api/profile/profile", token);
 

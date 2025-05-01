@@ -8,6 +8,13 @@
     "scheme": "oralcare",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "cover",
+      "backgroundColor": "#ffffff",
+      "imageWidth": 1170,
+      "imageHeight": 2532
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.test.oralcare",
@@ -37,15 +44,19 @@
     },
     "plugins": [
       "expo-router",
+      "expo-secure-store",
+      "expo-video",
+      //splash screen
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/SplashSon.png",
-          "resizeMode": "cover"
+          "image": "./assets/images/splash.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#fff",
+          "imageWidth": 1170,
+          "imageHeight": 2532
         }
       ],
-      "expo-secure-store",
-      "expo-video",
       [
         "expo-image-picker",
         {
