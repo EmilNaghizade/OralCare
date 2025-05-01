@@ -7,6 +7,7 @@ import {
   Alert,
   ActivityIndicator,
   StatusBar,
+  Platform,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import BackButton from "../../../components/BackButton";
@@ -65,22 +66,22 @@ const OtpScreen = () => {
 
       <View style={styles.container}>
         <View style={{ flex: 1, justifyContent: "center" }}>
-        <Typo fontWeight="600" size={28} style={styles.title}>
-          Enter the OTP sent to
-        </Typo>
-        <Typo fontWeight="400" size={18} style={styles.email}>
-          {email}
-        </Typo>
+          <Typo fontWeight="600" size={28} style={styles.title}>
+            Enter the OTP sent to
+          </Typo>
+          <Typo fontWeight="400" size={18} style={styles.email}>
+            {email}
+          </Typo>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Enter 6-digit OTP"
-          placeholderTextColor="#ccc"
-          keyboardType="numeric"
-          maxLength={6}
-          value={otp}
-          onChangeText={setOtp}
-        />
+          <TextInput
+            style={styles.input}
+            placeholder="Enter 6-digit OTP"
+            placeholderTextColor="#ccc"
+            keyboardType="numeric"
+            maxLength={6}
+            value={otp}
+            onChangeText={setOtp}
+          />
         </View>
 
         <View style={styles.buttonContainer}>
@@ -135,6 +136,8 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     flex: 1,
     justifyContent: "flex-end",
+    paddingBottom: Platform.OS === "ios" ? 30 : 20,
+
   },
   button: {
     justifyContent: "flex-end",
@@ -143,7 +146,6 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingVertical: 15,
     alignItems: "flex-end",
-
   },
   buttonDisabled: {
     backgroundColor: "#7FCFB6",

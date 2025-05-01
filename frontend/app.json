@@ -35,15 +35,13 @@
       "bundler": "metro",
       "output": "static"
     },
-
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
           "image": "./assets/images/SplashSon.png",
-          "resizeMode": "cover",
-          "backgroundColor": "#ffffff"
+          "resizeMode": "cover"
         }
       ],
       "expo-secure-store",

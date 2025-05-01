@@ -618,9 +618,9 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.welcomeHeader}>
-            <Typo size={24} fontWeight="600" style={{ lineHeight: 24 }}>
+            <Typo size={26} fontWeight="600" >
               👋 Welcome,{" "}
-              <Typo size={24} fontWeight="600" color="#92999C">
+              <Typo size={26} fontWeight="600" color="#92999C">
                 {firstName}
               </Typo>
             </Typo>

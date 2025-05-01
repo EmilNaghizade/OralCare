@@ -7,6 +7,7 @@ import {
   Alert,
   StatusBar,
   ActivityIndicator,
+  Platform,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import BackButton from "../../../components/BackButton";
@@ -132,6 +133,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     flex: 1,
     justifyContent: "flex-end",
+      paddingBottom: Platform.OS === "ios" ? 30 : 20,
   },
   button: {
     justifyContent: "flex-end",
