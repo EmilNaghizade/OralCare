@@ -1,3 +1,4 @@
+// app/(auth)/register/email.jsx
 import React, { useState, useRef, useEffect } from "react";
 import {
   View,
@@ -10,147 +11,128 @@ import {
   Easing,
   ActivityIndicator,
   StatusBar,
+  Text,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import BackButton from "../../../components/BackButton"; // Adjust path
-import Button from "../../../components/Button"; // Adjust path
+import BackButton from "../../../components/BackButton";
+import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
 import AnimatedIcon from "../../../components/AnimatedIcon";
+import "../../../i18n";
+import { useTranslation } from "react-i18next";
 
-// Placeholder for PNG icon - UPDATE PATH
 const emailIcon = require("../../../assets/images/Email.png");
-
-const NEXT_SCREEN_ROUTE = "/(auth)/register/password"; // <-- UPDATE if needed
+const NEXT_SCREEN_ROUTE = "/(auth)/register/password";
 const BACKEND_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-
-// Simple email validation regex
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-const EmailScreen = () => {
+export default function EmailScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams(); // Get params passed from previous screen
-  const { name, gender } = params; // Extract previous data
+  const params = useLocalSearchParams();
+  const { name, gender } = params;
 
   const [email, setEmail] = useState("");
-  const [isFocused, setIsFocused] = useState(false); // State for animation
-  const [isLoading, setIsLoading] = useState(false); // Added loading state
-  const focusAnim = useRef(new Animated.Value(0)).current; // Animation value
+  const [isFocused, setIsFocused] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const focusAnim = useRef(new Animated.Value(0)).current;
+  const { t } = useTranslation();
 
   useEffect(() => {
-    // Input focus animation logic (same as EnterNameScreen)
     Animated.timing(focusAnim, {
       toValue: isFocused ? 1 : 0,
       duration: 200,
       easing: Easing.bezier(0.4, 0, 0.2, 1),
       useNativeDriver: false,
     }).start();
-  }, [isFocused, focusAnim]);
+  }, [isFocused]);
 
-  // Animated styles for the input wrapper
-  const animatedWrapperStyle = {
-    width: "100%",
-  };
-
-  const validateEmail = (emailToValidate) => {
-    return emailRegex.test(emailToValidate);
-  };
+  const validateEmail = (e) => emailRegex.test(e);
 
   const handleNext = async () => {
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail) {
-      Alert.alert("Email Required", "Please enter your email address.");
-      return;
-    }
-    if (!validateEmail(trimmedEmail)) {
-      Alert.alert("Invalid Email", "Please enter a valid email address.");
-      return;
-    }
-
-    setIsLoading(true); // Set loading to true before API call
-
-    try {
-      // Backend'e e-posta kontrolü için istek gönder
-      const response = await fetch(
-        `${BACKEND_URL}/api/auth/check-email?email=${trimmedEmail}`,
-        {
-          // YOUR_BACKEND_API_ENDPOINT yerine backend adresinizi yazın
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+    const trimmed = email.trim();
+    if (!trimmed) {
+      Alert.alert(
+        t("register.email.alertRequiredTitle", "Email Required"),
+        t("register.email.alertRequiredMessage", "Please enter your email address.")
       );
+      return;
+    }
+    if (!validateEmail(trimmed)) {
+      Alert.alert(
+        t("register.email.alertInvalidTitle", "Invalid Email"),
+        t("register.email.alertInvalidMessage", "Please enter a valid email address.")
+      );
+      return;
+    }
 
-      const data = await response.json();
+    setIsLoading(true);
+    try {
+      // Check existence
+      const checkRes = await fetch(
+        `${BACKEND_URL}/api/auth/check-email?email=${trimmed}`
+      );
+      const { exists } = await checkRes.json();
 
-      if (data.exists) {
-        // E-posta veritabanında varsa uyarı göster
+      if (exists) {
         Alert.alert(
-          "Email Already Exists",
-          "This email is already registered. Please use a different email address."
+          t("register.email.alertExistsTitle", "Email Already Exists"),
+          t(
+            "register.email.alertExistsMessage",
+            "This email is already registered. Please use a different email address."
+          )
         );
       } else {
-        // E-posta veritabanında yoksa bir sonraki ekrana geç
-        const otpResponse = await fetch(`${BACKEND_URL}/api/auth/send-otp`, {
+        // Send OTP
+        const otpRes = await fetch(`${BACKEND_URL}/api/auth/send-otp`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: trimmedEmail, isReset: false }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: trimmed, isReset: false }),
         });
-        console.log("OTP response:", otpResponse);
+        if (!otpRes.ok) throw new Error("otp");
 
-        if (!otpResponse.ok) {
-          throw new Error("Failed to send OTP.");
-        }
-
-        // 2. Go to OTP screen
         router.push({
           pathname: "/(auth)/register/otp",
-          params: { name, gender, email: trimmedEmail },
+          params: { name, gender, email: trimmed },
         });
       }
-    } catch (error) {
-      console.error("Error checking email:", error);
+    } catch (err) {
       Alert.alert(
-        "Error",
-        "An error occurred while checking the email. Please try again later."
+        t("register.email.alertErrorTitle", "Error"),
+        t(
+          "register.email.alertErrorMessage",
+          "An error occurred while checking the email. Please try again later."
+        )
       );
     } finally {
-      setIsLoading(false); // Set loading to false after API call
+      setIsLoading(false);
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
-
       <BackButton />
       <View style={styles.container}>
         <View style={styles.content}>
-          {/* Replace with SVG if using SVG */}
           <AnimatedIcon iconSource={emailIcon} />
-          {/* <Image source={emailIcon} style={styles.icon} />
-          {/* <EmailIcon width={60} height={60} fill="#4CAF50" style={styles.iconSvg} /> */}
 
           <Typo fontWeight="600" size={36} style={styles.title}>
-            Enter your email
+            {t("register.email.title", "Enter your email")}
           </Typo>
 
-          {/* Animated Wrapper + TextInput */}
-          <Animated.View style={animatedWrapperStyle}>
+          <Animated.View style={{ width: "100%" }}>
             <TextInput
               style={styles.input}
-              placeholder="user@gmail.com" // Placeholder matching image
+              placeholder={t("register.email.placeholder", "user@gmail.com")}
               placeholderTextColor="#ccc"
               value={email}
               onChangeText={setEmail}
-              keyboardType="email-address" // Use email keyboard
-              autoCapitalize="none" // Disable auto-capitalization
-              autoComplete="email" // Help with autofill
-              textContentType="emailAddress" // Help with autofill (iOS)
-              returnKeyType="next" // Keyboard return key says "Next"
-              onSubmitEditing={handleNext} // Allow submitting via keyboard
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
+              onSubmitEditing={handleNext}
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
             />
@@ -166,13 +148,8 @@ const EmailScreen = () => {
             {isLoading ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Typo
-                fontWeight="600"
-                size={16}
-                color={"#fff"}
-                style={styles.buttonText}
-              >
-                Next
+              <Typo fontWeight="600" size={16} color="#fff">
+                {t("common.next", "Next")}
               </Typo>
             )}
           </Button>
@@ -180,46 +157,40 @@ const EmailScreen = () => {
       </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  safeArea: { flex: 1, backgroundColor: "#fff" },
   container: {
-    flex: 1, // Take remaining space
-    justifyContent: "space-between", // Push content up, button down
+    flex: 1,
+    justifyContent: "space-between",
     paddingHorizontal: 30,
   },
   content: {
-    flex: 1, // Allow content to take space
+    flex: 1,
     alignItems: "center",
-    justifyContent: "flex-start", // <--- Change to 'flex-start'
+    justifyContent: "flex-start",
     paddingHorizontal: 30,
-    paddingTop: Platform.OS === "ios" ? 20 : 60, // <-- Add paddingTop like other screens (adjust value if needed)
+    paddingTop: Platform.OS === "ios" ? 20 : 60,
   },
-
   title: {
-    lineHeight: 44, // Adjust line height for multi-line text
+    lineHeight: 44,
     textAlign: "center",
     marginBottom: 40,
     color: "#000",
   },
   input: {
-    // Base input styles (border handled by animated wrapper)
     width: "100%",
     fontSize: 24,
     paddingVertical: 10,
-    paddingBottom: 10, // Space for underline
     textAlign: "center",
     color: "#000",
   },
   buttonContainer: {
     width: "100%",
     alignItems: "center",
-    marginTop: 20, // Match content padding
-    paddingBottom: Platform.OS === "ios" ? 30 : 20, // Space from bottom
+    marginTop: 20,
+    paddingBottom: Platform.OS === "ios" ? 30 : 20,
   },
   button: {
     backgroundColor: "#038565",
@@ -229,8 +200,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonDisabled: {
-    backgroundColor: "#7FCFB6", // Lighter green for disabled state
+    backgroundColor: "#7FCFB6",
   },
 });
-
-export default EmailScreen;

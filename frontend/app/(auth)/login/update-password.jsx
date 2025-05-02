@@ -1,5 +1,4 @@
-// File: app/(auth)/login/update-password.jsx
-
+// app/(auth)/login/update-password.jsx
 import React, { useState } from "react";
 import {
   View,
@@ -16,6 +15,8 @@ import {
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import "../../../i18n";
+import { useTranslation } from "react-i18next";
 import BackButton from "../../../components/BackButton";
 import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
@@ -24,9 +25,10 @@ import { authApi } from "../../../services/api";
 
 const passwordIcon = require("../../../assets/images/Password.png");
 
-const UpdatePasswordScreen = () => {
+export default function UpdatePasswordScreen() {
   const router = useRouter();
   const { email, otp } = useLocalSearchParams();
+  const { t } = useTranslation();
 
   const [newPassword, setNewPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -34,19 +36,29 @@ const UpdatePasswordScreen = () => {
 
   const handleUpdatePassword = async () => {
     if (newPassword.length < 6) {
-      Alert.alert("Weak Password", "Password must be at least 6 characters.");
+      Alert.alert(
+        t("login.updatePassword.alertWeakTitle", "Weak Password"),
+        t(
+          "login.updatePassword.alertWeakMessage",
+          "Password must be at least 6 characters."
+        )
+      );
       return;
     }
-
     setIsLoading(true);
-
     try {
       await authApi.resetPasswordWithOtp({ email, otp, newPassword });
-      Alert.alert("Success", "Your password was updated.");
+      Alert.alert(
+        t("login.updatePassword.alertSuccessTitle", "Success"),
+        t("login.updatePassword.alertSuccessMessage", "Your password was updated.")
+      );
       router.replace("/(auth)/login");
     } catch (error) {
-      console.error("Password update failed:", error);
-      Alert.alert("Error", error?.message || "Could not update password");
+      Alert.alert(
+        t("login.updatePassword.alertErrorTitle", "Error"),
+        error?.message ||
+          t("login.updatePassword.alertErrorMessage", "Could not update password")
+      );
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +68,6 @@ const UpdatePasswordScreen = () => {
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.safeArea}>
         <StatusBar barStyle="dark-content" />
-
         <BackButton />
 
         <View style={styles.container}>
@@ -64,13 +75,19 @@ const UpdatePasswordScreen = () => {
             <AnimatedIcon iconSource={passwordIcon} />
 
             <Typo fontWeight="600" size={36} style={styles.title}>
-              Create new password
+              {t(
+                "login.updatePassword.title",
+                "Create new password"
+              )}
             </Typo>
 
-            <View style={styles.animatedWrapperStyle}>
+            <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="New Password"
+                placeholder={t(
+                  "login.updatePassword.placeholder",
+                  "New Password"
+                )}
                 placeholderTextColor="#ccc"
                 value={newPassword}
                 onChangeText={setNewPassword}
@@ -78,7 +95,7 @@ const UpdatePasswordScreen = () => {
                 autoCapitalize="none"
               />
               <TouchableOpacity
-                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                onPress={() => setIsPasswordVisible((v) => !v)}
                 style={styles.eyeIconContainer}
               >
                 <Ionicons
@@ -96,26 +113,27 @@ const UpdatePasswordScreen = () => {
               onPress={handleUpdatePassword}
               disabled={isLoading}
             >
-              <Typo fontWeight="600" size={16} color="#fff">
-                {isLoading ? "Updating..." : "Reset Password"}
-              </Typo>
+              {isLoading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Typo fontWeight="600" size={16} color="#fff">
+                  {t(
+                    "login.updatePassword.button",
+                    "Reset Password"
+                  )}
+                </Typo>
+              )}
             </Button>
           </View>
         </View>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  container: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
+  safeArea: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, justifyContent: "space-between" },
   content: {
     flex: 1,
     alignItems: "center",
@@ -129,7 +147,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     color: "#333",
   },
-  animatedWrapperStyle: {
+  inputWrapper: {
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
@@ -138,13 +156,10 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 24,
     paddingVertical: 10,
-    paddingBottom: 10,
     textAlign: "center",
     color: "#000",
   },
-  eyeIconContainer: {
-    padding: 10,
-  },
+  eyeIconContainer: { padding: 10 },
   buttonContainer: {
     width: "100%",
     alignItems: "center",
@@ -158,9 +173,5 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: "center",
   },
-  disabledButton: {
-    backgroundColor: "#a5d6a7",
-  },
+  disabledButton: { backgroundColor: "#a5d6a7" },
 });
-
-export default UpdatePasswordScreen;

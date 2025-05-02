@@ -1,7 +1,7 @@
 // frontend/admin/index.jsx
-import React from "react";
+import React, {useEffect} from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { useFocusEffect } from "@react-navigation/native";
+
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, BackHandler, Platform } from "react-native";
 import VideoManagement from "./VideoManagement";
@@ -15,25 +15,19 @@ import UserManagement from "./UserManagement";
 const Tab = createBottomTabNavigator();
 
 export default function AdminPanel() {
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        if (Platform.OS === "android") {
-          BackHandler.exitApp(); // exits the app
-          return true; // prevent default behavior
-        }
-        return false;
-      };
+  useEffect(() => {
+    const handler = () => {
+      // whatever you want on back press
+      return Platform.OS === "android"; // true to swallow it
+    };
 
-      const subscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        handler
-      );
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handler
+    );
 
-      return () => subscription.remove();
-    }, [])
-  );
-
+    return () => subscription.remove();
+  }, []);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({

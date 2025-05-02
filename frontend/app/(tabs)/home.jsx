@@ -32,24 +32,31 @@ import {
   quizApi,
 } from "../../services/api";
 import QuizCard from "../../components/QuizCard"; // Adjust path if needed
+import "../../i18n";
+import { useTranslation } from "react-i18next";
 
 const getUserLaunchedKey = (userId) =>
   `@OralCareApp:user_${userId}_hasLaunched`;
 const getProfile = (token) => fetchWithAuth("/api/profile/profile", token);
 
-const SectionHeader = ({ title, onSeeAllPress, isOnSeeAll }) => (
-  <View style={styles.sectionHeader}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    {isOnSeeAll && (
-      <TouchableOpacity onPress={onSeeAllPress}>
-        <Text style={styles.seeAllText}>See all</Text>
-      </TouchableOpacity>
-    )}
-  </View>
-);
+const SectionHeader = ({ titleKey, onSeeAllPress, isOnSeeAll }) => {
+  const { t } = useTranslation();
+
+  return (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{t(titleKey)}</Text>
+      {isOnSeeAll && (
+        <TouchableOpacity onPress={onSeeAllPress}>
+          <Text style={styles.seeAllText}>{t("home.seeAll")}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
 
 const QuizSection = ({ authToken }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -81,9 +88,9 @@ const QuizSection = ({ authToken }) => {
   if (loading) {
     return (
       <View style={styles.sectionCard}>
-        <SectionHeader title="Test your knowledge" isOnSeeAll={false} />
+        <SectionHeader titleKey="home.quizSection.title" isOnSeeAll={false} />
         <Text style={styles.sectionSubtitle}>
-          Take quizzes based on videos and articles
+          {t("home.quizSection.subtitle")}
         </Text>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#038565" />
@@ -95,9 +102,9 @@ const QuizSection = ({ authToken }) => {
   if (quizzes.length === 0) {
     return (
       <View style={styles.sectionCard}>
-        <SectionHeader title="Test your knowledge" isOnSeeAll={false} />
+        <SectionHeader titleKey="home.quizSection.title" isOnSeeAll={false} />
         <Text style={styles.sectionSubtitle}>
-          Take quizzes based on videos and articles
+          {t("home.quizSection.subtitle")}
         </Text>
         <View style={styles.emptyContainer}>
           <Typo style={styles.emptyText}>No quizzes available</Typo>
@@ -109,12 +116,12 @@ const QuizSection = ({ authToken }) => {
   return (
     <View style={styles.sectionCard}>
       <SectionHeader
-        title="Test your knowledge"
+        titleKey={"home.quizSection.title"}
         isOnSeeAll={true}
         onSeeAllPress={() => router.push("/quizzes")}
       />
       <Text style={styles.sectionSubtitle}>
-        Take quizzes based on videos and articles
+        {t("home.quizSection.subtitle")}
       </Text>
       <FlatList
         data={quizzes}
@@ -130,6 +137,7 @@ const QuizSection = ({ authToken }) => {
 
 const WatchAndLearnSection = ({ authToken }) => {
   const router = useRouter();
+  const { t } = useTranslation();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -155,12 +163,12 @@ const WatchAndLearnSection = ({ authToken }) => {
     return (
       <View style={styles.sectionCard}>
         <SectionHeader
-          title="Watch & Learn"
+          titleKey="home.watchSection.title"
           onSeeAllPress={() => router.push("/education")}
           isOnSeeAll={true}
         />
         <Text style={styles.sectionSubtitle}>
-          Expert videos for step-by-step guidance
+          {t("home.watchSection.subtitle")}
         </Text>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#038565" />
@@ -174,15 +182,15 @@ const WatchAndLearnSection = ({ authToken }) => {
     return (
       <View style={styles.sectionCard}>
         <SectionHeader
-          title="Watch & Learn"
+          titleKey="home.watchSection.title"
           onSeeAllPress={() => router.push("/education")}
           isOnSeeAll={true}
         />
         <Text style={styles.sectionSubtitle}>
-          Expert videos for step-by-step guidance
+          {t("home.watchSection.subtitle")}
         </Text>
         <View style={styles.emptyContainer}>
-          <Typo style={styles.emptyText}>No videos available</Typo>
+          <Typo style={styles.emptyText}>{t("home.watchSection.empty")}</Typo>
         </View>
       </View>
     );
@@ -208,12 +216,12 @@ const WatchAndLearnSection = ({ authToken }) => {
   return (
     <View style={styles.sectionCard}>
       <SectionHeader
-        title="Watch & Learn"
+        titleKey="home.watchSection.title"
         onSeeAllPress={() => router.push("/education")}
         isOnSeeAll={true}
       />
       <Text style={styles.sectionSubtitle}>
-        Expert videos for step-by-step guidance
+        {t("home.watchSection.subtitle")}
       </Text>
       <FlatList
         data={adaptedVideos}
@@ -233,6 +241,7 @@ const KnowledgeHubSection = ({ authToken }) => {
   const [articles, setArticles] = useState([]);
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchKnowledgeData = async () => {
@@ -300,12 +309,12 @@ const KnowledgeHubSection = ({ authToken }) => {
     return (
       <View style={styles.sectionCard}>
         <SectionHeader
-          title="Knowledge Hub"
+          titleKey="home.knowledgeSection.title"
           onSeeAllPress={() => router.push("/knowledge")}
           isOnSeeAll={true}
         />
         <Text style={styles.sectionSubtitle}>
-          Articles and news on our industry.
+          {t("home.knowledgeSection.subtitle")}
         </Text>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#038565" />
@@ -317,12 +326,12 @@ const KnowledgeHubSection = ({ authToken }) => {
   return (
     <View style={styles.sectionCard}>
       <SectionHeader
-        title="Knowledge Hub"
+        titleKey={"home.knowledgeSection.title"}
         onSeeAllPress={() => router.push("/knowledge")}
         isOnSeeAll={true}
       />
       <Text style={styles.sectionSubtitle}>
-        Articles and news on our industry.
+        {t("home.knowledgeSection.subtitle")}
       </Text>
 
       <View style={styles.knowledgeTabs}>
@@ -339,7 +348,7 @@ const KnowledgeHubSection = ({ authToken }) => {
               activeKnowledgeTab === "Articles" && styles.activeTabText,
             ]}
           >
-            Articles
+            {t("home.knowledgeSection.tabArticles")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -355,7 +364,7 @@ const KnowledgeHubSection = ({ authToken }) => {
               activeKnowledgeTab === "News" && styles.activeTabText,
             ]}
           >
-            News
+            {t("home.knowledgeSection.tabNews")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -363,7 +372,9 @@ const KnowledgeHubSection = ({ authToken }) => {
       {knowledgeItemsToShow.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Typo style={styles.emptyText}>
-            No {activeKnowledgeTab.toLowerCase()} available
+            {activeKnowledgeTab === "Articles"
+              ? t("home.knowledgeSection.emptyArticles")
+              : t("home.knowledgeSection.emptyNews")}
           </Typo>
         </View>
       ) : (
@@ -397,6 +408,7 @@ export default function HomeScreen() {
   const [showModal, setShowModal] = useState(false);
   const [userId, setUserId] = useState(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const { t } = useTranslation();
 
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
@@ -527,17 +539,6 @@ export default function HomeScreen() {
     return () => clearInterval(interval);
   }, [authToken]);
 
-  const SectionHeader = ({ title, onSeeAllPress, isOnSeeAll }) => (
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {isOnSeeAll && (
-        <TouchableOpacity onPress={onSeeAllPress}>
-          <Text style={styles.seeAllText}>See all</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-
   return (
     <>
       {/* 1‑time “first login” modal */}
@@ -558,20 +559,19 @@ export default function HomeScreen() {
 
             {/* Headline */}
             <Text style={styles.modalTitle}>
-              Oral Care: Why it Matters More Than You Think
+              {t("home.onboardingModal.title")}
             </Text>
 
             {/* Body text */}
             <Text style={styles.modalDescription}>
-              Some people are religious about brushing, flossing, and using
-              mouthwash. Others? Not so much. But the difference between those
-              who invest in oral care and those who skip it goes way beyond
-              fresh breath.
+              {t("home.onboardingModal.description")}
             </Text>
 
             {/* “Read more” link */}
             <TouchableOpacity>
-              <Text style={styles.readMore}>Read more from this article</Text>
+              <Text style={styles.readMore}>
+                {t("home.onboardingModal.readMore")}
+              </Text>
             </TouchableOpacity>
 
             {/* Secondary card preview */}
@@ -601,7 +601,7 @@ export default function HomeScreen() {
                   });
               }}
             >
-              <Text style={styles.proceedButtonText}>Proceed to app</Text>
+              <Text style={styles.proceedButtonText}>{t("home.onboardingModal.proceedButton")}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -615,9 +615,10 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.welcomeHeader}>
-            <Typo size={26} fontWeight="600">
-              👋 Welcome,{" "}
-              <Typo size={26} fontWeight="600" color="#92999C">
+            <Typo size={22} fontWeight="600" >
+              👋 {t("home.welcome")},{" "}
+  
+              <Typo size={22} fontWeight="600" color="#92999C" style={{ }}>
                 {firstName}
               </Typo>
             </Typo>

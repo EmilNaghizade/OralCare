@@ -13,6 +13,8 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import BackButton from "../../../components/BackButton";
 import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
+import "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
@@ -21,10 +23,14 @@ const OtpVerifyScreen = () => {
   const { email } = useLocalSearchParams();
   const [otp, setOtp] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { t } = useTranslation();
 
   const handleVerifyOtp = async () => {
     if (otp.length !== 6) {
-      Alert.alert("Invalid OTP", "OTP must be 6 digits");
+      Alert.alert(
+        t("login.otpVerify.alertInvalidTitle", "Invalid OTP"),
+        t("login.otpVerify.alertInvalidMessage", "OTP must be 6 digits.")
+      );
       return;
     }
 
@@ -50,7 +56,10 @@ const OtpVerifyScreen = () => {
       });
     } catch (err) {
       console.error("OTP verification failed:", err);
-      Alert.alert("Error", err?.response?.data?.error || "OTP failed");
+      Alert.alert(
+        t("login.otpVerify.alertErrorTitle", "Error"),
+        err?.message || t("login.otpVerify.alertErrorMessage", "OTP failed")
+      );
     } finally {
       setIsLoading(false);
     }
@@ -64,15 +73,20 @@ const OtpVerifyScreen = () => {
       <View style={styles.container}>
         <View style={{ flex: 1, justifyContent: "center" }}>
           <Typo fontWeight="600" size={28} style={styles.title}>
-            Enter the OTP sent to
+            {t("login.otpVerify.title", "Enter the OTP sent to")}
           </Typo>
+          <Typo style={styles.checkSpamText}>
+            {" "}
+            {t("login.otpVerify.checkSpam")}{" "}
+          </Typo>
+
           <Typo fontWeight="400" size={18} style={styles.email}>
             {email}
           </Typo>
 
           <TextInput
             style={styles.input}
-            placeholder="Enter 6-digit OTP"
+            placeholder={t("login.otpVerify.placeholder", "Enter 6-digit OTP")}
             placeholderTextColor="#ccc"
             keyboardType="numeric"
             maxLength={6}
@@ -91,7 +105,7 @@ const OtpVerifyScreen = () => {
               <ActivityIndicator color="#fff" size="small" />
             ) : (
               <Typo fontWeight="600" size={16} color="#fff">
-                Verify OTP
+                {t("login.otpVerify.button", "Verify OTP")}
               </Typo>
             )}
           </Button>
@@ -133,7 +147,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     flex: 1,
     justifyContent: "flex-end",
-      paddingBottom: Platform.OS === "ios" ? 30 : 20,
+    paddingBottom: Platform.OS === "ios" ? 30 : 20,
   },
   button: {
     justifyContent: "flex-end",
@@ -145,6 +159,13 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     backgroundColor: "#7FCFB6",
+  },
+  checkSpamText: {
+    fontSize: 14,
+    color: "#888",
+    textAlign: "center",
+    marginTop: 8,
+    marginBottom: 20,
   },
 });
 export default OtpVerifyScreen;

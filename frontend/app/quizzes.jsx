@@ -16,8 +16,9 @@ import { useAuth } from "./_layout";
 import BackButton from "../components/BackButton";
 import Typo from "../components/Typo";
 import { quizApi } from "../services/api";
-import { LogBox } from "react-native";
 import QuizCard from "../components/QuizCard";
+import "../i18n";
+import { useTranslation } from "react-i18next";
 
 export default function Quizzes() {
   // Ignore specific warning
@@ -26,6 +27,7 @@ export default function Quizzes() {
   const { authToken } = useAuth();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -75,7 +77,7 @@ export default function Quizzes() {
           <View style={styles.headerButtons}>
             <BackButton />
           </View>
-          <Text style={styles.headerTitle}>Test your knowledge</Text>
+          <Text style={styles.headerTitle}>{t("home.quizSection.title")}</Text>
         </View>
 
         {/* Articles/News Grid */}
@@ -85,7 +87,7 @@ export default function Quizzes() {
           </View>
         ) : quizzes.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Typo style={styles.emptyText}>No available Quizzes</Typo>
+            <Typo style={styles.emptyText}>{t("home.quizSection.empty")}</Typo>
           </View>
         ) : (
           <FlatList

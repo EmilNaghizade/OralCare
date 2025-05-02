@@ -14,6 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 import BackButton from "../components/BackButton";
 import { VideoCard } from "../components/VideoCard";
 import { videoApi } from "../services/api";
+import "../i18n";
+import { useTranslation } from "react-i18next";
 
 import Typo from "../components/Typo";
 import { useAuth } from "./_layout";
@@ -22,6 +24,7 @@ export default function Education() {
   const { authToken } = useAuth();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
 
   useEffect(() => {
     fetchVideos();
@@ -73,7 +76,7 @@ export default function Education() {
           <View style={styles.headerButtons}>
             <BackButton />
           </View>
-          <Text style={styles.headerTitle}>Watch & Learn</Text>
+          <Text style={styles.headerTitle}>{t("home.watchSection.title")}</Text>
         </View>
 
         {/* Articles Grid */}
@@ -84,7 +87,7 @@ export default function Education() {
           </View>
         ) : videos.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Typo style={styles.emptyText}>No videos available</Typo>
+            <Typo style={styles.emptyText}>{t("home.watchSection.empty")}</Typo>
           </View>
         ) : (
           <FlatList

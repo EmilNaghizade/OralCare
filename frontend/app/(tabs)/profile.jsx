@@ -23,6 +23,8 @@ import { useRouter } from "expo-router";
 import { profileApi } from "../../services/profileApi";
 import * as ImagePicker from "expo-image-picker";
 import { quizApi, videoApi } from "../../services/api";
+import { useTranslation } from "react-i18next";
+import "../../i18n";
 
 const getProfile = (token) => fetchWithAuth("/api/profile/profile", token);
 
@@ -61,6 +63,7 @@ export default function ProfileScreen() {
   const [toastType, setToastType] = useState("success"); // 'success' or 'error'
   const toastAnimation = useRef(new Animated.Value(0)).current;
   const [isAdmin, setIsAdmin] = useState(false);
+  const { t } = useTranslation();
 
   const panResponder = useRef(
     PanResponder.create({
@@ -201,8 +204,8 @@ export default function ProfileScreen() {
       const { status } = await ImagePicker.requestCameraPermissionsAsync();
       if (status !== "granted") {
         Alert.alert(
-          "Permission Required",
-          "Camera access is needed to take a profile photo. Please enable it in your device settings.",
+          t("profile.alert.permissionRequired"),
+          t("profile.alert.cameraPermission"),
           [{ text: "OK" }]
         );
         setPhotoModalVisible(false);
@@ -228,7 +231,7 @@ export default function ProfileScreen() {
           newImage.uri,
           newImage.base64
         );
-        showToast("Profile photo added successfully");
+        showToast(t("profile.toast.photoAdded"), "success");
       }
     } catch (error) {
       console.error("Error taking photo:", error);
@@ -272,7 +275,7 @@ export default function ProfileScreen() {
           newImage.uri,
           newImage.base64
         );
-        showToast("Profile photo uploaded successfully");
+        showToast(t("profile.toast.photoUploaded"), "success");
       }
     } catch (error) {
       console.error("Error picking image:", error);
@@ -290,7 +293,7 @@ export default function ProfileScreen() {
         if (user) {
           setUser({ ...user, profileImage: null });
         }
-        showToast("Profile photo removed successfully");
+        showToast(t("profile.toast.photoRemoved"), "success");
       }
     } catch (error) {
       console.error("Error deleting photo:", error);
@@ -315,7 +318,7 @@ export default function ProfileScreen() {
         title: "Invite a friend",
         url: "https://expo.dev/accounts/emilnaghizade/projects/oral-care/builds/160dd9ab-a376-4c6c-a292-7c71f926e373",
         message:
-          "Download Oral Care App! 📲 Link: https://expo.dev/accounts/emilnaghizade/projects/oral-care/builds/160dd9ab-a376-4c6c-a292-7c71f926e373",
+           "Download Oral Care App! 📲 Link: https://expo.dev/accounts/emilnaghizade/projects/oral-care/builds/160dd9ab-a376-4c6c-a292-7c71f926e373",
       });
       if (result.action === Share.sharedAction) {
         console.log("Shared successfully!");
@@ -388,7 +391,7 @@ export default function ProfileScreen() {
           <View style={styles.statsSection}>
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>{profileData.videoCount}</Text>
-              <Text style={styles.statLabel}>Videos</Text>
+              <Text style={styles.statLabel}>{t("profile.video")}</Text>
               <Ionicons
                 name="videocam-outline"
                 size={24}
@@ -398,7 +401,7 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.statCard}>
               <Text style={styles.statNumber}>{profileData.quizCount}</Text>
-              <Text style={styles.statLabel}>Quizzes</Text>
+              <Text style={styles.statLabel}>{t("profile.quizzes")}</Text>
               <Ionicons
                 name="book-outline"
                 size={24}
@@ -410,7 +413,7 @@ export default function ProfileScreen() {
 
           {/* Profile List Section */}
           <View style={styles.listCard}>
-            <Text style={styles.listHeader}>Profile</Text>
+            <Text style={styles.listHeader}>{t("profile.profile")}</Text>
             {isAdmin && (
               <TouchableOpacity
                 style={styles.listItem}
@@ -422,41 +425,41 @@ export default function ProfileScreen() {
                   color={"#6B7280"}
                   style={styles.listItemIcon}
                 />
-                <Text style={styles.listItemText}>Admin Panel</Text>
+                <Text style={styles.listItemText}>{t("profile.adminPanel")}</Text>
               </TouchableOpacity>
             )}
             <View style={styles.separator} />
             <ProfileListItem
               iconName="person-add-outline"
-              label="Invite a friend"
+              label={t("profile.inviteFriend")}
               onPress={navigateToInvite}
             />
             <View style={styles.separator} />
             <ProfileListItem
               iconName="notifications-outline"
-              label="Notifications"
+              label={t("profile.notifications")}
               onPress={navigateToNotifications}
             />
             <View style={styles.separator} />
             <ProfileListItem
               iconName="settings-outline"
-              label="User settings"
+              label={t("profile.userSettings")}
               onPress={() => router.push("/userSettings")}
             />
           </View>
 
           {/* Support List Section */}
           <View style={styles.listCard}>
-            <Text style={styles.listHeader}>Support & Feedback</Text>
+            <Text style={styles.listHeader}>{t("profile.list.supportSection")}</Text>
             <ProfileListItem
               iconName="chatbubble-ellipses-outline"
-              label="Chat with us"
+              label={t("profile.chatWithUs")}
               onPress={navigateToFAQ}
             />
             <View style={styles.separator} />
             <ProfileListItem
               iconName="log-out-outline"
-              label="Log out"
+              label={t("profile.logOut")}
               onPress={handleLogout}
               isLogout={true}
             />
@@ -492,7 +495,9 @@ export default function ProfileScreen() {
               <View style={styles.iconStyle}>
                 <Camera variant="Outline" size={24} color="#000" />
               </View>
-              <Text style={styles.modalOptionText}>Take Photo</Text>
+              <Text style={styles.modalOptionText}>
+                {t("profile.modal.takePhoto")}
+              </Text>
               <View style={{ flex: 1, alignItems: "flex-end" }}>
                 <Ionicons name="chevron-forward" size={24} color="#000" />
               </View>
@@ -501,7 +506,9 @@ export default function ProfileScreen() {
               <View style={styles.iconStyle}>
                 <Gallery variant="Outline" size={24} color="#000" />
               </View>
-              <Text style={styles.modalOptionText}>Upload Photo</Text>
+              <Text style={styles.modalOptionText}>
+                {t("profile.modal.uploadPhoto")}
+              </Text>
               <View style={{ flex: 1, alignItems: "flex-end" }}>
                 <Ionicons name="chevron-forward" size={24} color="#000" />
               </View>
@@ -511,7 +518,7 @@ export default function ProfileScreen() {
                 <GalleryRemove variant="Outline" size={24} color="#000" />
               </View>
               <Text style={[styles.modalOptionText, styles.deleteText]}>
-                Delete Photo
+                {t("profile.modal.deletePhoto")}
               </Text>
               <View style={{ flex: 1, alignItems: "flex-end" }}>
                 <Ionicons name="chevron-forward" size={24} color="#000" />
@@ -521,7 +528,7 @@ export default function ProfileScreen() {
               style={styles.cancelButton}
               onPress={() => setPhotoModalVisible(false)}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{t("common.cancel")}</Text>
             </TouchableOpacity>
           </Animated.View>
         </TouchableOpacity>

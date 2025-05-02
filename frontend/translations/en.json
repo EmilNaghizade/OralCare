@@ -1,0 +1,265 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Welcome to OralCare",
+      "badge": "🌟 Welcome to Oral Care"
+    },
+    "slide1": {
+      "title": "Learn with Video Tutorials!",
+      "subtitle": "Follow video guides for effective oral care practices."
+    },
+    "slide2": {
+      "title": "Quiz your knowledge!",
+      "subtitle": "Take quizzes to test and improve your oral health knowledge."
+    },
+    "slide3": {
+      "title": "Get Instant Support",
+      "subtitle": "Chat with our managers or connect via your preferred messenger."
+    },
+    "buttons": {
+      "getStarted": "Get started",
+      "login": "Log in",
+      "language": "Language"
+    }
+  },
+
+  "register": {
+    "name": {
+      "title": "What's your name\nand surname?",
+      "placeholder": "Name Surname"
+    },
+    "validation": {
+      "nameRequired": {
+        "title": "Name Required",
+        "message": "Please enter your name and surname."
+      }
+    },
+    "email": {
+      "title": "Enter your email",
+      "placeholder": "user@gmail.com",
+      "alertRequiredTitle": "Email Required",
+      "alertRequiredMessage": "Please enter your email address.",
+      "alertInvalidTitle": "Invalid Email",
+      "alertInvalidMessage": "Please enter a valid email address.",
+      "alertExistsTitle": "Email Already Exists",
+      "alertExistsMessage": "This email is already registered. Please use a different email address.",
+      "alertErrorTitle": "Error",
+      "alertErrorMessage": "An error occurred while checking the email. Please try again later."
+    },
+    "otp": {
+      "title": "Enter the OTP sent to",
+      "checkSpam": "Please check your spam folder as well.",
+      "placeholder": "Enter 6-digit OTP",
+      "button": "Verify OTP",
+      "alertInvalidTitle": "Invalid OTP",
+      "alertInvalidMessage": "OTP must be 6 digits.",
+      "alertErrorTitle": "Error"
+    },
+    "gender": {
+      "title": "Select your gender",
+      "alertTitle": "Selection Required",
+      "alertMessage": "Please select your gender.",
+      "options": {
+        "man": "Man",
+        "woman": "Woman",
+        "preferNotToSay": "Prefer not to say"
+      },
+      "password": {
+        "title": "Create password",
+        "placeholder": "Password",
+        "alertWeakTitle": "Weak Password",
+        "alertWeakMessage": "Password must be at least 6 characters long.",
+        "alertFailedTitle": "Registration Failed",
+        "alertFailedMessage": "An unexpected error occurred.",
+        "button": "Complete sign up",
+        "signingUp": "Signing Up..."
+      }
+    }
+  },
+  "login": {
+    "email": {
+      "title": "Enter your email",
+      "placeholder": "user@gmail.com",
+      "alertRequiredTitle": "Email Required",
+      "alertRequiredMessage": "Please enter your email address.",
+      "alertInvalidTitle": "Invalid Email",
+      "alertInvalidMessage": "Please enter a valid email address.",
+      "alertErrorTitle": "Error",
+      "alertErrorUserNotFoundMessage": "User not found. Please try again.",
+      "alertErrorNotFoundMessage": "User not found.",
+      "alertErrorGeneralMessage": "An error occurred during login. Please try again."
+    },
+    "password": {
+      "title": "Enter password",
+      "placeholder": "Password",
+      "alertWeakTitle": "Weak Password",
+      "alertWeakMessage": "Password must be at least 6 characters long.",
+      "alertFailedTitle": "Login Failed",
+      "alertFailedMessage": "An unexpected error occurred.",
+      "forgot": "Forgot your password?",
+      "button": "Complete sign in",
+      "signingIn": "Signing In..."
+    },
+    "forgot": {
+      "title": "Forgot your password?",
+      "placeholder": "Enter your email",
+      "button": "Send OTP",
+      "alertInvalidTitle": "Invalid Email",
+      "alertInvalidMessage": "Please enter a valid email address.",
+      "alertErrorTitle": "Error",
+      "alertErrorMessage": "Could not send OTP"
+    },
+    "otpVerify": {
+      "title": "Enter the OTP sent to",
+      "placeholder": "Enter 6-digit OTP",
+      "checkSpam": "Please check your spam folder as well.",
+      "button": "Verify OTP",
+      "alertInvalidTitle": "Invalid OTP",
+      "alertInvalidMessage": "OTP must be 6 digits.",
+      "alertErrorTitle": "Error",
+      "alertErrorMessage": "OTP failed"
+    },
+    "updatePassword": {
+      "title": "Create new password",
+      "placeholder": "New Password",
+      "button": "Reset Password",
+      "alertWeakTitle": "Weak Password",
+      "alertWeakMessage": "Password must be at least 6 characters.",
+      "alertSuccessTitle": "Success",
+      "alertSuccessMessage": "Your password was updated.",
+      "alertErrorTitle": "Error",
+      "alertErrorMessage": "Could not update password"
+    }
+  },
+  "articles": {
+    "minRead": "min read"
+  },
+  "proceedModal": {
+    "title": "Oral Care: Why it Matters More Than You Think",
+    "description": "Some people are religious about brushing, flossing, and using mouthwash. Others? Not so much. But the difference between those who invest in oral care and those who skip it goes way beyond fresh breath.",
+    "readMore": "Read more from this article",
+    "proceedButton": "Proceed to app"
+  },
+  "settings": {
+    "language": "Language",
+    "currentLanguage": "Current Language",
+    "selectLanguage": "Select Language"
+  },
+  "home": {
+    "seeAll": "See all",
+
+    "welcome": "Welcome",
+
+    "quizSection": {
+      "title": "Test your knowledge",
+      "subtitle": "Take quizzes based on videos and articles",
+      "empty": "No quizzes available"
+    },
+    "watchSection": {
+      "title": "Watch & Learn",
+      "subtitle": "Expert videos for step-by-step guidance",
+      "empty": "No videos available"
+    },
+    "knowledgeSection": {
+      "title": "Knowledge Hub",
+      "subtitle": "Articles and news on our industry.",
+      "tabArticles": "Articles",
+      "tabNews": "News",
+      "emptyArticles": "No articles available",
+      "emptyNews": "No news available"
+    },
+
+    "onboardingModal": {
+      "title": "Oral Care: Why it Matters More Than You Think",
+      "description": "Some people are religious about brushing, flossing, and using mouthwash. Others? Not so much. But the difference between those who invest in oral care and those who skip it goes way beyond fresh breath.",
+      "readMore": "Read more from this article",
+      "proceedButton": "Proceed to app"
+    }
+  },
+  "notifications": {
+    "screenTitle": "Notifications",
+    "markAllAsRead": "Mark all as read",
+    "empty": "You have no notifications yet."
+  },
+  "products": {
+    "headerTitle": "Oral Care Products",
+    "empty": "No products available",
+    "error": "Could not load products from server. Showing sample products instead."
+  },
+  "profile": {
+    "list": {
+      "profileSection": "Profile",
+      "supportSection": "Support & Feedback"
+    },
+    "adminPanel": "Admin Panel",
+    "video": "Video",
+    "quizzes": "Quizzes",
+    "inviteFriend": "Invite a friend",
+    "notifications": "Notifications",
+    "userSettings": "User settings",
+    "chatWithUs": "Chat with us",
+    "logOut": "Log out",
+    "modal": {
+      "takePhoto": "Take Photo",
+      "uploadPhoto": "Upload Photo",
+      "deletePhoto": "Delete Photo"
+    },
+    "alert": {
+      "permissionRequired": "Permission Required",
+      "cameraPermission": "Camera access is needed to take a profile photo. Please enable it in your device settings.",
+      "galleryPermission": "Photo library access is needed to select a profile photo. Please enable it in your device settings."
+    },
+    "toast": {
+      "photoAdded": "Profile photo added successfully",
+      "photoAddError": "Failed to add photo",
+      "photoUploaded": "Profile photo uploaded successfully",
+      "photoUploadError": "Failed to upload photo",
+      "photoRemoved": "Profile photo removed successfully",
+      "photoRemoveError": "Failed to remove photo"
+    }
+  },
+  "userSettings": {
+    "profileSettings": "Profile Settings",
+    "loadingProfile": "Loading profile...",
+    "fetchError": "Could not load profile.",
+    "personalInformation": "Personal Information",
+    "errors": {
+      "nameEmpty": "Name cannot be empty",
+      "emailInvalid": "Please enter a valid email",
+      "currentPasswordRequired": "Current password is required",
+      "currentPasswordIncorrect": "Current password is incorrect",
+      "passwordShort": "New password must be at least 6 characters",
+      "passwordMismatch": "New passwords do not match"
+    },
+    "language": "Language",
+    "changePassword": "Change Password",
+    "passwordNote": "Leave these fields empty if you don't want to change your password",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "emailAddress": "Email Address",
+    "emailPlaceholder": "Enter your email address",
+    "currentPassword": "Current Password",
+    "currentPasswordPlaceholder": "Enter your current password",
+    "newPassword": "New Password",
+    "newPasswordPlaceholder": "Enter new password",
+    "confirmNewPassword": "Confirm New Password",
+    "confirmPasswordPlaceholder": "Confirm new password",
+    "passwordUpdatedTitle": "Password Updated",
+    "passwordUpdatedMessage": "Your password has been changed. Please use the new one next time.",
+    "profileUpdated": "Profile updated successfully",
+    "updateFailed": "Update failed",
+    "updateProfile": "Update Profile"
+  },
+  "tabs": {
+    "home": "Home",
+    "products": "Products",
+    "profile": "Profile"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "next": "Next",
+    "back": "Back",
+    "ok": "OK"
+  }
+}

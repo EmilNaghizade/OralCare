@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+// app/(auth)/register/gender.jsx
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -10,138 +11,139 @@ import {
   StatusBar,
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import BackButton from "../../../components/BackButton"; // Adjust path
-import Button from "../../../components/Button"; // Adjust path
+import BackButton from "../../../components/BackButton";
+import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
 import AnimatedIcon from "../../../components/AnimatedIcon";
+import "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 const genderIcon = require("../../../assets/images/Gender.png");
 
-const genders = ["Man", "Woman", "Prefer not to say"];
-const NEXT_SCREEN_ROUTE = "/(auth)/register/email"; // <-- UPDATE if needed
+// İndi hər bir seçimin kodu və fallback mətni ilə
+const GENDERS = [
+  { code: "man", fallback: "Man" },
+  { code: "woman", fallback: "Woman" },
+  { code: "preferNotToSay", fallback: "Prefer not to say" },
+];
 
-const GenderSelectionScreen = () => {
+const NEXT_SCREEN_ROUTE = "/(auth)/register/email";
+
+export default function GenderSelectionScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams(); // Get params passed from previous screen
-  const { name } = params; // Extract the name
+  const params = useLocalSearchParams();
+  const { name } = params;
 
-  const [selectedGender, setSelectedGender] = useState(null); // State for selected gender
+  const { t } = useTranslation();
+  const [selectedGender, setSelectedGender] = useState(null);
 
-  const handleSelectGender = (gender) => {
-    setSelectedGender(gender);
+  const handleSelect = (code) => {
+    setSelectedGender(code);
   };
 
   const handleNext = () => {
     if (!selectedGender) {
-      Alert.alert("Selection Required", "Please select your gender.");
+      Alert.alert(
+        t("register.gender.alertTitle", "Selection Required"),
+        t("register.gender.alertMessage", "Please select your gender.")
+      );
       return;
     }
-
-    // Navigate to the next screen, passing name and selected gender
     router.push({
       pathname: NEXT_SCREEN_ROUTE,
-      params: { name: name, gender: selectedGender },
+      params: { name, gender: selectedGender },
     });
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-                  <StatusBar barStyle="dark-content" />
-      
+      <StatusBar barStyle="dark-content" />
       <BackButton />
 
-      {/* Use flex: 1 and space-between to push button to bottom */}
       <View style={styles.container}>
         <View style={styles.content}>
           <AnimatedIcon iconSource={genderIcon} />
 
           <Typo fontWeight="600" size={36} style={styles.title}>
-            Select your gender
+            {t("register.gender.title", "Select your gender")}
           </Typo>
 
-          {/* Gender Options */}
           <View style={styles.optionsContainer}>
-            {genders.map((gender) => (
+            {GENDERS.map(({ code, fallback }) => (
               <TouchableOpacity
-                key={gender}
+                key={code}
                 style={[
                   styles.optionButton,
-                  // Apply selected style if this gender matches the state
-                  selectedGender === gender && styles.selectedOptionButton,
+                  selectedGender === code && styles.selectedOptionButton,
                 ]}
-                onPress={() => handleSelectGender(gender)}
+                onPress={() => handleSelect(code)}
               >
                 <Typo fontWeight="600" size={18} style={styles.optionText}>
-                  {gender}
+                  {t(`register.gender.options.${code}`, fallback)}
                 </Typo>
               </TouchableOpacity>
             ))}
           </View>
         </View>
 
-        {/* Bottom Button Container */}
         <View style={styles.buttonContainer}>
           <Button
-            style={[styles.button, !selectedGender && styles.disabledButton]} // Optionally disable style
+            style={[styles.button, !selectedGender && styles.disabledButton]}
             onPress={handleNext}
-            disabled={!selectedGender} // Optionally disable press
+            disabled={!selectedGender}
           >
-            <Text style={styles.buttonText}>Next</Text>
+            <Text style={styles.buttonText}>
+              {t("common.next", "Next")}
+            </Text>
           </Button>
         </View>
       </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  safeArea: { flex: 1, backgroundColor: "#fff" },
   container: {
-    flex: 1, // Take remaining space
-    justifyContent: "space-between", // Push content up, button down
+    flex: 1,
+    justifyContent: "space-between",
     paddingHorizontal: 30,
   },
   content: {
-    // flex: 1, // Allow content to take up space but not push button excessively
     alignItems: "center",
-    paddingTop: 20, // Space below header/back button
+    paddingTop: 20,
   },
   title: {
-    lineHeight: 44, // Adjust line height for multi-line text
+    lineHeight: 44,
     textAlign: "center",
     marginBottom: 40,
     color: "#333",
   },
   optionsContainer: {
-    width: "100%", // Options take full width of padding
+    width: "100%",
   },
   optionButton: {
-    backgroundColor: "#F0F5F7", // Light grey background
-    paddingVertical: 18, // Make buttons taller
+    backgroundColor: "#F0F5F7",
+    paddingVertical: 18,
     paddingHorizontal: 15,
-    borderRadius: 15, // Rounded corners
-    marginBottom: 15, // Space between buttons
-    alignItems: "center", // Center text horizontally
+    borderRadius: 15,
+    marginBottom: 15,
+    alignItems: "center",
     borderWidth: 1,
-    borderColor: "transparent", // Default transparent border
+    borderColor: "transparent",
   },
   selectedOptionButton: {
-    // Green background when selected
-    borderColor: "#038565", // Green border when selected
-    borderWidth: 1,
+    borderColor: "#038565",
   },
   optionText: {
-    color: "#000", // Dark text color for non-selected
+    color: "#000",
     lineHeight: 24,
   },
   buttonContainer: {
     width: "100%",
     alignItems: "center",
-    paddingBottom: Platform.OS === "ios" ? 30 : 20, // Space from bottom edge
-    marginTop: 20, // Add space above button if options list gets long
+    paddingBottom: Platform.OS === "ios" ? 30 : 20,
+    marginTop: 20,
   },
   button: {
     backgroundColor: "#038565",
@@ -151,8 +153,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   disabledButton: {
-    // Optional style for disabled button state
-    backgroundColor: "#a5d6a7", // Lighter green
+    backgroundColor: "#a5d6a7",
   },
   buttonText: {
     color: "#fff",
@@ -160,5 +161,3 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 });
-
-export default GenderSelectionScreen;

@@ -1,5 +1,4 @@
-// File: app/(auth)/login/forgot.jsx
-
+// app/(auth)/login/forgot.jsx
 import React, { useState } from "react";
 import {
   View,
@@ -12,49 +11,55 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
+import "../../../i18n";
+import { useTranslation } from "react-i18next";
 import BackButton from "../../../components/BackButton";
 import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
+import AnimatedIcon from "../../../components/AnimatedIcon";
 
+const emailIcon = require("../../../assets/images/Email.png");
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
-const ForgotPasswordScreen = () => {
+
+export default function ForgotPasswordScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const validateEmail = (emailToValidate) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(emailToValidate);
-  };
+  const validateEmail = (e) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.trim());
 
   const handleSendOtp = async () => {
-    const trimmedEmail = email.trim();
-
-    if (!validateEmail(trimmedEmail)) {
-      Alert.alert("Invalid Email", "Please enter a valid email address.");
+    const trimmed = email.trim();
+    if (!validateEmail(trimmed)) {
+      Alert.alert(
+        t("login.forgot.alertInvalidTitle", "Invalid Email"),
+        t(
+          "login.forgot.alertInvalidMessage",
+          "Please enter a valid email address."
+        )
+      );
       return;
     }
-
     setIsLoading(true);
-
     try {
-      const otpResponse = await fetch(`${BACKEND_URL}/api/auth/send-otp`, {
+      await fetch(`${BACKEND_URL}/api/auth/send-otp`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email: trimmedEmail, isReset: true }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: trimmed, isReset: true }),
       });
-      console.log("OTP response:", otpResponse);
-
       router.push({
         pathname: "/(auth)/login/otp",
-        params: { email: trimmedEmail },
+        params: { email: trimmed },
       });
     } catch (err) {
       console.error("Failed to send OTP:", err);
-      Alert.alert("Error", err?.response?.data?.error || "Could not send OTP");
+      Alert.alert(
+        t("login.forgot.alertErrorTitle", "Error"),
+        err?.response?.data?.error ||
+          t("login.forgot.alertErrorMessage", "Could not send OTP")
+      );
     } finally {
       setIsLoading(false);
     }
@@ -65,57 +70,49 @@ const ForgotPasswordScreen = () => {
       <StatusBar barStyle="dark-content" />
       <BackButton />
       <View style={styles.container}>
-        <View style={styles.inputContainer}>
-          <Typo fontWeight="600" size={28} style={styles.title}>
-            Forgot your password?
-          </Typo>
-
-          <TextInput
-            style={styles.input}
-            placeholder="Enter your email"
-            placeholderTextColor="#ccc"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            returnKeyType="done"
-            onSubmitEditing={handleSendOtp}
-          />
+      
+          <View style={styles.inputContainer}>
+            <Typo fontWeight="600" size={28} style={styles.title}>
+              {t("login.forgot.title", "Forgot your password?")}
+            </Typo>
+            <TextInput
+              style={styles.input}
+              placeholder={t("login.forgot.placeholder", "Enter your email")}
+              placeholderTextColor="#ccc"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              returnKeyType="done"
+              onSubmitEditing={handleSendOtp}
+            />
+          </View>
+          <View style={styles.buttonContainer}>
+            <Button
+              style={[styles.button, isLoading && styles.buttonDisabled]}
+              disabled={isLoading}
+              onPress={handleSendOtp}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Typo fontWeight="600" size={16} color="#fff">
+                  {t("login.forgot.button", "Send OTP")}
+                </Typo>
+              )}
+            </Button>
+          </View>
         </View>
-
-        <View style={styles.buttonContainer}>
-          <Button
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            disabled={isLoading}
-            onPress={handleSendOtp}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" size="small" />
-            ) : (
-              <Typo fontWeight="600" size={16} color="#fff">
-                Send OTP
-              </Typo>
-            )}
-          </Button>
-        </View>
-      </View>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  // Added headerContainer style from previous examples
-
-  container: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
+  safeArea: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, justifyContent: "space-between" },
+  inputContainer: { flex: 1, justifyContent: "center", paddingHorizontal: 30 },
   title: {
-    lineHeight: 44, // Adjust line height for multi-line text
+    lineHeight: 36,
     textAlign: "center",
     marginBottom: 40,
     color: "#333",
@@ -123,14 +120,8 @@ const styles = StyleSheet.create({
   input: {
     fontSize: 24,
     paddingVertical: 10,
-    paddingBottom: 10, // Space for underline
     textAlign: "center",
     color: "#000",
-    // Remove borders here - handled by wrapper
-  },
-  inputContainer: {
-    flex: 1,
-    justifyContent: "center",
   },
   buttonContainer: {
     flex: 1,
@@ -147,9 +138,5 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: "center",
   },
-  buttonDisabled: {
-    backgroundColor: "#7FCFB6",
-  },
+  buttonDisabled: { backgroundColor: "#7FCFB6" },
 });
-
-export default ForgotPasswordScreen;

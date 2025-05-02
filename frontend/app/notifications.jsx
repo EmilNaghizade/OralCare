@@ -16,11 +16,14 @@ import { Ionicons } from "@expo/vector-icons";
 import Typo from "../components/Typo";
 import BackButton from "../components/BackButton";
 import { useAuth } from "./_layout";
+import { useTranslation } from "react-i18next";
+import "../i18n";
 import { notificationApi } from "../services/api";
 
 export default function NotificationsScreen() {
   const router = useRouter();
   const { authToken } = useAuth();
+  const { t } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -240,7 +243,7 @@ export default function NotificationsScreen() {
   const renderEmptyList = () => (
     <View style={styles.emptyContainer}>
       <Ionicons name="notifications-off-outline" size={60} color="#ccc" />
-      <Typo style={styles.emptyText}>You have no notifications yet.</Typo>
+      <Typo style={styles.emptyText}>{t("notifications.empty")}</Typo>
     </View>
   );
 
@@ -263,7 +266,7 @@ export default function NotificationsScreen() {
           style={styles.markAllReadButton}
           onPress={markAllAsRead}
         >
-          <Typo style={styles.markAllReadText}>Mark all as read</Typo>
+          <Typo style={styles.markAllReadText}>{t("notifications.markAllAsRead")}</Typo>
         </TouchableOpacity>
       )}
 

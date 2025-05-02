@@ -16,15 +16,18 @@ import BackButton from "../components/BackButton";
 import Typo from "../components/Typo";
 import { articleApi, newsApi } from "../services/api";
 import { useAuth } from "./_layout";
-import { LogBox } from 'react-native';
+import { LogBox } from "react-native";
+import "../i18n";
+import { useTranslation } from "react-i18next";
 
 LogBox.ignoreLogs([
-  'VirtualizedLists should never be nested'  // disable specific warning
+  "VirtualizedLists should never be nested", // disable specific warning
 ]);
 
 export default function KnowledgeHub() {
   const router = useRouter();
   const { authToken } = useAuth();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("Articles");
   const [articles, setArticles] = useState([]);
   const [news, setNews] = useState([]);
@@ -42,16 +45,18 @@ export default function KnowledgeHub() {
         const data = await articleApi.getAllArticles(authToken);
         if (data && data.articles) {
           // Map the backend data to match the expected format for ArticleCard
-          const mappedArticles = data.articles.map(article => ({
+          const mappedArticles = data.articles.map((article) => ({
             _id: article._id,
             title: article.title,
-            image: { uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${article.thumbnail}` },
+            image: {
+              uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${article.thumbnail}`,
+            },
             readTime: `${article.readingTime}min read`,
-            createdAt: new Date(article.createdAt).toLocaleDateString('en-US', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric'
-            })
+            createdAt: new Date(article.createdAt).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            }),
           }));
           setArticles(mappedArticles);
         }
@@ -59,16 +64,18 @@ export default function KnowledgeHub() {
         const data = await newsApi.getAllNews(authToken);
         if (data && data.news) {
           // Map the backend data to match the expected format for ArticleCard
-          const mappedNews = data.news.map(item => ({
+          const mappedNews = data.news.map((item) => ({
             _id: item._id,
             title: item.title,
-            image: { uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${item.thumbnail}` },
+            image: {
+              uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${item.thumbnail}`,
+            },
             readTime: `${item.readingTime}min read`,
-            createdAt: new Date(item.createdAt).toLocaleDateString('en-US', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric'
-            })
+            createdAt: new Date(item.createdAt).toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            }),
           }));
           setNews(mappedNews);
         }
@@ -89,19 +96,28 @@ export default function KnowledgeHub() {
   const displayData = activeTab === "Articles" ? articles : news;
 
   const renderArticleItem = ({ item }) => (
-    <ArticleCard item={item} cardWidth={"47%"} params={{activeTab: activeTab}} />
+    <ArticleCard
+      item={item}
+      cardWidth={"47%"}
+      params={{ activeTab: activeTab }}
+    />
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
       {/* Header */}
-      <ScrollView style={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.header}>
           <View style={styles.headerButtons}>
             <BackButton />
           </View>
-          <Text style={styles.headerTitle}>Knowledge Hub</Text>
+          <Text style={styles.headerTitle}>
+            {t("home.knowledgeSection.title")}
+          </Text>
 
           {/* Tab Navigation */}
           <View style={styles.tabContainer}>
@@ -115,7 +131,7 @@ export default function KnowledgeHub() {
                   activeTab === "Articles" && styles.activeTabText,
                 ]}
               >
-                Articles
+                {t("home.knowledgeSection.tabArticles")}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -128,7 +144,7 @@ export default function KnowledgeHub() {
                   activeTab === "News" && styles.activeTabText,
                 ]}
               >
-                News
+                {t("home.knowledgeSection.tabNews")}
               </Text>
             </TouchableOpacity>
           </View>
@@ -141,7 +157,11 @@ export default function KnowledgeHub() {
           </View>
         ) : displayData.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Typo style={styles.emptyText}>No {activeTab.toLowerCase()} available</Typo>
+            <Typo style={styles.emptyText}>
+              {activeKnowledgeTab === "Articles"
+                ? t("home.knowledgeSection.emptyArticles")
+                : t("home.knowledgeSection.emptyNews")}
+            </Typo>
           </View>
         ) : (
           <FlatList
@@ -166,9 +186,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  scrollContainer: { 
-    paddingBottom: 30, 
-    backgroundColor: "#f0f2f5" 
+  scrollContainer: {
+    paddingBottom: 30,
+    backgroundColor: "#f0f2f5",
   },
   header: {
     height: 200, // Header yüksekliği

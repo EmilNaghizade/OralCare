@@ -2,6 +2,9 @@
 import React from "react";
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons"; // Or your preferred icon library
+import "../../i18n"; // Import your i18n setup if needed
+
+import { useTranslation } from "react-i18next"; // Import i18n hook
 
 // Define a helper function for tabBarIcon for cleaner code
 const TabBarIcon = ({ name, color }) => {
@@ -18,7 +21,7 @@ const TabBarIcon = ({ name, color }) => {
 export default function TabLayout() {
   // Define your active tab color (e.g., your app's theme color)
   const activeTabColor = "#038565"; // Example green color
-
+  const { t } = useTranslation(); // Initialize the translation hook
   return (
     <Tabs
       screenOptions={{
@@ -39,7 +42,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="home" // Matches the filename home.jsx
         options={{
-          title: "Home", // Tab bar label
+          title: t("tabs.home"), // Tab bar label
           // headerShown: true, // Optionally show header for specific tabs
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
@@ -53,7 +56,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="products" // Matches products.jsx
         options={{
-          title: "Products",
+          title: t("tabs.products"),
           tabBarIcon: ({ color, focused }) => (
             // Choose an appropriate icon name
             <TabBarIcon
@@ -66,7 +69,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="profile" // Matches profile.jsx
         options={{
-          title: "Profile",
+          title: t("tabs.profile"),
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon
               name={focused ? "person-circle" : "person-circle-outline"}

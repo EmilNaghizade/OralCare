@@ -11,7 +11,6 @@ primary_region = 'fra'
 [mounts]
   source = "oralcare_data"
   destination = "/app/src/uploads"
-  initial_size = "10gb"
 
 [processes]
   app = "node src/index.js"
@@ -35,6 +34,6 @@ primary_region = 'fra'
 
 
 [[vm]]
-  memory = '2gb'
+  memory = '1gb'
   cpu_kind = 'shared'
   cpus = 2

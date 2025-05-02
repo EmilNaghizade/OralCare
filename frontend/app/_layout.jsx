@@ -8,10 +8,11 @@ import React, {
 } from "react";
 import { Slot, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
-import { ActivityIndicator, View,Text } from "react-native";
+import { ActivityIndicator, View, Text } from "react-native";
 import { authApi } from "../services/api";
-
-
+import "../i18n";
+import { I18nextProvider } from "react-i18next";
+import i18n from "../i18n";
 
 // --- Authentication Context ---
 const AuthContext = createContext(null);
@@ -128,7 +129,6 @@ function AuthProvider({ children }) {
     const getAdmin = async () => {
       try {
         if (isLoading || hasNavigated.current) return;
-        console.log(user, "userblin");
         if (!authToken || !user) {
           hasNavigated.current = true;
           router.replace("/onboarding");
@@ -151,11 +151,6 @@ function AuthProvider({ children }) {
 
     getAdmin();
   }, [isLoading, authToken, user?.role]); // Add router and user to dependencies isLoading, authToken ve user değiştiğinde çalışır
-
-
-
-
-
 
   // Login fonksiyonu: token ve user objesini alır (API response'dan)
   // Login function without routing
@@ -246,9 +241,7 @@ function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      <View
-        style={{ flex: 1, backgroundColor: "#ffffff" }}
-      >
+      <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
         {isLoading ? (
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -269,10 +262,13 @@ function AuthProvider({ children }) {
 
 // --- Kök Layout Component ---
 export default function RootLayout() {
-
   return (
-    <AuthProvider>
-      <Slot />
-    </AuthProvider>
+    <I18nextProvider i18n={i18n}>
+    
+      <AuthProvider>
+        <Slot />
+      </AuthProvider>
+     
+    </I18nextProvider>
   );
 }

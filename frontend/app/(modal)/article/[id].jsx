@@ -17,17 +17,19 @@ import Badge from "../../../components/Badge";
 import Typo from "../../../components/Typo";
 import { articleApi, newsApi } from "../../../services/api";
 import { useAuth } from "../../_layout";
+import "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 const ArticleDetail = () => {
-  const { id: contentId,  activeTab } = useLocalSearchParams(); // Get ID and type from route param
+  const { id: contentId, activeTab } = useLocalSearchParams(); // Get ID and type from route param
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { authToken } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation;
 
   // Determine if we're looking at an article or news item
-
 
   console.log(activeTab, "activeTab");
 
@@ -117,7 +119,9 @@ const ArticleDetail = () => {
         </Typo>
         <View style={styles.badgeRow}>
           <Badge>{formattedDate}</Badge>
-          <Badge>{data.readingTime} min read</Badge>
+          <Badge>
+            {data.readingTime} {t("articles.minRed")}
+          </Badge>
         </View>
 
         <Image
@@ -125,7 +129,6 @@ const ArticleDetail = () => {
             uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${data.thumbnail}`,
           }}
           style={styles.coverImage}
-      
         />
 
         <View style={styles.bodyTextContainer}>

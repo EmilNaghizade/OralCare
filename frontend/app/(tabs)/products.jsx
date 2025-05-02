@@ -16,6 +16,8 @@ import { useAuth } from "../_layout";
 import Typo from "../../components/Typo";
 import axios from "axios";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
+import "../../i18n";
 
 const PADDING = 16; // Yeni padding/gap değeri
 const { width } = Dimensions.get("window");
@@ -23,6 +25,7 @@ const ITEM_WIDTH = (width - PADDING * 3) / 2;
 
 // --- Ürün Kartı Bileşeni ---
 const ProductCard = ({ item }) => {
+
   // Fix the image source handling
   let imageSource;
 
@@ -86,6 +89,7 @@ const ProductCard = ({ item }) => {
 
 // --- Ana Ürünler Ekranı Bileşeni ---
 export default function ProductsScreen() {
+  const { t } = useTranslation();
   const { authToken } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -139,7 +143,7 @@ export default function ProductsScreen() {
         {/* Custom Header */}
         <View style={styles.header}>
           <Typo fontWeight="600" size={20} style={styles.headerTitle}>
-            Oral Care Products
+            {t("products.headerTitle")}
           </Typo>
         </View>
         {loading ? (
@@ -158,7 +162,7 @@ export default function ProductsScreen() {
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Typo style={styles.emptyText}>No products available</Typo>
+                <Typo style={styles.emptyText}> {t("products.empty")} </Typo>
               </View>
             }
           />
@@ -166,7 +170,7 @@ export default function ProductsScreen() {
         {/* Error message if any */}
         {error && (
           <View style={styles.errorContainer}>
-            <Typo style={styles.errorText}>{error}</Typo>
+            <Typo style={styles.errorText}>{t("products.error")}</Typo>
           </View>
         )}
       </View>
@@ -187,6 +191,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff", // Beyaz header arka planı
     paddingTop: 40, // Internal padding
     paddingHorizontal: 20,
+    
     paddingBottom: 24, // Internal padding (adjust as needed)
     // Alt köşeleri yuvarlatma
     borderBottomLeftRadius: 24, // <<< YUVARLAK KÖŞE
@@ -195,6 +200,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24, // Başlık boyutu
     fontWeight: "600", // Başlık kalınlığı
+    flexWrap: "wrap", // Başlık satırları sarmalansın
     lineHeight: 32, // Başlık satır yüksekliği
     color: "#1c1c1c", // Koyu başlık rengi
     textAlign: "left", // Başlığı ortala

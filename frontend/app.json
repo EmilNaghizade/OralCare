@@ -52,7 +52,7 @@
         {
           "image": "./assets/images/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#fff",
+          "backgroundColor": "#ffffff",
           "imageWidth": 1170,
           "imageHeight": 2532
         }
