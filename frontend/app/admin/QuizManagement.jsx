@@ -1,4 +1,5 @@
 // frontend/app/admin/QuizManagement.jsx
+import 'react-native-gesture-handler';
 import React from "react";
 import { createStackNavigator } from "@react-navigation/stack";
 import QuizListScreen from "./components/QuizListScreen";
