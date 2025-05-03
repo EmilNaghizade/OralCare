@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import {
   View,
   StyleSheet,
@@ -17,11 +17,13 @@ import { VideoCard } from "../../components/VideoCard"; // Kendi VideoCard'ını
 import Typo from "../../components/Typo"; // Kendi Typo'nuz
 import { videoApi, quizApi } from "../../services/api";
 import { useAuth } from "../_layout";
+import { useTranslation } from "react-i18next";
 
 const RelatedVideos = ({ quizId }) => {
   const { authToken } = useAuth();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { i18n,t } = useTranslation();
 
   useEffect(() => {
     fetchVideos();
@@ -29,11 +31,15 @@ const RelatedVideos = ({ quizId }) => {
 
   const fetchVideos = async () => {
     try {
-      const data = await videoApi.getAllVideos(authToken);
+      const data = await videoApi.getAllVideos(authToken, i18n.language);
       if (data && data.videos) {
         // In a real app, you might have a way to fetch videos related to the specific quiz
         // fetch videos that match quizzes category
-        const quizData = await quizApi.getQuizById(quizId, authToken);
+        const quizData = await quizApi.getQuizById(
+          quizId,
+          authToken,
+          i18n.language
+        );
         const relatedVideos = data.videos.filter((video) =>
           video.category.includes(quizData.category)
         );
@@ -63,7 +69,7 @@ const RelatedVideos = ({ quizId }) => {
   if (videos.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Typo style={styles.emptyText}>No related videos available</Typo>
+        <Typo style={styles.emptyText}>{t("quiz.noRelatedVideos")}</Typo>
       </View>
     );
   }
@@ -72,6 +78,7 @@ const RelatedVideos = ({ quizId }) => {
   const adaptedVideos = videos.map((video) => ({
     _id: video._id,
     title: video.title,
+    titleTranslations: video.titleTranslations,
     thumbnailUrl: {
       uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${video.thumbnailUrl}`,
     },
@@ -108,7 +115,7 @@ export default function QuizDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [finishedQuizzes, setFinishedQuizzes] = useState([]);
-
+  const { i18n, t } = useTranslation();
   // Fetch quiz data
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -117,7 +124,11 @@ export default function QuizDetailScreen() {
         setError(null);
 
         // Fetch the specific quiz
-        const quizData = await quizApi.getQuizById(quizId, authToken);
+        const quizData = await quizApi.getQuizById(
+          quizId,
+          authToken,
+          i18n.language
+        );
         setQuiz(quizData);
         console.log("Fetched quiz data:", quizData);
 
@@ -241,12 +252,12 @@ export default function QuizDetailScreen() {
           >
             <View style={styles.badge}>
               <Ionicons name="help-circle-outline" size={14} color="#fff" />
-              <Typo style={styles.badgeText}>Quiz</Typo>
+              <Typo style={styles.badgeText}>{t("quiz.quiz")}</Typo>
             </View>
 
             <View style={styles.badge}>
               <Typo style={styles.badgeText}>
-                {quiz?.questions?.length || 0} questions
+                {quiz?.questions?.length || 0} {t}
               </Typo>
             </View>
 
@@ -259,7 +270,7 @@ export default function QuizDetailScreen() {
             {isQuizCompleted() && (
               <View style={[styles.badge, styles.completedBadge]}>
                 <Ionicons name="checkmark-circle" size={14} color="#fff" />
-                <Typo style={styles.badgeText}>Completed</Typo>
+                <Typo style={styles.badgeText}>{t("quiz.completed")}</Typo>
               </View>
             )}
 
@@ -280,7 +291,7 @@ export default function QuizDetailScreen() {
             onPress={handleStartQuiz}
           >
             <Typo fontWeight="600" size={16} style={styles.startButtonText}>
-              {isQuizCompleted() ? "Retake Quiz" : "Start Quiz"}
+              {isQuizCompleted() ? t("quiz.retakeQuiz"): t("quiz.startQuiz")}
             </Typo>
           </TouchableOpacity>
         </LinearGradient>
@@ -288,7 +299,7 @@ export default function QuizDetailScreen() {
         {/* Alt Beyaz Alan - İlgili Videolar */}
         <View style={styles.contentContainer}>
           <Typo style={styles.relatedVideosTitle}>
-            Before starting the quiz you can watch related videos below:
+            {t("quiz.before")}
           </Typo>
 
           {/* Video Kartları */}

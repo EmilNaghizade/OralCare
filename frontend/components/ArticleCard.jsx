@@ -1,12 +1,22 @@
 import { Image, Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import Typo from "../components/Typo";
+import { useTranslation } from "react-i18next";
 import Badge from "./Badge";
 
 export const ArticleCard = ({ item, cardWidth = 230, params }) => {
+  const { i18n } = useTranslation();
   const cardStyle = {
     width: cardWidth,
   };
+  
+  const title = item.titleTranslations
+    ? item.titleTranslations[i18n.language] ||
+      item.titleTranslations.en ||
+      item.title
+    : item.title;
+
+    console.log(title,"articleCard")
   return (
     <TouchableOpacity
       style={[styles.card, cardStyle]}
@@ -22,7 +32,7 @@ export const ArticleCard = ({ item, cardWidth = 230, params }) => {
         <Badge>{item.readTime}</Badge>
         {/* Başlık */}
         <Typo style={styles.title} numberOfLines={3}>
-          {item.title}
+           {title}12313
         </Typo>
 
         {/* Yayın Tarihi */}

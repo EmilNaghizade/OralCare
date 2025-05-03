@@ -30,6 +30,7 @@ export default function KnowledgeHub() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("Articles");
   const [articles, setArticles] = useState([]);
+  const { i18n } = useTranslation();
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -42,17 +43,18 @@ export default function KnowledgeHub() {
     setLoading(true);
     try {
       if (activeTab === "Articles") {
-        const data = await articleApi.getAllArticles(authToken);
+        const data = await articleApi.getAllArticles(authToken, i18n.language);
         if (data && data.articles) {
           // Map the backend data to match the expected format for ArticleCard
           const mappedArticles = data.articles.map((article) => ({
             _id: article._id,
             title: article.title,
+            titleTranslations: article.titleTranslations,
             image: {
               uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${article.thumbnail}`,
             },
-            readTime: `${article.readingTime}min read`,
-            createdAt: new Date(article.createdAt).toLocaleDateString("en-US", {
+            readTime: `${article.readingTime} ${t("articles.minRead")}`,
+            createdAt: new Date(article.createdAt).toLocaleDateString( i18n.language==="en"? "en-US" : "ru-RU", {
               day: "numeric",
               month: "long",
               year: "numeric",
@@ -61,17 +63,18 @@ export default function KnowledgeHub() {
           setArticles(mappedArticles);
         }
       } else {
-        const data = await newsApi.getAllNews(authToken);
+        const data = await newsApi.getAllNews(authToken,i18n.language);
         if (data && data.news) {
           // Map the backend data to match the expected format for ArticleCard
           const mappedNews = data.news.map((item) => ({
             _id: item._id,
             title: item.title,
+            titleTranslations: item.titleTranslations,
             image: {
               uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${item.thumbnail}`,
             },
-            readTime: `${item.readingTime}min read`,
-            createdAt: new Date(item.createdAt).toLocaleDateString("en-US", {
+            readTime: `${item.readingTime} ${t("articles.minRead")}`,
+            createdAt: new Date(item.createdAt).toLocaleDateString( i18n.language==="en"? "en-US" : "ru-RU", {
               day: "numeric",
               month: "long",
               year: "numeric",
@@ -158,7 +161,7 @@ export default function KnowledgeHub() {
         ) : displayData.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Typo style={styles.emptyText}>
-              {activeKnowledgeTab === "Articles"
+              {activeTab === "Articles"
                 ? t("home.knowledgeSection.emptyArticles")
                 : t("home.knowledgeSection.emptyNews")}
             </Typo>

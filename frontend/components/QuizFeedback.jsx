@@ -1,12 +1,14 @@
-import React, { useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useRef } from "react";
+import { View, Text, StyleSheet, Animated, Dimensions } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 
 const FeedbackToast = ({ isVisible, isCorrect, onAnimationEnd }) => {
   const translateY = useRef(new Animated.Value(100)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+  const { i18n, t } = useTranslation();
 
   useEffect(() => {
     if (isVisible) {
@@ -58,10 +60,12 @@ const FeedbackToast = ({ isVisible, isCorrect, onAnimationEnd }) => {
         },
       ]}
     >
-      <View style={[
-        styles.toast,
-        isCorrect ? styles.correctToast : styles.incorrectToast
-      ]}>
+      <View
+        style={[
+          styles.toast,
+          isCorrect ? styles.correctToast : styles.incorrectToast,
+        ]}
+      >
         <View style={styles.iconContainer}>
           <Ionicons
             name={isCorrect ? "checkmark" : "close"}
@@ -70,7 +74,7 @@ const FeedbackToast = ({ isVisible, isCorrect, onAnimationEnd }) => {
           />
         </View>
         <Text style={styles.text}>
-          {isCorrect ? "Correct Answer!" : "Incorrect Answer!"}
+          {isCorrect ? t("quizResult.correct") : t("quizResult.incorrect")}
         </Text>
       </View>
     </Animated.View>
@@ -79,40 +83,40 @@ const FeedbackToast = ({ isVisible, isCorrect, onAnimationEnd }) => {
 
 const styles = StyleSheet.create({
   container: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 50,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
     zIndex: 1000,
   },
   toast: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 15,
     paddingHorizontal: 24,
     borderRadius: 24,
-    width: "90%"
+    width: "90%",
   },
   correctToast: {
-    backgroundColor: '#00AE83', // Green color for correct answer
+    backgroundColor: "#00AE83", // Green color for correct answer
   },
   incorrectToast: {
-    backgroundColor: '#FB0A0A', // Red color for incorrect answer
+    backgroundColor: "#FB0A0A", // Red color for incorrect answer
   },
   iconContainer: {
     width: 30,
     height: 30,
     borderRadius: 15,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 12,
   },
   text: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
 

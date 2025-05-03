@@ -120,10 +120,10 @@ export const authApi = {
 
 export const quizApi = {
   // Get all quizzes (for admin)
-  getAllQuizzes: async (token, page = 1, limit = 10) => {
+  getAllQuizzes: async (token, page = 1, limit = 10, lang) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/quizzes?page=${page}&limit=${limit}`,
+        `${API_URL}/api/quizzes?page=${page}&limit=${limit}?lang=${lang}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -138,13 +138,16 @@ export const quizApi = {
   },
 
   // Get a specific quiz
-  getQuizById: async (quizId, token) => {
+  getQuizById: async (quizId, token, lang) => {
     try {
-      const response = await axios.get(`${API_URL}/api/quizzes/${quizId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/quizzes/${quizId}?lang=${lang}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error(`Error fetching quiz with ID ${quizId}:`, error);
@@ -310,9 +313,9 @@ export const quizApi = {
 // Add these functions to your existing api.js file within the appropriate export object
 export const videoApi = {
   //get all videos
-  getAllVideos: async (token) => {
+  getAllVideos: async (token, lang) => {
     try {
-      const response = await axios.get(`${API_URL}/api/videos`, {
+      const response = await axios.get(`${API_URL}/api/videos?lang=${lang}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -380,7 +383,7 @@ export const videoApi = {
     }
   },
   // New admin methods for video management
-  getVideoById: async (videoId, token) => {
+  getVideoById: async (videoId, token, lang) => {
     try {
       // Use provided token or get it from secure storage
       const authToken = token || (await getAuthToken());
@@ -392,11 +395,14 @@ export const videoApi = {
 
       console.log(`Fetching video with ID: ${videoId} using token`);
 
-      const response = await axios.get(`${API_URL}/api/videos/${videoId}`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/videos/${videoId}?lang=${lang}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
 
       return response.data;
     } catch (error) {
@@ -560,10 +566,10 @@ export const productApi = {
 };
 
 export const articleApi = {
-  getAllArticles: async (token, page = 1, limit = 10) => {
+  getAllArticles: async (token, page = 1, limit = 10, lang) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/articles?page=${page}&limit=${limit}`,
+        `${API_URL}/api/articles?page=${page}&limit=${limit}?lang=${lang}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -577,13 +583,16 @@ export const articleApi = {
     }
   },
 
-  getArticleById: async (articleId, token) => {
+  getArticleById: async (articleId, token, lang = "en") => {
     try {
-      const response = await axios.get(`${API_URL}/api/articles/${articleId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/articles/${articleId}?lang=${lang}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error(`Error fetching article with ID ${articleId}:`, error);
@@ -593,10 +602,10 @@ export const articleApi = {
 };
 
 export const newsApi = {
-  getAllNews: async (token, page = 1, limit = 10) => {
+  getAllNews: async (token, page = 1, limit = 10, lang) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/news?page=${page}&limit=${limit}`,
+        `${API_URL}/api/news?page=${page}&limit=${limit}?lang=${lang}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -610,13 +619,16 @@ export const newsApi = {
     }
   },
 
-  getNewsById: async (newsId, token) => {
+  getNewsById: async (newsId, token, lang = "en") => {
     try {
-      const response = await axios.get(`${API_URL}/api/news/${newsId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/news/${newsId}?lang=${lang}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error(`Error fetching news with ID ${newsId}:`, error);

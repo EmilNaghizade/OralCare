@@ -24,9 +24,12 @@ export default function QuizForm({ route, navigation }) {
   const [initialLoading, setInitialLoading] = useState(isEditing);
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    category: "",
+    titleEn: "",
+    titleRu: "",
+    descriptionEn: "",
+    descriptionRu: "",
+    categoryEn: "",
+    categoryRu: "",
     colorScheme: "green",
     isPublished: true,
     time: 2,
@@ -46,9 +49,21 @@ export default function QuizForm({ route, navigation }) {
         const quizData = await quizApi.getQuizById(quizId, authToken);
         console.log("Fetched quiz data:", quizData.time);
         setFormData({
-          title: quizData.title || "",
-          description: quizData.description || "",
-          category: quizData.category || "",
+          titleEn: quizData.titleTranslations?.en || quizData.title.en || "",
+          titleRu: quizData.titleTranslations?.ru || quizData.title.ru || "",
+          descriptionEn:
+            quizData.descriptionTranslations?.en ||
+            quizData.description.en ||
+            "",
+          descriptionRu:
+            quizData.descriptionTranslations?.ru ||
+            quizData.description.ru ||
+            "",
+
+          categoryEn:
+            quizData.categoryTranslation?.en || quizData.category.en || "",
+          categoryRu:
+            quizData.categoryTranslation?.ru || quizData.category.ru || "",
           colorScheme: quizData.colorScheme || "green",
           isPublished: quizData.isPublished !== false, // Default to true if undefined
           time: quizData.time || 2,
@@ -87,8 +102,15 @@ export default function QuizForm({ route, navigation }) {
 
   // Validate form
   const validateForm = () => {
-    if (!formData.title.trim()) {
-      Alert.alert("Error", "Title is required");
+    if (
+      !formData.titleEn.trim() ||
+      !formData.titleRu.trim() ||
+      !formData.descriptionEn.trim() ||
+      !formData.descriptionRu.trim() ||
+      !formData.categoryEn.trim() ||
+      !formData.categoryRu.trim()
+    ) {
+      Alert.alert("Error", "Title, description and caregory is required");
       return false;
     }
     return true;
@@ -106,13 +128,39 @@ export default function QuizForm({ route, navigation }) {
 
     setLoading(true);
     try {
+      const formDataForUpload = new FormData();
+      const titleObject = {
+        en: formData.titleEn,
+        ru: formData.titleRu,
+      };
+
+      const descriptionObject = {
+        en: formData.descriptionEn,
+        ru: formData.descriptionRu,
+      };
+
+      const categoryObject = {
+        en: formData.categoryEn,
+        ru: formData.categoryRu,
+      };
+
+      formDataForUpload.append("title", JSON.stringify(titleObject));
+      formDataForUpload.append(
+        "description",
+        JSON.stringify(descriptionObject)
+      );
+      formDataForUpload.append("category", JSON.stringify(categoryObject));
+      formDataForUpload.append("colorScheme", formData.colorScheme || 0);
+      formDataForUpload.append("time", formData.time);
+      formDataForUpload.append("isPublished", formData.isPublished);
+
       if (isEditing) {
-        await quizApi.updateQuiz(quizId, formData, authToken);
+        await quizApi.updateQuiz(quizId, formDataForUpload, authToken);
         Alert.alert("Success", "Quiz updated successfully", [
           { text: "OK", onPress: () => navigation.goBack() },
         ]);
       } else {
-        const result = await quizApi.createQuiz(formData, authToken);
+        const result = await quizApi.createQuiz(formDataForUpload, authToken);
         Alert.alert("Success", "Quiz created successfully", [
           {
             text: "Add Questions Now",
@@ -148,32 +196,56 @@ export default function QuizForm({ route, navigation }) {
         </Text>
 
         {/* Title Input */}
-        <Text style={styles.label}>Title *</Text>
+        <Text style={styles.label}>Title (English) *</Text>
         <TextInput
           style={styles.input}
-          value={formData.title}
-          onChangeText={(text) => handleInputChange("title", text)}
-          placeholder="Enter quiz title"
+          value={formData.titleEn}
+          onChangeText={(text) => handleInputChange("titleEn", text)}
+          placeholder="Enter article title in English"
         />
 
-        {/* Description Input */}
-        <Text style={styles.label}>Description</Text>
+        <Text style={styles.label}>Title (Russian) *</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.titleRu}
+          onChangeText={(text) => handleInputChange("titleRu", text)}
+          placeholder="Введите заголовок статьи на русском"
+        />
+
+        <Text style={styles.label}>Description (English) *</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
-          value={formData.description}
-          onChangeText={(text) => handleInputChange("description", text)}
-          placeholder="Enter quiz description"
+          value={formData.descriptionEn}
+          onChangeText={(text) => handleInputChange("descriptionEn", text)}
+          placeholder="Enter article description in English"
           multiline={true}
           numberOfLines={4}
         />
 
-        {/* Category Input */}
-        <Text style={styles.label}>Category</Text>
+        <Text style={styles.label}>Description (Russian) *</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={formData.descriptionRu}
+          onChangeText={(text) => handleInputChange("descriptionRu", text)}
+          placeholder="Введите описание статьи на русском"
+          multiline={true}
+          numberOfLines={4}
+        />
+
+        <Text style={styles.label}>Category (English) *</Text>
         <TextInput
           style={styles.input}
-          value={formData.category}
-          onChangeText={(text) => handleInputChange("category", text)}
-          placeholder="Enter quiz category"
+          value={formData.categoryEn}
+          onChangeText={(text) => handleInputChange("categoryEn", text)}
+          placeholder="Enter video category"
+        />
+
+        <Text style={styles.label}>Category (Russian) *</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.categoryRu}
+          onChangeText={(text) => handleInputChange("categoryRu", text)}
+          placeholder="Введите категорию видео"
         />
 
         {/* Time Input */}
@@ -185,7 +257,7 @@ export default function QuizForm({ route, navigation }) {
           placeholder="Enter time in minutes"
           keyboardType="numeric"
         />
-        
+
         {/* Color Scheme Selection */}
         <Text style={styles.label}>Color Scheme</Text>
         <View style={styles.colorSchemeContainer}>

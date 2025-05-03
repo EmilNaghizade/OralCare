@@ -56,7 +56,7 @@ const SectionHeader = ({ titleKey, onSeeAllPress, isOnSeeAll }) => {
 
 const QuizSection = ({ authToken }) => {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t,i18n } = useTranslation();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -67,7 +67,7 @@ const QuizSection = ({ authToken }) => {
   const fetchQuizzes = async () => {
     try {
       setLoading(true);
-      const data = await quizApi.getAllQuizzes(authToken);
+      const data = await quizApi.getAllQuizzes(authToken,i18n.language);
       if (data && data.quizzes) {
         // Filter to only published quizzes and limit to 4 for display
         const publishedQuizzes = data.quizzes
@@ -77,6 +77,7 @@ const QuizSection = ({ authToken }) => {
       } else {
         setQuizzes([]);
       }
+      console.log(i18n.language)
     } catch (error) {
       console.error("Error fetching quizzes:", error);
       setQuizzes([]);
@@ -137,13 +138,13 @@ const QuizSection = ({ authToken }) => {
 
 const WatchAndLearnSection = ({ authToken }) => {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchVideos = async () => {
     try {
-      const data = await videoApi.getAllVideos(authToken);
+      const data = await videoApi.getAllVideos(authToken, i18n.language);
 
       if (data && data.videos) {
         setVideos(data.videos.slice(0, 4)); // Take only the first 4 videos
@@ -241,25 +242,31 @@ const KnowledgeHubSection = ({ authToken }) => {
   const [articles, setArticles] = useState([]);
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const fetchKnowledgeData = async () => {
       setLoading(true);
       try {
         if (activeKnowledgeTab === "Articles") {
-          const data = await articleApi.getAllArticles(authToken, 1, 4);
+          const data = await articleApi.getAllArticles(
+            authToken,
+            1,
+            4,
+            i18n.language
+          );
           if (data && data.articles) {
             // Map the backend data to match the expected format for ArticleCard
             const mappedArticles = data.articles.map((article) => ({
               _id: article._id,
               title: article.title,
+              titleTranslations: article.titleTranslations,
               image: {
                 uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${article.thumbnail}`,
               },
-              readTime: `${article.readingTime}min read`,
+              readTime: `${article.readingTime} ${t("articles.minRead")}`,
               createdAt: new Date(article.createdAt).toLocaleDateString(
-                "en-US",
+                i18n.language === "en" ? "en-US" : "ru-RU",
                 {
                   day: "numeric",
                   month: "long",
@@ -270,21 +277,25 @@ const KnowledgeHubSection = ({ authToken }) => {
             setArticles(mappedArticles);
           }
         } else {
-          const data = await newsApi.getAllNews(authToken, 1, 4);
+          const data = await newsApi.getAllNews(authToken, 1, 4, i18n.language);
           if (data && data.news) {
             // Map the backend data to match the expected format for ArticleCard
             const mappedNews = data.news.map((item) => ({
               _id: item._id,
               title: item.title,
+              titleTranslations: item.titleTranslations,
               image: {
                 uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${item.thumbnail}`,
               },
-              readTime: `${item.readingTime}min read`,
-              createdAt: new Date(item.createdAt).toLocaleDateString("en-US", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              }),
+              readTime: `${item.readingTime} ${t("articles.minRead")}`,
+              createdAt: new Date(item.createdAt).toLocaleDateString(
+                i18n.language === "en" ? "en-US" : "ru-RU",
+                {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }
+              ),
             }));
             setNews(mappedNews);
           }
@@ -408,7 +419,7 @@ export default function HomeScreen() {
   const [showModal, setShowModal] = useState(false);
   const [userId, setUserId] = useState(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
@@ -495,20 +506,29 @@ export default function HomeScreen() {
 
     const getArticles = async () => {
       try {
-        const data = await articleApi.getAllArticles(authToken, 1, 4);
+        const data = await articleApi.getAllArticles(
+          authToken,
+          1,
+          4,
+          i18n.language
+        );
         if (data && data.articles) {
           const mappedArticles = data.articles.map((article) => ({
             _id: article._id,
             title: article.title,
+            titleTranslations: article.titleTranslations,
             image: {
               uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${article.thumbnail}`,
             },
-            readTime: `${article.readingTime}min read`,
-            createdAt: new Date(article.createdAt).toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            }),
+            readTime: `${article.readingTime} ${t("articles.minRead")}`,
+            createdAt: new Date(article.createdAt).toLocaleDateString(
+              i18n.language === "en" ? "en-US" : "ru-RU",
+              {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              }
+            ),
           }));
           setArticles(mappedArticles);
         }
@@ -601,7 +621,9 @@ export default function HomeScreen() {
                   });
               }}
             >
-              <Text style={styles.proceedButtonText}>{t("home.onboardingModal.proceedButton")}</Text>
+              <Text style={styles.proceedButtonText}>
+                {t("home.onboardingModal.proceedButton")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -615,10 +637,9 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.welcomeHeader}>
-            <Typo size={22} fontWeight="600" >
+            <Typo size={22} fontWeight="600">
               👋 {t("home.welcome")},{" "}
-  
-              <Typo size={22} fontWeight="600" color="#92999C" style={{ }}>
+              <Typo size={22} fontWeight="600" color="#92999C" style={{}}>
                 {firstName}
               </Typo>
             </Typo>

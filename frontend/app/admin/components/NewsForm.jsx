@@ -1,4 +1,5 @@
 // frontend/app/admin/components/NewsForm.jsx
+// frontend/app/admin/components/NewsForm.jsx
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -27,8 +28,10 @@ export default function NewsForm({ route, navigation }) {
   const API_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
+    titleEn: "",
+    titleRu: "",
+    descriptionEn: "",
+    descriptionRu: "",
     readingTime: "",
     thumbnailFile: null,
   });
@@ -51,12 +54,20 @@ export default function NewsForm({ route, navigation }) {
       const newsData = response.data;
       if (newsData) {
         setFormData({
-          title: newsData.title || "",
-          description: newsData.description || "",
+          titleEn: newsData.titleTranslations?.en || newsData.title.en || "",
+          titleRu: newsData.titleTranslations?.ru || newsData.title.ru || "",
+          descriptionEn:
+            newsData.descriptionTranslations?.en ||
+            newsData.description.en ||
+            "",
+          descriptionRu:
+            newsData.descriptionTranslations?.ru ||
+            newsData.description.ru ||
+            "",
           readingTime: newsData.readingTime
             ? newsData.readingTime.toString()
             : "",
-          thumbnailFile: null, // We don't reload the actual file
+          thumbnailFile: null,
         });
 
         // Set preview if available
@@ -114,10 +125,16 @@ export default function NewsForm({ route, navigation }) {
 
   const handleSubmit = async () => {
     // Validate form
-    if (!formData.title || !formData.description || !formData.readingTime) {
+    if (
+      !formData.titleEn ||
+      !formData.titleRu ||
+      !formData.descriptionEn ||
+      !formData.descriptionRu ||
+      !formData.readingTime
+    ) {
       Alert.alert(
         "Missing Information",
-        "Please fill in all required fields (title, description, reading time)"
+        "Please fill in all required fields (title and description in both languages, and reading time)"
       );
       return;
     }
@@ -138,8 +155,23 @@ export default function NewsForm({ route, navigation }) {
     try {
       // Create FormData object for file upload
       const formDataForUpload = new FormData();
-      formDataForUpload.append("title", formData.title);
-      formDataForUpload.append("description", formData.description);
+
+      // Create multi-language objects
+      const titleObject = {
+        en: formData.titleEn,
+        ru: formData.titleRu,
+      };
+
+      const descriptionObject = {
+        en: formData.descriptionEn,
+        ru: formData.descriptionRu,
+      };
+
+      formDataForUpload.append("title", JSON.stringify(titleObject));
+      formDataForUpload.append(
+        "description",
+        JSON.stringify(descriptionObject)
+      );
       formDataForUpload.append("readingTime", formData.readingTime || 3);
 
       // Append thumbnail file if we have one
@@ -156,7 +188,7 @@ export default function NewsForm({ route, navigation }) {
         const thumbnailFileName = formData.thumbnailFile.split("/").pop();
         const thumbnailFile = {
           uri: formData.thumbnailFile,
-          type: "image/jpeg", // Set appropriate type based on file
+          type: "image/jpeg",
           name: thumbnailFileName,
         };
 
@@ -209,20 +241,38 @@ export default function NewsForm({ route, navigation }) {
           {isEditing ? "Edit News" : "Add New News"}
         </Text>
 
-        <Text style={styles.label}>Title *</Text>
+        <Text style={styles.label}>Title (English) *</Text>
         <TextInput
           style={styles.input}
-          value={formData.title}
-          onChangeText={(text) => handleInputChange("title", text)}
-          placeholder="Enter news title"
+          value={formData.titleEn}
+          onChangeText={(text) => handleInputChange("titleEn", text)}
+          placeholder="Enter news title in English"
         />
 
-        <Text style={styles.label}>Description *</Text>
+        <Text style={styles.label}>Title (Russian) *</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.titleRu}
+          onChangeText={(text) => handleInputChange("titleRu", text)}
+          placeholder="Введите заголовок новости на русском"
+        />
+
+        <Text style={styles.label}>Description (English) *</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
-          value={formData.description}
-          onChangeText={(text) => handleInputChange("description", text)}
-          placeholder="Enter news description"
+          value={formData.descriptionEn}
+          onChangeText={(text) => handleInputChange("descriptionEn", text)}
+          placeholder="Enter news description in English"
+          multiline={true}
+          numberOfLines={4}
+        />
+
+        <Text style={styles.label}>Description (Russian) *</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={formData.descriptionRu}
+          onChangeText={(text) => handleInputChange("descriptionRu", text)}
+          placeholder="Введите описание новости на русском"
           multiline={true}
           numberOfLines={4}
         />
@@ -282,6 +332,8 @@ export default function NewsForm({ route, navigation }) {
     </ScrollView>
   );
 }
+
+// ... styles are the same as ArticleForm
 
 const styles = StyleSheet.create({
   container: {

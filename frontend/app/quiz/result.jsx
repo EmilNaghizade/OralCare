@@ -1,4 +1,4 @@
-import React, { useEffect, useRef,useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -16,6 +16,7 @@ import ConfettiCannon from "react-native-confetti-cannon"; // <-- Konfeti kütü
 import Typo from "../../components/Typo"; // Kendi Typo bileşeniniz
 import { useAuth } from "../_layout"; // Auth context'inizi import edin
 import { quizApi } from "../../services/api";
+import { useTranslation } from "react-i18next";
 
 const POINTS_PER_QUESTION = 10; // Her doğru cevap için puan
 const resultImage = require("../../assets/images/Result.png");
@@ -23,6 +24,7 @@ const resultImage = require("../../assets/images/Result.png");
 export default function QuizResultsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { t } = useTranslation();
   const { updateUserPoints } = useAuth(); // Context'ten puan güncelleme fonksiyonunu alın
 
   // Parametreleri al ve number'a çevir (string gelebilirler)
@@ -40,8 +42,6 @@ export default function QuizResultsScreen() {
       try {
         setLoading(true);
         await quizApi.markQuizCompleted(quizId);
-
- 
       } catch (error) {
         console.error("Error marking quiz as completed:", error);
       } finally {
@@ -63,7 +63,7 @@ export default function QuizResultsScreen() {
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#038565" />
-          <Text style={styles.loadingText}>Saving your results...</Text>
+          <Text style={styles.loadingText}>{t("quizResult.saving")}</Text>
         </View>
       </SafeAreaView>
     );
@@ -95,7 +95,7 @@ export default function QuizResultsScreen() {
 
       {/* Başlık */}
       <Typo size={26} fontWeight="600" style={styles.title}>
-        Congratulations on{"\n"}completing quiz!
+        {t("quizResult.completed")}
       </Typo>
 
       {/* Skor */}
@@ -103,13 +103,12 @@ export default function QuizResultsScreen() {
         <Typo style={styles.scoreAchieved}>{score}</Typo>
         <Typo style={styles.scoreTotal}>/{totalQuestions}</Typo>
       </View>
-      <Typo style={styles.scoreLabel}>Answered Correctly</Typo>
-
+      <Typo style={styles.scoreLabel}> {t("quizResult.answered")} </Typo>
 
       {/* Anasayfaya Dön Butonu */}
       <TouchableOpacity style={styles.homeButton} onPress={handleGoHome}>
         <Typo fontWeight="600" size={16} style={styles.homeButtonText}>
-          Go to home
+          {t("quizResult.goHome")}
         </Typo>
       </TouchableOpacity>
     </SafeAreaView>

@@ -10,6 +10,11 @@ export const getAllQuizzes = async (req, res) => {
     const limit = req.query.limit ? parseInt(req.query.limit) : 10;
     const skip = (page - 1) * limit;
 
+    const language =
+      req.query.lang ||
+      req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
+      "en";
+
     // Build filter based on query parameters
     const filter = {};
     if (req.query.category) filter.category = req.query.category;
@@ -25,10 +30,21 @@ export const getAllQuizzes = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
+    const transformQuizzes = quizzes.map((quiz) => ({
+      ...quiz.toObject(),
+      title: quiz.title[language] || quiz.title.en,
+      description: quiz.description[language] || quiz.description.en,
+      category: quiz.category[language] || quiz.category.en,
+      // Include all language versions in separate properties
+      titleTranslations: quiz.title,
+      descriptionTranslations: quiz.description,
+      categoryTranslation: quiz.category,
+    }));
+
     const total = await Quiz.countDocuments(filter);
 
     res.json({
-      quizzes,
+      quizzes: transformQuizzes,
       totalQuizzes: total,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
@@ -53,7 +69,22 @@ export const getQuizById = async (req, res) => {
       return res.status(404).json({ error: "Quiz not found" });
     }
 
-    res.json(quiz);
+    const language =
+      req.query.lang ||
+      req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
+      "en";
+
+    const transformedQuiz = {
+      ...quiz.toObject(),
+      title: quiz.title[language] || quiz.title.en,
+      description: quiz.description[language] || quiz.description.en,
+      category: quiz.category[language] || quiz.category.en,
+      titleTranslations: quiz.title,
+      descriptionTranslations: quiz.description,
+      categoryTranslation: quiz.category,
+    };
+
+    res.json(transformedQuiz);
   } catch (error) {
     console.error("Error fetching quiz:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -80,18 +111,55 @@ export const createQuiz = async (req, res) => {
       time,
     } = req.body;
 
+    let parsedTitle = title;
+    let parsedDescription = description;
+    let parsedCategory = category;
+
     // Validate required fields
-    if (!title || !description) {
-      return res
-        .status(400)
-        .json({ error: "Title or Description is required" });
+    if (typeof title === "string") {
+      try {
+        parsedTitle = JSON.parse(title);
+      } catch (e) {
+        parsedTitle = { en: title, ru: title };
+      }
+    }
+
+    if (typeof description === "string") {
+      try {
+        parsedDescription = JSON.parse(description);
+      } catch (e) {
+        parsedDescription = { en: description, ru: description };
+      }
+    }
+
+    if (typeof category === "string") {
+      try {
+        parsedCategory = JSON.parse(category);
+      } catch (e) {
+        parsedCategory = { en: category, ru: category };
+      }
+    }
+
+    // Validate that we have both language versions
+    if (
+      !parsedTitle.en ||
+      !parsedTitle.ru ||
+      !parsedDescription.en ||
+      !parsedDescription.ru ||
+      !parsedCategory.en ||
+      !parsedCategory.ru
+    ) {
+      return res.status(400).json({
+        error:
+          "Title, description and category must be provided in both English and Russian",
+      });
     }
 
     // Create a new quiz
     const quiz = new Quiz({
-      title,
-      description,
-      category,
+      title: parsedTitle,
+      description: parsedDescription,
+      category: parsedCategory,
       colorScheme: colorScheme || "green",
       isPublished: isPublished === undefined ? true : isPublished,
       questions: questions || [],
@@ -130,10 +198,69 @@ export const updateQuiz = async (req, res) => {
       return res.status(404).json({ error: "Quiz not found" });
     }
 
-    // Update fields
-    if (title !== undefined) quiz.title = title;
-    if (description !== undefined) quiz.description = description;
-    if (category !== undefined) quiz.category = category;
+    let parsedTitle = title;
+    let parsedDescription = description;
+    let parsedCategory = category;
+
+    if (typeof title === "string") {
+      try {
+        parsedTitle = JSON.parse(title);
+      } catch (e) {
+        parsedTitle = {
+          ...article.title,
+          en: title,
+        };
+      }
+    }
+
+    if (typeof description === "string") {
+      try {
+        parsedDescription = JSON.parse(description);
+      } catch (e) {
+        parsedDescription = {
+          ...article.description,
+          en: description,
+        };
+      }
+    }
+
+    if (typeof category === "string") {
+      try {
+        parsedCategory = JSON.parse(category);
+      } catch (e) {
+        parsedCategory = {
+          ...article.category,
+          en: category,
+        };
+      }
+    }
+    // Update basic fields
+    if (parsedTitle) {
+      if (!parsedTitle.en || !parsedTitle.ru) {
+        return res.status(400).json({
+          error: "Title must be provided in both English and Russian",
+        });
+      }
+      quiz.title = parsedTitle;
+    }
+
+    if (parsedDescription) {
+      if (!parsedDescription.en || !parsedDescription.ru) {
+        return res.status(400).json({
+          error: "Description must be provided in both English and Russian",
+        });
+      }
+      quiz.description = parsedDescription;
+    }
+
+    if (parsedCategory) {
+      if (!parsedCategory.en || !parsedCategory.ru) {
+        return res.status(400).json({
+          error: "Category must be provided in both English and Russian",
+        });
+      }
+      quiz.category = parsedCategory;
+    }
     if (colorScheme !== undefined) quiz.colorScheme = colorScheme;
     if (isPublished !== undefined) quiz.isPublished = isPublished;
     if (time !== undefined) quiz.time = time;
@@ -186,24 +313,22 @@ export const addQuestion = async (req, res) => {
 
     const { question, options, correctAnswer } = req.body;
 
-    // Validate required fields
-    if (!question || !options || correctAnswer === undefined) {
-      return res.status(400).json({
-        error: "Question, options, and correctAnswer are required",
-      });
-    }
-
-    // Validate options is an array
-    if (!Array.isArray(options) || options.length < 2) {
-      return res.status(400).json({
-        error: "Options must be an array with at least 2 items",
-      });
-    }
+    if (typeof question === "string") question = JSON.parse(question);
+    if (typeof options === "string") options = JSON.parse(options);
 
     // Validate correctAnswer is a valid index
-    if (correctAnswer < 0 || correctAnswer >= options.length) {
+    if (
+      !question?.en ||
+      !question?.ru ||
+      !Array.isArray(options.en) ||
+      !Array.isArray(options.ru) ||
+      options.en.length < 2 ||
+      options.ru.length < 2 ||
+      correctAnswer === undefined
+    ) {
       return res.status(400).json({
-        error: "correctAnswer must be a valid index in the options array",
+        error:
+          "question ve options hem en hem ru olmalı, her dilde en az 2 seçenek içermeli ve correctAnswer belirtmeli",
       });
     }
 
@@ -233,75 +358,70 @@ export const addQuestion = async (req, res) => {
 // Update a question in a quiz (admin only)
 export const updateQuestion = async (req, res) => {
   try {
-    // Check if user is admin
     if (req.user.role !== "admin") {
       return res
         .status(403)
         .json({ error: "Not authorized to update questions" });
     }
 
-    const { question, options, correctAnswer } = req.body;
+    let { question, options, correctAnswer } = req.body;
     const { id: quizId, questionId } = req.params;
 
-    // Find the quiz
     const quiz = await Quiz.findById(quizId);
-    if (!quiz) {
-      return res.status(404).json({ error: "Quiz not found" });
-    }
+    if (!quiz) return res.status(404).json({ error: "Quiz not found" });
 
-    // Find the question index
-    const questionIndex = quiz.questions.findIndex(
+    const qIdx = quiz.questions.findIndex(
       (q) => q._id.toString() === questionId
     );
-
-    if (questionIndex === -1) {
+    if (qIdx === -1)
       return res.status(404).json({ error: "Question not found" });
-    }
 
-    // Update the question fields
+    // 1) question güncelleme
     if (question !== undefined) {
-      quiz.questions[questionIndex].question = question;
+      if (typeof question === "string") question = JSON.parse(question);
+      if (!question.en || !question.ru) {
+        return res.status(400).json({ error: "question hem en hem ru olmalı" });
+      }
+      quiz.questions[qIdx].question = question;
     }
 
+    // 2) options güncelleme
     if (options !== undefined) {
-      // Validate options
-      if (!Array.isArray(options) || options.length < 2) {
+      if (typeof options === "string") options = JSON.parse(options);
+      if (
+        !Array.isArray(options.en) ||
+        !Array.isArray(options.ru) ||
+        options.en.length < 2 ||
+        options.ru.length < 2
+      ) {
         return res.status(400).json({
-          error: "Options must be an array with at least 2 items",
+          error: "options.en ve options.ru en az 2 seçenekli dizi olmalı",
         });
       }
-      quiz.questions[questionIndex].options = options;
+      quiz.questions[qIdx].options = options;
 
-      // If options change, make sure correctAnswer is still valid
-      if (
-        correctAnswer === undefined &&
-        quiz.questions[questionIndex].correctAnswer >= options.length
-      ) {
-        quiz.questions[questionIndex].correctAnswer = 0;
+      // eğer mevcut correctAnswer dizinin dışına çıktıysa sıfırla
+      if (quiz.questions[qIdx].correctAnswer >= options.en.length) {
+        quiz.questions[qIdx].correctAnswer = 0;
       }
     }
 
+    // 3) correctAnswer güncelleme
     if (correctAnswer !== undefined) {
-      // Validate correctAnswer against current options
-      const currentOptions = quiz.questions[questionIndex].options;
-      if (correctAnswer < 0 || correctAnswer >= currentOptions.length) {
-        return res.status(400).json({
-          error: "correctAnswer must be a valid index in the options array",
-        });
+      const len = quiz.questions[qIdx].options.en.length;
+      if (correctAnswer < 0 || correctAnswer >= len) {
+        return res.status(400).json({ error: "correctAnswer geçersiz index" });
       }
-      quiz.questions[questionIndex].correctAnswer = correctAnswer;
+      quiz.questions[qIdx].correctAnswer = correctAnswer;
     }
 
     await quiz.save();
-
-    // Return the updated question
-    res.json(quiz.questions[questionIndex]);
+    res.json(quiz.questions[qIdx]);
   } catch (error) {
     console.error("Error updating question:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
 // Delete a question from a quiz (admin only)
 export const deleteQuestion = async (req, res) => {
   try {

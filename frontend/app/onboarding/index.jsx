@@ -7,6 +7,7 @@ import {
   StatusBar,
   Dimensions,
   SafeAreaView,
+  Platform,
   TouchableOpacity,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
@@ -66,6 +67,7 @@ const OnboardingScreen = () => {
         visible={showLanguageModal}
         onClose={() => setShowLanguageModal(false)}
         onSelectLanguage={changeLanguage}
+        statusBarTranslucent={true} 
       />
 
       {/* Language button in top-right corner */}
@@ -160,7 +162,7 @@ const styles = StyleSheet.create({
   },
   languageButton: {
     position: "absolute",
-    top: 75,
+    top: Platform.OS === "ios"? 75: 30,
     right: 20,
     flexDirection: "row",
     alignItems: "center",

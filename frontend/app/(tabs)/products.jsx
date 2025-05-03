@@ -25,6 +25,13 @@ const ITEM_WIDTH = (width - PADDING * 3) / 2;
 
 // --- Ürün Kartı Bileşeni ---
 const ProductCard = ({ item }) => {
+  const { t, i18n } = useTranslation();
+
+  const productName = item.nameTranslations
+    ? item.nameTranslations[i18n?.language] ||
+      item.nameTranslations.en ||
+      item.name
+    : item.name;
 
   // Fix the image source handling
   let imageSource;
@@ -50,7 +57,6 @@ const ProductCard = ({ item }) => {
     }
   } else {
     // Fallback to default image if no image is provided
-  
   }
 
   // Get the product link based on available properties
@@ -81,7 +87,7 @@ const ProductCard = ({ item }) => {
       </View>
       {/* Product Name */}
       <Typo style={styles.productName} numberOfLines={2}>
-        {item.name}
+        {productName}
       </Typo>
     </TouchableOpacity>
   );
@@ -89,7 +95,7 @@ const ProductCard = ({ item }) => {
 
 // --- Ana Ürünler Ekranı Bileşeni ---
 export default function ProductsScreen() {
-  const { t } = useTranslation();
+  const { t,i18n } = useTranslation();
   const { authToken } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,7 +103,7 @@ export default function ProductsScreen() {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [i18n.language]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -106,7 +112,7 @@ export default function ProductsScreen() {
     try {
       // Try to fetch products from API
       const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_API_BASE_URL}/api/products`,
+        `${process.env.EXPO_PUBLIC_API_BASE_URL}/api/products?lang=${i18n.language}`,
         {
           headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
         }
@@ -191,7 +197,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff", // Beyaz header arka planı
     paddingTop: 40, // Internal padding
     paddingHorizontal: 20,
-    
+
     paddingBottom: 24, // Internal padding (adjust as needed)
     // Alt köşeleri yuvarlatma
     borderBottomLeftRadius: 24, // <<< YUVARLAK KÖŞE

@@ -15,15 +15,29 @@ export const getAllNews = async (req, res) => {
     const limit = req.query.limit ? Number(req.query.limit) : 10;
     const skip = (page - 1) * limit;
 
+    const language =
+      req.query.lang ||
+      req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
+      "en";
+
     const newsItems = await News.find()
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
+    const transformedNews = newsItems.map((news) => ({
+      ...news.toObject(),
+      title: news.title[language] || news.title.en,
+      description: news.description[language] || news.description.en,
+      // Include all language versions in separate properties
+      titleTranslations: news.title,
+      descriptionTranslations: news.description,
+    }));
+
     const total = await News.countDocuments();
 
     res.json({
-      news: newsItems,
+      news: transformedNews,
       totalNews: total,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
@@ -42,7 +56,21 @@ export const getNewsById = async (req, res) => {
       return res.status(404).json({ error: "News item not found" });
     }
 
-    res.json(newsItem);
+    // Get the preferred language from query params or headers
+    const language =
+      req.query.lang ||
+      req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
+      "en";
+
+    const transformedNews = {
+      ...newsItem.toObject(),
+      title: newsItem.title[language] || newsItem.title.en,
+      description: newsItem.description[language] || newsItem.description.en,
+      titleTranslations: newsItem.title,
+      descriptionTranslations: newsItem.description,
+    };
+
+    res.json(transformedNews);
   } catch (error) {
     console.error("Error fetching news item:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -58,6 +86,37 @@ export const createNews = async (req, res) => {
 
     const { title, description, readingTime } = req.body;
 
+    let parsedTitle = title;
+    let parsedDescription = description;
+
+    if (typeof title === "string") {
+      try {
+        parsedTitle = JSON.parse(title);
+      } catch (e) {
+        parsedTitle = { en: title, ru: title };
+      }
+    }
+
+    if (typeof description === "string") {
+      try {
+        parsedDescription = JSON.parse(description);
+      } catch (e) {
+        parsedDescription = { en: description, ru: description };
+      }
+    }
+
+    // Validate that we have both language versions
+    if (
+      !parsedTitle.en ||
+      !parsedTitle.ru ||
+      !parsedDescription.en ||
+      !parsedDescription.ru
+    ) {
+      return res.status(400).json({
+        error:
+          "Title and description must be provided in both English and Russian",
+      });
+    }
     // Check if thumbnail file was uploaded
     if (!req.file) {
       return res.status(400).json({ error: "Thumbnail image is required" });
@@ -67,17 +126,13 @@ export const createNews = async (req, res) => {
     const thumbnailUrl = `/uploads/thumbnails/${req.file.filename}`;
 
     const newsItem = new News({
-      title,
-      description,
+      title: parsedTitle,
+      description: parsedDescription,
       thumbnail: thumbnailUrl,
       readingTime: Number(readingTime) || 3,
     });
 
-    await createContentNotification(
-      "New News Available",
-      "news", 
-      newsItem
-    );
+    await createContentNotification("New News Available", "news", newsItem);
 
     await newsItem.save();
     res.status(201).json(newsItem);
@@ -102,9 +157,49 @@ export const updateNews = async (req, res) => {
       return res.status(404).json({ error: "News item not found" });
     }
 
+    let parsedTitle = title;
+    let parsedDescription = description;
+
+    if (typeof title === "string") {
+      try {
+        parsedTitle = JSON.parse(title);
+      } catch (e) {
+        parsedTitle = {
+          ...newsItem.title,
+          en: title,
+        };
+      }
+    }
+
+    if (typeof description === "string") {
+      try {
+        parsedDescription = JSON.parse(description);
+      } catch (e) {
+        parsedDescription = {
+          ...newsItem.description,
+          en: description,
+        };
+      }
+    }
+
     // Update basic fields
-    if (title) newsItem.title = title;
-    if (description) newsItem.description = description;
+    if (parsedTitle) {
+      if (!parsedTitle.en || !parsedTitle.ru) {
+        return res.status(400).json({
+          error: "Title must be provided in both English and Russian",
+        });
+      }
+      newsItem.title = parsedTitle;
+    }
+
+    if (parsedDescription) {
+      if (!parsedDescription.en || !parsedDescription.ru) {
+        return res.status(400).json({
+          error: "Description must be provided in both English and Russian",
+        });
+      }
+      newsItem.description = parsedDescription;
+    }
     if (readingTime) newsItem.readingTime = Number(readingTime);
 
     // Update thumbnail if provided

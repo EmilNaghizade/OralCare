@@ -1,4 +1,3 @@
-// frontend/app/admin/components/QuestionsManagement.jsx
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -14,28 +13,33 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../_layout";
 import BackButton from "../../../components/BackButton";
 import { quizApi } from "../../../services/api";
+import { useTranslation } from "react-i18next";
 
 export default function QuestionsManagement({ route, navigation }) {
   const { quizId } = route.params;
   const { authToken } = useAuth();
+  const { i18n } = useTranslation();
 
   const [quiz, setQuiz] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch quiz data
+  // Fetch quiz data on focus
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       fetchQuizData();
     });
-
     return unsubscribe;
   }, [navigation, quizId]);
 
   const fetchQuizData = async () => {
     setLoading(true);
     try {
-      const quizData = await quizApi.getQuizById(quizId, authToken);
+      const quizData = await quizApi.getQuizById(
+        quizId,
+        authToken,
+        i18n.language.substring(0, 2)
+      );
       setQuiz(quizData);
     } catch (error) {
       console.error("Error fetching quiz data:", error);
@@ -53,7 +57,6 @@ export default function QuestionsManagement({ route, navigation }) {
   };
 
   const handleDeleteQuestion = (questionId) => {
-    // Prevent deleting the last question
     if (quiz.questions.length <= 1) {
       Alert.alert(
         "Cannot Delete",
@@ -110,6 +113,9 @@ export default function QuestionsManagement({ route, navigation }) {
     );
   }
 
+  // Determine locale (default to 'en')
+  const lang = i18n.language.substring(0, 2) || "en";
+
   return (
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -128,7 +134,7 @@ export default function QuestionsManagement({ route, navigation }) {
 
       <TouchableOpacity
         style={styles.addButton}
-        onPress={() => navigation.navigate("AddQuestion", { quizId: quizId })}
+        onPress={() => navigation.navigate("AddQuestion", { quizId })}
       >
         <Ionicons name="add" size={24} color="white" />
         <Text style={styles.buttonText}>Add New Question</Text>
@@ -146,45 +152,58 @@ export default function QuestionsManagement({ route, navigation }) {
         <FlatList
           data={quiz.questions}
           keyExtractor={(item) => item._id}
-          renderItem={({ item, index }) => (
-            <View style={styles.questionItem}>
-              <View style={styles.questionInfo}>
-                <View style={styles.questionNumberBadge}>
-                  <Text style={styles.questionNumber}>{index + 1}</Text>
+          renderItem={({ item, index }) => {
+            const questionText =
+              item.question && typeof item.question === "object"
+                ? item.question[lang] || item.question.en
+                : String(item.question);
+            const opts =
+              item.options && typeof item.options === "object"
+                ? item.options[lang] || item.options.en
+                : Array.isArray(item.options)
+                ? item.options
+                : [];
+
+            return (
+              <View style={styles.questionItem}>
+                <View style={styles.questionInfo}>
+                  <View style={styles.questionNumberBadge}>
+                    <Text style={styles.questionNumber}>{index + 1}</Text>
+                  </View>
+                  <View style={styles.textContainer}>
+                    <Text style={styles.questionText} numberOfLines={2}>
+                      {questionText}
+                    </Text>
+                    <Text style={styles.optionCount}>
+                      {opts.length} options
+                    </Text>
+                  </View>
                 </View>
-                <View style={styles.textContainer}>
-                  <Text style={styles.questionText} numberOfLines={2}>
-                    {item.question}
-                  </Text>
-                  <Text style={styles.optionCount}>
-                    {item.options.length} options
-                  </Text>
+
+                <View style={styles.actions}>
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() =>
+                      navigation.navigate("EditQuestion", {
+                        quizId,
+                        questionId: item._id,
+                        isEditing: true,
+                      })
+                    }
+                  >
+                    <Ionicons name="create-outline" size={24} color="#007AFF" />
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.actionButton}
+                    onPress={() => handleDeleteQuestion(item._id)}
+                  >
+                    <Ionicons name="trash-outline" size={24} color="#FF3B30" />
+                  </TouchableOpacity>
                 </View>
               </View>
-
-              <View style={styles.actions}>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() =>
-                    navigation.navigate("EditQuestion", {
-                      quizId: quizId,
-                      questionId: item._id,
-                      isEditing: true,
-                    })
-                  }
-                >
-                  <Ionicons name="create-outline" size={24} color="#007AFF" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => handleDeleteQuestion(item._id)}
-                >
-                  <Ionicons name="trash-outline" size={24} color="#FF3B30" />
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
+            );
+          }}
           refreshing={refreshing}
           onRefresh={handleRefresh}
           contentContainerStyle={

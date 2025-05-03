@@ -27,7 +27,7 @@ const ArticleDetail = () => {
   const [error, setError] = useState(null);
   const { authToken } = useAuth();
   const router = useRouter();
-  const { t } = useTranslation;
+  const { t,i18n } = useTranslation();
 
   // Determine if we're looking at an article or news item
 
@@ -39,9 +39,9 @@ const ArticleDetail = () => {
       try {
         let result;
         if (activeTab === "Articles") {
-          result = await articleApi.getArticleById(contentId, authToken);
+          result = await articleApi.getArticleById(contentId, authToken,i18n.language);
         } else {
-          result = await newsApi.getNewsById(contentId, authToken);
+          result = await newsApi.getNewsById(contentId, authToken,i18n.language);
         }
         setData(result);
       } catch (err) {
@@ -58,7 +58,7 @@ const ArticleDetail = () => {
     if (contentId) {
       fetchData();
     }
-  }, [contentId, authToken]);
+  }, [contentId, authToken,i18n.language]);
 
   if (loading) {
     return (
@@ -99,7 +99,7 @@ const ArticleDetail = () => {
   }
 
   // Format date from ISO string
-  const formattedDate = new Date(data.createdAt).toLocaleDateString("en-US", {
+  const formattedDate = new Date(data.createdAt).toLocaleDateString( i18n.language==="en"? "en-US" : "ru-RU", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -120,7 +120,7 @@ const ArticleDetail = () => {
         <View style={styles.badgeRow}>
           <Badge>{formattedDate}</Badge>
           <Badge>
-            {data.readingTime} {t("articles.minRed")}
+            {data.readingTime} {t("articles.minRead")}
           </Badge>
         </View>
 

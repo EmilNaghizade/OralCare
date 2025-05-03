@@ -24,7 +24,7 @@ export default function Education() {
   const { authToken } = useAuth();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { t } = useTranslation();
+  const { t,i18n } = useTranslation();
 
   useEffect(() => {
     fetchVideos();
@@ -33,7 +33,7 @@ export default function Education() {
   const fetchVideos = async () => {
     try {
       setLoading(true);
-      const data = await videoApi.getAllVideos(authToken);
+      const data = await videoApi.getAllVideos(authToken,i18n.language);
       if (data && data.videos) {
         setVideos(data.videos);
       } else {

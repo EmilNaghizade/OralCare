@@ -16,15 +16,32 @@ export const getAllVideos = async (req, res) => {
     const limit = req.query.limit ? Number(req.query.limit) : 10;
     const skip = (page - 1) * limit;
 
+    // Get the preferred language from query params or headers
+    const language =
+      req.query.lang ||
+      req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
+      "en";
+
     const videos = await Video.find()
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
+    const transformedVideos = videos.map((video) => ({
+      ...video.toObject(),
+      title: video.title[language] || video.title.en,
+      description: video.description[language] || video.description.en,
+      category: video.category[language] || video.category.en,
+      // Include all language versions in separate properties
+      titleTranslations: video.title,
+      descriptionTranslations: video.description,
+      categoryTranslation: video.category,
+    }));
+
     const total = await Video.countDocuments();
 
     res.json({
-      videos,
+      videos: transformedVideos,
       totalVideos: total,
     });
   } catch (error) {
@@ -41,6 +58,49 @@ export const createVideo = async (req, res) => {
     }
 
     const { title, description, category, duration } = req.body;
+    let parsedTitle = title;
+    let parsedDescription = description;
+    let parsedCategory = category;
+
+    if (typeof title === "string") {
+      try {
+        parsedTitle = JSON.parse(title);
+      } catch (e) {
+        parsedTitle = { en: title, ru: title };
+      }
+    }
+
+    if (typeof description === "string") {
+      try {
+        parsedDescription = JSON.parse(description);
+      } catch (e) {
+        parsedDescription = { en: description, ru: description };
+      }
+    }
+
+    if (typeof category === "string") {
+      try {
+        parsedCategory = JSON.parse(category);
+      } catch (e) {
+        parsedCategory = { en: category, ru: category };
+      }
+    }
+
+    // Validate that we have both language versions
+    if (
+      !parsedTitle.en ||
+      !parsedTitle.ru ||
+      !parsedDescription.en ||
+      !parsedDescription.ru ||
+      !parsedCategory.en ||
+      !parsedCategory.ru
+    ) {
+      return res.status(400).json({
+        error:
+          "Title, description and category must be provided in both English and Russian",
+      });
+    }
+
     let tags = [];
     if (req.body.tags) {
       try {
@@ -70,14 +130,13 @@ export const createVideo = async (req, res) => {
     const videoUrl = `/uploads/videos/${videoFile.filename}`;
     const thumbnailUrl = `/uploads/thumbnails/${thumbnailFile.filename}`;
 
-
     const video = new Video({
-      title,
-      description,
+      title: parsedTitle,
+      description: parsedDescription,
       videoUrl,
       thumbnailUrl,
       duration: duration || 0, // Default to 0 if not provided
-      category,
+      category: parsedCategory,
       tags,
       isPublished: true,
     });
@@ -125,10 +184,70 @@ export const updateVideo = async (req, res) => {
       return res.status(404).json({ error: "Video not found" });
     }
 
-    // Update the basic fields
-    video.title = title || video.title;
-    video.description = description || video.description;
-    video.category = category || video.category;
+    let parsedTitle = title;
+    let parsedDescription = description;
+    let parsedCategory = category;
+
+    if (typeof title === "string") {
+      try {
+        parsedTitle = JSON.parse(title);
+      } catch (e) {
+        parsedTitle = {
+          ...article.title,
+          en: title,
+        };
+      }
+    }
+
+    if (typeof description === "string") {
+      try {
+        parsedDescription = JSON.parse(description);
+      } catch (e) {
+        parsedDescription = {
+          ...article.description,
+          en: description,
+        };
+      }
+    }
+
+    if (typeof category === "string") {
+      try {
+        parsedCategory = JSON.parse(category);
+      } catch (e) {
+        parsedCategory = {
+          ...article.category,
+          en: category,
+        };
+      }
+    }
+    // Update basic fields
+    if (parsedTitle) {
+      if (!parsedTitle.en || !parsedTitle.ru) {
+        return res.status(400).json({
+          error: "Title must be provided in both English and Russian",
+        });
+      }
+      video.title = parsedTitle;
+    }
+
+    if (parsedDescription) {
+      if (!parsedDescription.en || !parsedDescription.ru) {
+        return res.status(400).json({
+          error: "Description must be provided in both English and Russian",
+        });
+      }
+      video.description = parsedDescription;
+    }
+
+    if (parsedCategory) {
+      if (!parsedCategory.en || !parsedCategory.ru) {
+        return res.status(400).json({
+          error: "Category must be provided in both English and Russian",
+        });
+      }
+      video.category = parsedCategory;
+    }
+
     video.duration = duration ? Number(duration) : video.duration;
     video.tags = tags; // Replace existing tags with new tags
 
@@ -186,7 +305,21 @@ export const getVideo = async (req, res) => {
     if (!video) {
       return res.status(404).json({ error: "Video not found" });
     }
-    res.json(video);
+    const language =
+      req.query.lang ||
+      req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
+      "en";
+    const transformedVideo = {
+      ...video.toObject(),
+      title: video.title[language] || video.title.en,
+      description: video.description[language] || video.description.en,
+      category: video.category[language] || video.category.en,
+      titleTranslations: video.title,
+      descriptionTranslations: video.description,
+      categoryTranslation: video.category
+    };
+
+    res.json(transformedVideo);
   } catch (error) {
     console.error("Error fetching video:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -270,4 +403,3 @@ export const markVideoAsWatched = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-

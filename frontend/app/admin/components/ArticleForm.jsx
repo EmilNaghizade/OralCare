@@ -27,8 +27,10 @@ export default function ArticleForm({ route, navigation }) {
   const API_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
+    titleEn: "",
+    titleRu: "",
+    descriptionEn: "",
+    descriptionRu: "",
     readingTime: "",
     thumbnailFile: null,
   });
@@ -51,10 +53,22 @@ export default function ArticleForm({ route, navigation }) {
       const articleData = response.data;
       if (articleData) {
         setFormData({
-          title: articleData.title || "",
-          description: articleData.description || "",
-          readingTime: articleData.readingTime ? articleData.readingTime.toString() : "",
-          thumbnailFile: null, // We don't reload the actual file
+          titleEn:
+            articleData.titleTranslations?.en || articleData.title.en || "",
+          titleRu:
+            articleData.titleTranslations?.ru || articleData.title.ru || "",
+          descriptionEn:
+            articleData.descriptionTranslations?.en ||
+            articleData.description.en ||
+            "",
+          descriptionRu:
+            articleData.descriptionTranslations?.ru ||
+            articleData.description.ru ||
+            "",
+          readingTime: articleData.readingTime
+            ? articleData.readingTime.toString()
+            : "",
+          thumbnailFile: null,
         });
 
         // Set preview if available
@@ -112,10 +126,16 @@ export default function ArticleForm({ route, navigation }) {
 
   const handleSubmit = async () => {
     // Validate form
-    if (!formData.title || !formData.description || !formData.readingTime) {
+    if (
+      !formData.titleEn ||
+      !formData.titleRu ||
+      !formData.descriptionEn ||
+      !formData.descriptionRu ||
+      !formData.readingTime
+    ) {
       Alert.alert(
         "Missing Information",
-        "Please fill in all required fields (title, description, reading time)"
+        "Please fill in all required fields (title and description in both languages, and reading time)"
       );
       return;
     }
@@ -136,8 +156,23 @@ export default function ArticleForm({ route, navigation }) {
     try {
       // Create FormData object for file upload
       const formDataForUpload = new FormData();
-      formDataForUpload.append("title", formData.title);
-      formDataForUpload.append("description", formData.description);
+
+      // Create multi-language objects
+      const titleObject = {
+        en: formData.titleEn,
+        ru: formData.titleRu,
+      };
+
+      const descriptionObject = {
+        en: formData.descriptionEn,
+        ru: formData.descriptionRu,
+      };
+
+      formDataForUpload.append("title", JSON.stringify(titleObject));
+      formDataForUpload.append(
+        "description",
+        JSON.stringify(descriptionObject)
+      );
       formDataForUpload.append("readingTime", formData.readingTime || 5);
 
       // Append thumbnail file if we have one
@@ -154,7 +189,7 @@ export default function ArticleForm({ route, navigation }) {
         const thumbnailFileName = formData.thumbnailFile.split("/").pop();
         const thumbnailFile = {
           uri: formData.thumbnailFile,
-          type: "image/jpeg", // Set appropriate type based on file
+          type: "image/jpeg",
           name: thumbnailFileName,
         };
 
@@ -180,7 +215,9 @@ export default function ArticleForm({ route, navigation }) {
       // Success message
       Alert.alert(
         "Success",
-        isEditing ? "Article updated successfully" : "Article created successfully",
+        isEditing
+          ? "Article updated successfully"
+          : "Article created successfully",
         [{ text: "OK", onPress: () => navigation.goBack() }]
       );
     } catch (error) {
@@ -207,20 +244,38 @@ export default function ArticleForm({ route, navigation }) {
           {isEditing ? "Edit Article" : "Add New Article"}
         </Text>
 
-        <Text style={styles.label}>Title *</Text>
+        <Text style={styles.label}>Title (English) *</Text>
         <TextInput
           style={styles.input}
-          value={formData.title}
-          onChangeText={(text) => handleInputChange("title", text)}
-          placeholder="Enter article title"
+          value={formData.titleEn}
+          onChangeText={(text) => handleInputChange("titleEn", text)}
+          placeholder="Enter article title in English"
         />
 
-        <Text style={styles.label}>Description *</Text>
+        <Text style={styles.label}>Title (Russian) *</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.titleRu}
+          onChangeText={(text) => handleInputChange("titleRu", text)}
+          placeholder="Введите заголовок статьи на русском"
+        />
+
+        <Text style={styles.label}>Description (English) *</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
-          value={formData.description}
-          onChangeText={(text) => handleInputChange("description", text)}
-          placeholder="Enter article description"
+          value={formData.descriptionEn}
+          onChangeText={(text) => handleInputChange("descriptionEn", text)}
+          placeholder="Enter article description in English"
+          multiline={true}
+          numberOfLines={4}
+        />
+
+        <Text style={styles.label}>Description (Russian) *</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={formData.descriptionRu}
+          onChangeText={(text) => handleInputChange("descriptionRu", text)}
+          placeholder="Введите описание статьи на русском"
           multiline={true}
           numberOfLines={4}
         />

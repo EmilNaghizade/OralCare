@@ -76,6 +76,24 @@
       }
     }
   },
+  "quiz": {
+    "questions": "questions",
+    "quiz": "quiz",
+    "completed": "Completed",
+    "before": "Before starting the quiz you can watch related videos below:",
+    "noRelatedVideos": "No related videos available",
+    "startQuiz": "Start Quiz",
+    "retakeQuiz": "Retake Quiz"
+  },
+  "quizResult": {
+    "goHome": "Go to home",
+    "answered": "Answered Correctly",
+    "completed": "Congratulations on\ncompleting quiz!",
+    "correct": "Correct Answer!",
+    "incorrect": "Incorrect Answer!",
+    "saving": "Saving your results..."
+  },
+  "questionCount": "Question {{current}} of {{total}}",
   "login": {
     "email": {
       "title": "Enter your email",
@@ -177,6 +195,24 @@
     }
   },
   "notifications": {
+    "video": {
+      "new": "New video added: {{title}}"
+    },
+    "news": {
+      "new": "New news: {{title}}"
+    },
+    "article": {
+      "new": "New article published: {{title}}"
+    },
+    "product": {
+      "new": "New product available: {{name}}"
+    },
+    "quiz": {
+      "new": "New quiz available: {{title}}"
+    },
+    "content": {
+      "new": "New content added"
+    },
     "screenTitle": "Notifications",
     "markAllAsRead": "Mark all as read",
     "empty": "You have no notifications yet."

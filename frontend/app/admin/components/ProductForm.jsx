@@ -28,7 +28,8 @@ export default function ProductForm({ route, navigation }) {
   const API_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   const [formData, setFormData] = useState({
-    name: "",
+    nameEn: "",
+    nameRu: "",
     link: "",
     imageFile: null,
   });
@@ -50,7 +51,8 @@ export default function ProductForm({ route, navigation }) {
 
       const product = response.data;
       setFormData({
-        name: product.name || "",
+        nameEn: product.nameTranslations?.en || product.name.en || "",
+        nameRu: product.nameTranslations?.ru || product.name.ru || "",
         link: product.link || "",
         imageFile: null, // We don't reload the actual file
       });
@@ -108,10 +110,10 @@ export default function ProductForm({ route, navigation }) {
 
   const handleSubmit = async () => {
     // Validate form
-    if (!formData.name || !formData.link) {
+    if (!formData.nameEn || !formData.nameRu || !formData.link) {
       Alert.alert(
         "Missing Information",
-        "Please fill in all required fields (name and link)"
+        "Please fill in all required fields (name in both languages and link)"
       );
       return;
     }
@@ -126,7 +128,14 @@ export default function ProductForm({ route, navigation }) {
     try {
       // Create FormData object for file upload
       const formDataForUpload = new FormData();
-      formDataForUpload.append("name", formData.name);
+
+      // Create multilingual name object
+      const nameObject = {
+        en: formData.nameEn,
+        ru: formData.nameRu,
+      };
+
+      formDataForUpload.append("name", JSON.stringify(nameObject));
       formDataForUpload.append("link", formData.link);
 
       // Append image file if we have one
@@ -139,7 +148,7 @@ export default function ProductForm({ route, navigation }) {
         const imageFileName = formData.imageFile.split("/").pop();
         const imageFile = {
           uri: formData.imageFile,
-          type: "image/jpeg", // Set appropriate type based on file
+          type: "image/jpeg",
           name: imageFileName,
         };
 
@@ -205,12 +214,20 @@ export default function ProductForm({ route, navigation }) {
       <View style={styles.formContainer}>
         <BackButton onPress={() => navigation.goBack()} />
 
-        <Text style={styles.label}>Product Name *</Text>
+        <Text style={styles.label}>Product Name (English) *</Text>
         <TextInput
           style={styles.input}
-          value={formData.name}
-          onChangeText={(text) => handleInputChange("name", text)}
-          placeholder="Enter product name"
+          value={formData.nameEn}
+          onChangeText={(text) => handleInputChange("nameEn", text)}
+          placeholder="Enter product name in English"
+        />
+
+        <Text style={styles.label}>Product Name (Russian) *</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.nameRu}
+          onChangeText={(text) => handleInputChange("nameRu", text)}
+          placeholder="Введите название продукта на русском"
         />
 
         <Text style={styles.label}>Product Link *</Text>
@@ -221,9 +238,6 @@ export default function ProductForm({ route, navigation }) {
           placeholder="Enter product link (URL)"
           autoCapitalize="none"
         />
-
-
-  
 
         <Text style={styles.label}>Product Image *</Text>
         <TouchableOpacity style={styles.uploadButton} onPress={pickImage}>
@@ -296,12 +310,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-  },
-  stockContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginVertical: 8,
   },
   uploadButton: {
     flexDirection: "row",

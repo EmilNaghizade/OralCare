@@ -4,8 +4,10 @@ import { View, TouchableOpacity, StyleSheet } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { LinearGradient } from "expo-linear-gradient";
 import Typo from "./Typo";
+import { useTranslation } from "react-i18next";
 
 const QuizCard = ({ item, cardWidth = 240 }) => {
+  const { i18n } = useTranslation();
   const cardStyle = {
     width: cardWidth,
   };
@@ -33,6 +35,12 @@ const QuizCard = ({ item, cardWidth = 240 }) => {
       centerIconName = "leaf-outline";
       break;
   }
+
+  const title = item.titleTranslations
+    ? item.titleTranslations[i18n.language] ||
+      item.titleTranslations.en ||
+      item.title
+    : item.title;
 
   return (
     <TouchableOpacity
@@ -70,7 +78,7 @@ const QuizCard = ({ item, cardWidth = 240 }) => {
             style={styles.quizTitle}
             numberOfLines={3}
           >
-            {item.title}
+            {title}
           </Typo>
         </View>
       </LinearGradient>

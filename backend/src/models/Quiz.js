@@ -3,20 +3,41 @@ import mongoose from "mongoose";
 
 const QuizSchema = new mongoose.Schema({
   title: {
-    type: String,
-    required: true,
+    en: {
+      type: String,
+      required: true,
+    },
+    ru: {
+      type: String,
+      required: true,
+    },
   },
   description: {
-    type: String,
-    required: true,
+    en: {
+      type: String,
+      required: true,
+    },
+    ru: {
+      type: String,
+      required: true,
+    },
   },
   questions: [
     {
       question: {
-        type: String,
-        required: true,
+        en: {
+          type: String,
+          required: true,
+        },
+        ru: {
+          type: String,
+          required: true,
+        },
       },
-      options: [String],
+      options: {
+        en: [{ type: String, required: true }],
+        ru: [{ type: String, required: true }],
+      },
       correctAnswer: {
         type: Number, // Index of the correct option
         required: true,
@@ -29,7 +50,14 @@ const QuizSchema = new mongoose.Schema({
     default: "green",
   },
   category: {
-    type: String,
+    en: {
+      type: String,
+      required: true,
+    },
+    ru: {
+      type: String,
+      required: true,
+    },
   },
   time: {
     type: Number,

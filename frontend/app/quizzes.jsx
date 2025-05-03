@@ -27,7 +27,7 @@ export default function Quizzes() {
   const { authToken } = useAuth();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
@@ -37,15 +37,16 @@ export default function Quizzes() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const data = await quizApi.getAllQuizzes(authToken);
+      const data = await quizApi.getAllQuizzes(authToken, i18n.language);
       if (data && data.quizzes) {
-        console.log("Fetched quizzes:", );
+        console.log("Fetched quizzes:");
         // Map the backend data to match the expected format for QuizCard
         const mappedQuizzes = data.quizzes.map((quiz) => ({
           _id: quiz._id,
           title: quiz.title,
+          titleTranslations: quiz.titleTranslations,
           colorScheme: quiz.colorScheme,
-          __v: quiz.__v
+          __v: quiz.__v,
         }));
         setQuizzes(mappedQuizzes);
       }

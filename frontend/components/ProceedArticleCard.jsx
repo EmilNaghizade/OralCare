@@ -1,38 +1,50 @@
-import { Image, Text,TouchableOpacity, StyleSheet, View } from "react-native";
+import { Image, Text, TouchableOpacity, StyleSheet, View } from "react-native";
 import { router } from "expo-router";
 import Typo from "../components/Typo";
 import Badge from "./Badge";
+import { useTranslation } from "react-i18next";
 
-export const ProceedArticleCard = ({ item, cardStyle }) => (
-  <TouchableOpacity
-    style={[styles.container, cardStyle]}
-    onPress={() => {
-      router.push({
-        pathname: `/article/${item._id}`,
-        params: { activeTab: "Articles" }, // Pass the activeTab parameter
-      });
-    }}
-  >
-    {/* Left side - Image */}
-    <Image source={item.image} style={styles.image} />
 
-    {/* Right side - Content */}
-    <View style={styles.contentContainer}>
-      {/* Read Time Badge */}
-      <View style={styles.badgeContainer}>
-        <Text style={styles.badgeText}>{item.readTime}</Text>
+export const ProceedArticleCard = ({ item, cardStyle }) => {
+  const {i18n}= useTranslation();
+  const title = item.titleTranslations
+    ? item.titleTranslations[i18n.language] ||
+      item.titleTranslations.en ||
+      item.title
+    : item.title;
+
+  console.log(title, "articleCard");
+  return (
+    <TouchableOpacity
+      style={[styles.container, cardStyle]}
+      onPress={() => {
+        router.push({
+          pathname: `/article/${item._id}`,
+          params: { activeTab: "Articles" }, // Pass the activeTab parameter
+        });
+      }}
+    >
+      {/* Left side - Image */}
+      <Image source={item.image} style={styles.image} />
+
+      {/* Right side - Content */}
+      <View style={styles.contentContainer}>
+        {/* Read Time Badge */}
+        <View style={styles.badgeContainer}>
+          <Text style={styles.badgeText}>{item.readTime}</Text>
+        </View>
+
+        {/* Title */}
+        <Typo style={styles.title} numberOfLines={3}>
+          {title}
+        </Typo>
+
+        {/* Date */}
+        <Typo style={styles.date}>{item.createdAt}</Typo>
       </View>
-
-      {/* Title */}
-      <Typo style={styles.title} numberOfLines={3}>
-        {item.title}
-      </Typo>
-
-      {/* Date */}
-      <Typo style={styles.date}>{item.createdAt}</Typo>
-    </View>
-  </TouchableOpacity>
-);
+    </TouchableOpacity>
+  );
+};
 
 // --- Styles ---
 const styles = StyleSheet.create({
@@ -62,7 +74,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   badge: {
-   gap: 8
+    gap: 8,
   },
   title: {
     color: "#000",

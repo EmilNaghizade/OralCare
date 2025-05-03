@@ -9,11 +9,9 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#ffffff",
-      "imageWidth": 1170,
-      "imageHeight": 2532
+      "image": "./assets/images/IconOralCare2.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true,
@@ -50,11 +48,9 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash.png",
+          "image": "./assets/images/IconOralCare2.png",
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
-          "imageWidth": 1170,
-          "imageHeight": 2532
+          "backgroundColor": "#ffffff"
         }
       ],
       [
