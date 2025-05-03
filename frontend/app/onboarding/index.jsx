@@ -1,3 +1,4 @@
+// app/onboarding/index.jsx
 import React, { useRef, useState } from "react";
 import {
   View,
@@ -7,8 +8,8 @@ import {
   StatusBar,
   Dimensions,
   SafeAreaView,
-  Platform,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { useRouter } from "expo-router";
@@ -16,17 +17,21 @@ import Button from "../../components/Button";
 import Typo from "../../components/Typo";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
-import LanguageModal from "../../components/LanguageModal";
-import "../../i18n"; // Import the i18n configuration
+import "../../i18n";
 
 const { width } = Dimensions.get("window");
+
+const LANGUAGES = [
+  { code: "en", name: "EN", flag: "🇬🇧" },
+  { code: "ru", name: "RU", flag: "🇷🇺" },
+];
 
 const OnboardingScreen = () => {
   const carouselRef = useRef(null);
   const [activeSlide, setActiveSlide] = useState(0);
   const router = useRouter();
   const { t, i18n } = useTranslation();
-  const [showLanguageModal, setShowLanguageModal] = useState(false);
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
 
   const slides = [
     {
@@ -49,66 +54,83 @@ const OnboardingScreen = () => {
   const changeLanguage = async (lng) => {
     try {
       await i18n.changeLanguage(lng);
+      setShowLanguageDropdown(false);
     } catch (error) {
       console.error("Failed to change language:", error);
     }
   };
-  
-  const currentSlideData = slides[activeSlide] || {}; // Handle potential undefined slide
+
+  const currentSlideData = slides[activeSlide] || {};
+  const currentLanguage = LANGUAGES.find(lang => lang.code === i18n.language) || LANGUAGES[0];
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
 
-      <View style={{ flex: 0.1 }} />
-
-      {/* Language selection modal */}
-      <LanguageModal
-        visible={showLanguageModal}
-        onClose={() => setShowLanguageModal(false)}
-        onSelectLanguage={changeLanguage}
-        statusBarTranslucent={true} 
-      />
-
-      {/* Language button in top-right corner */}
-      <TouchableOpacity
-        style={styles.languageButton}
-        onPress={() => setShowLanguageModal(true)}
-      >
-        <Ionicons name="language-outline" size={20} color="#038565" />
-        <Text style={styles.languageButtonText}>
-          {t("onboarding.buttons.language", "Language")}
-        </Text>
-      </TouchableOpacity>
+      {/* Header with language selector */}
+      <View style={styles.header}>
+        <View style={styles.headerSpace} />
+        <View style={styles.languageSelector}>
+          <TouchableOpacity
+            style={styles.languageButton}
+            onPress={() => setShowLanguageDropdown(!showLanguageDropdown)}
+          >
+            <Text style={styles.flagText}>{currentLanguage.flag}</Text>
+            <Text style={styles.languageButtonText}>{currentLanguage.name}</Text>
+            <Ionicons 
+              name={showLanguageDropdown ? "chevron-up" : "chevron-down"} 
+              size={16} 
+              color="#038565" 
+            />
+          </TouchableOpacity>
+          
+          {showLanguageDropdown && (
+            <View style={styles.dropdown}>
+              {LANGUAGES.map((language) => (
+                <TouchableOpacity
+                  key={language.code}
+                  style={styles.dropdownItem}
+                  onPress={() => changeLanguage(language.code)}
+                >
+                  <Text style={styles.flagText}>{language.flag}</Text>
+                  <Text style={styles.dropdownItemText}>{language.name}</Text>
+                  {i18n.language === language.code && (
+                    <Ionicons name="checkmark" size={16} color="#038565" />
+                  )}
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+        </View>
+      </View>
 
       {/* Carousel */}
-      <Carousel
-        ref={carouselRef}
-        width={width}
-        height={width * 0.7}
-        data={slides}
-        loop={false}
-        onSnapToItem={(index) => setActiveSlide(index)}
-        renderItem={({ item }) =>
-          item ? (
-            <View style={styles.imageContainer}>
-              <Image source={item.image} style={styles.image} />
-            </View>
-          ) : null
-        }
-        style={styles.carousel}
-      />
+      <View style={styles.carouselContainer}>
+        <Carousel
+          ref={carouselRef}
+          width={width}
+          height={width * 0.7}
+          data={slides}
+          loop={false}
+          onSnapToItem={(index) => setActiveSlide(index)}
+          renderItem={({ item }) =>
+            item ? (
+              <View style={styles.imageContainer}>
+                <Image source={item.image} style={styles.image} />
+              </View>
+            ) : null
+          }
+        />
+      </View>
 
-      {/* Content Area below Carousel */}
+      {/* Content Area */}
       <View style={styles.contentArea}>
-        {/* Welcome Badge */}
         <View style={styles.badge}>
           <Typo fontWeight="600" size={14} style={styles.badgeText}>
             {t("onboarding.welcome.badge", "🌟 Welcome to OralCare")}
           </Typo>
         </View>
 
-        {/* Title & Subtitle */}
         <Typo fontWeight="600" size={32} style={styles.title}>
           {currentSlideData.title}
         </Typo>
@@ -116,7 +138,6 @@ const OnboardingScreen = () => {
           {currentSlideData.subtitle}
         </Typo>
 
-        {/* Pagination Dots */}
         <View style={styles.pagination}>
           {slides.map((_, index) => (
             <View
@@ -127,7 +148,7 @@ const OnboardingScreen = () => {
         </View>
       </View>
 
-      {/* Bottom Button Container */}
+      {/* Bottom Buttons */}
       <View style={styles.buttonContainer}>
         <Button
           style={styles.getStartedButton}
@@ -154,31 +175,77 @@ const OnboardingScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#fff",
+  },
+  header: {
+    flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#fff",
-    paddingBottom: 30,
-    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "ios" ? 10 : 20,
+    paddingBottom: 10,
+    width: "100%",
+    zIndex: 10,
+  },
+  headerSpace: {
+    flex: 1,
+  },
+  languageSelector: {
+    position: 'relative',
+    zIndex: 10,
   },
   languageButton: {
-    position: "absolute",
-    top: Platform.OS === "ios"? 75: 30,
-    right: 20,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F0F5F7",
     borderRadius: 20,
     paddingVertical: 6,
     paddingHorizontal: 12,
-    zIndex: 10,
   },
   languageButtonText: {
     fontSize: 14,
     fontWeight: "500",
     color: "#038565",
-    marginLeft: 4,
+    marginHorizontal: 6,
   },
-  carousel: {},
+  flagText: {
+    fontSize: 16,
+  },
+  dropdown: {
+    position: 'absolute',
+    top: 35,
+    right: 0,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    paddingVertical: 8,
+    minWidth: 100,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  dropdownItemText: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#000",
+    marginHorizontal: 8,
+    flex: 1,
+  },
+  carouselContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   imageContainer: {
     width: width,
     height: "100%",
@@ -193,7 +260,7 @@ const styles = StyleSheet.create({
   contentArea: {
     alignItems: "center",
     paddingHorizontal: 20,
-    marginTop: 10,
+    paddingBottom: 20,
   },
   badge: {
     backgroundColor: "#EDFAF7",
@@ -222,12 +289,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "#6B7280",
     marginTop: 8,
-    lineHeight: 22,
   },
   pagination: {
     flexDirection: "row",
     marginTop: 25,
-    marginBottom: 20,
   },
   dot: {
     width: 8,
@@ -243,9 +308,9 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   buttonContainer: {
-    width: "90%",
-    alignItems: "center",
-    marginBottom: 20,
+    width: "100%",
+    paddingHorizontal: 20,
+    paddingBottom: Platform.OS === "ios" ? 20 : 30,
   },
   getStartedButton: {
     backgroundColor: "#038565",
