@@ -1,4 +1,6 @@
 // app/_layout.jsx
+
+import "react-native-gesture-handler";
 import React, {
   useState,
   useEffect,
@@ -6,6 +8,7 @@ import React, {
   useContext,
   useCallback,
 } from "react";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Slot, useRouter } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 import { ActivityIndicator, View, Text } from "react-native";
@@ -263,12 +266,12 @@ function AuthProvider({ children }) {
 // --- Kök Layout Component ---
 export default function RootLayout() {
   return (
-    <I18nextProvider i18n={i18n}>
-    
-      <AuthProvider>
-        <Slot />
-      </AuthProvider>
-     
-    </I18nextProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <I18nextProvider i18n={i18n}>
+        <AuthProvider>
+          <Slot />
+        </AuthProvider>
+      </I18nextProvider>
+    </GestureHandlerRootView>
   );
 }
