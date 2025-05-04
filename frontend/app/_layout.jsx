@@ -16,6 +16,9 @@ import { authApi } from "../services/api";
 import "../i18n";
 import { I18nextProvider } from "react-i18next";
 import i18n from "../i18n";
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync();
 
 // --- Authentication Context ---
 const AuthContext = createContext(null);
@@ -127,33 +130,39 @@ function AuthProvider({ children }) {
     prepare();
   }, []); // Sadece component mount edildiğinde çalışır
 
+  useEffect(() => {
+    if (appIsReady) {
+      const hideSplashScreen = async () => {
+        await SplashScreen.hideAsync();
+      };
+      hideSplashScreen();
+    }
+  }, [appIsReady]);
+
   // Modified getAdmin useEffect
   useEffect(() => {
-    const getAdmin = async () => {
-      try {
-        if (isLoading || hasNavigated.current) return;
-        if (!authToken || !user) {
-          hasNavigated.current = true;
-          router.replace("/onboarding");
-        } else if (authToken && user && user?.role) {
-          hasNavigated.current = true;
-          console.log("User role is:", user.role);
-          if (user.role === "admin") {
-            console.log("Navigating to /admin");
-            router.replace("/admin");
-          } else {
-            router.replace("/(tabs)/home");
-          }
+    const navigateUser = async () => {
+      if (isLoading || hasNavigated.current || !appIsReady) return;
+
+      if (!authToken || !user) {
+        hasNavigated.current = true;
+        router.replace("/onboarding");
+      } else if (authToken && user && user?.role) {
+        hasNavigated.current = true;
+        console.log("User role is:", user.role);
+        if (user.role === "admin") {
+          console.log("Navigating to /admin");
+          router.replace("/admin");
         } else {
-          console.log("User or role not ready yet, waiting...");
+          router.replace("/(tabs)/home");
         }
-      } catch (error) {
-        console.error("Navigation error:", error);
+      } else {
+        console.log("User or role not ready yet, waiting...");
       }
     };
 
-    getAdmin();
-  }, [isLoading, authToken, user?.role]); // Add router and user to dependencies isLoading, authToken ve user değiştiğinde çalışır
+    navigateUser();
+  }, [isLoading, authToken, user?.role, appIsReady]);
 
   // Login fonksiyonu: token ve user objesini alır (API response'dan)
   // Login function without routing
@@ -242,22 +251,29 @@ function AuthProvider({ children }) {
     updateUserPoints,
   };
 
+  if (!appIsReady) {
+    return null;
+  }
+
   return (
     <AuthContext.Provider value={value}>
-      <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
-        {isLoading ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <ActivityIndicator size="large" color="#007AFF" />
-            <Text style={{ marginTop: 10, color: "#666" }}>
-              Loading your app...
-            </Text>
-          </View>
-        ) : (
-          children
-        )}
-      </View>
+      {isLoading ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "#ffffff",
+          }}
+        >
+          <ActivityIndicator size="large" color="#007AFF" />
+          <Text style={{ marginTop: 10, color: "#666" }}>
+            Loading your app...
+          </Text>
+        </View>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }

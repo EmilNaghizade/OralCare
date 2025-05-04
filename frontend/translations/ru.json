@@ -50,16 +50,16 @@
       }
     },
     "email": {
-      "title": "Введите ваш email",
+      "title": "Введите ваш электронная почта",
       "placeholder": "user@gmail.com",
-      "alertRequiredTitle": "Требуется email",
+      "alertRequiredTitle": "Требуется электронная почта",
       "alertRequiredMessage": "Пожалуйста, введите ваш адрес электронной почты.",
-      "alertInvalidTitle": "Неверный email",
+      "alertInvalidTitle": "Неверный электронная почта",
       "alertInvalidMessage": "Пожалуйста, введите корректный адрес электронной почты.",
-      "alertExistsTitle": "Email уже существует",
-      "alertExistsMessage": "Этот email уже зарегистрирован. Пожалуйста, используйте другой адрес.",
+      "alertExistsTitle": "Электронная почта уже существует",
+      "alertExistsMessage": "Этот электронная почта уже зарегистрирован. Пожалуйста, используйте другой адрес.",
       "alertErrorTitle": "Ошибка",
-      "alertErrorMessage": "Произошла ошибка при проверке email. Пожалуйста, попробуйте позже."
+      "alertErrorMessage": "Произошла ошибка при проверке электронная почта. Пожалуйста, попробуйте позже."
     },
     "otp": {
       "title": "Введите OTP, отправленный на",
@@ -83,11 +83,11 @@
   },
   "login": {
     "email": {
-      "title": "Введите ваш email",
+      "title": "Введите ваш электронная почта",
       "placeholder": "user@gmail.com",
-      "alertRequiredTitle": "Требуется email",
+      "alertRequiredTitle": "Требуется электронная почта",
       "alertRequiredMessage": "Пожалуйста, введите адрес электронной почты.",
-      "alertInvalidTitle": "Неверный email",
+      "alertInvalidTitle": "Неверный электронная почта",
       "alertInvalidMessage": "Пожалуйста, введите корректный адрес электронной почты.",
       "alertErrorTitle": "Ошибка",
       "alertErrorUserNotFoundMessage": "Пользователь не найден. Пожалуйста, попробуйте снова.",
@@ -107,9 +107,9 @@
     },
     "forgot": {
       "title": "Забыли пароль?",
-      "placeholder": "Введите ваш email",
+      "placeholder": "Введите ваш электронная почта",
       "button": "Отправить OTP",
-      "alertInvalidTitle": "Неверный email",
+      "alertInvalidTitle": "Неверный электронная почта",
       "alertInvalidMessage": "Пожалуйста, введите корректный адрес электронной почты.",
       "alertErrorTitle": "Ошибка",
       "alertErrorMessage": "Не удалось отправить OTP"
@@ -262,7 +262,7 @@
     "personalInformation": "Личная информация",
     "errors": {
       "nameEmpty": "Имя не может быть пустым",
-      "emailInvalid": "Пожалуйста, введите корректный email",
+      "emailInvalid": "Пожалуйста, введите корректный электронная почта",
       "currentPasswordRequired": "Требуется текущий пароль",
       "currentPasswordIncorrect": "Текущий пароль неверен",
       "passwordShort": "Новый пароль должен содержать не менее 6 символов",
@@ -273,7 +273,7 @@
     "passwordNote": "Оставьте поля пустыми, если не хотите менять пароль",
     "fullName": "ФИО",
     "fullNamePlaceholder": "Введите имя и фамилию",
-    "emailAddress": "Email",
+    "emailAddress": "Электронная почта",
     "emailPlaceholder": "Введите адрес электронной почты",
     "currentPassword": "Текущий пароль",
     "currentPasswordPlaceholder": "Введите текущий пароль",

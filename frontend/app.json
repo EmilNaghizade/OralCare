@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/IconOralCare2.png",
+      "image": "./assets/images/splash1.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -23,6 +23,11 @@
       }
     },
     "android": {
+      "splash": {
+        "image": "./assets/images/splash1.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/IconOralCare2.png",
         "backgroundColor": "#ffffff"
@@ -44,15 +49,6 @@
       "expo-router",
       "expo-secure-store",
       "expo-video",
-      //splash screen
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/IconOralCare2.png",
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ],
       [
         "expo-image-picker",
         {

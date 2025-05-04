@@ -203,12 +203,14 @@ export default function QuestionForm({ route, navigation }) {
                   value={options.en[idx]}
                   onChangeText={(t) => handleOptionChange("en", t, idx)}
                   placeholder={`Option ${idx + 1} (EN)`}
+                  placeholderTextColor={"#000"}
                 />
                 <TextInput
                   style={styles.optionInput}
                   value={options.ru[idx]}
                   onChangeText={(t) => handleOptionChange("ru", t, idx)}
                   placeholder={`Вариант ${idx + 1} (RU)`}
+                  placeholderTextColor={"#000"}
                 />
               </View>
               <TouchableOpacity

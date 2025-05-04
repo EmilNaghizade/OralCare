@@ -81,7 +81,7 @@ export default function UserSettings() {
         setName(user.name ?? "");
         setEmail(user.email ?? "");
       } catch {
-        setErrorMessage(
+        Alert.alert(
           t("userSettings.fetchError", "Could not load profile.")
         );
       } finally {
@@ -95,21 +95,21 @@ export default function UserSettings() {
     setErrorMessage("");
     setSuccessMessage("");
     if (!name.trim()) {
-      setErrorMessage(
+      Alert.alert(
         t("userSettings.errors.nameEmpty", "Name cannot be empty")
       );
       return false;
     }
     const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRx.test(email)) {
-      setErrorMessage(
+      Alert.alert(
         t("userSettings.errors.emailInvalid", "Please enter a valid email")
       );
       return false;
     }
     if (newPassword) {
       if (!currentPassword) {
-        setErrorMessage(
+        Alert.alert(
           t(
             "userSettings.errors.currentPasswordRequired",
             "Current password is required"
@@ -118,7 +118,7 @@ export default function UserSettings() {
         return false;
       }
       if (newPassword.length < 6) {
-        setErrorMessage(
+        Alert.alert(
           t(
             "userSettings.errors.passwordShort",
             "New password must be at least 6 characters"
@@ -127,7 +127,7 @@ export default function UserSettings() {
         return false;
       }
       if (newPassword !== confirmPassword) {
-        setErrorMessage(
+        Alert.alert(
           t(
             "userSettings.errors.passwordMismatch",
             "New passwords do not match"
@@ -192,22 +192,21 @@ export default function UserSettings() {
         setNewPassword("");
         setConfirmPassword("");
         Alert.alert(
-          t("userSettings.passwordUpdatedTitle", "Password Updated"),
+          t("userSettings.passwordUpdatedTitle"),
           t(
-            "settings.passwordUpdatedMessage",
-            "Your password has been changed. Please use the new one next time."
+            "userSettings.passwordUpdatedMessage"
           ),
           [{ text: t("common.ok", "OK") }]
         );
         return;
       }
 
-      setSuccessMessage(
+      Alert.alert(
         t("userSettings.profileUpdated", "Profile updated successfully")
       );
       setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      setErrorMessage(
+      Alert.alert(
         err.message || t("userSettings.updateFailed", "Update failed")
       );
     } finally {

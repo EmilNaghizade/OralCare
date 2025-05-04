@@ -259,6 +259,7 @@
     "loadingProfile": "Loading profile...",
     "fetchError": "Could not load profile.",
     "personalInformation": "Personal Information",
+
     "errors": {
       "nameEmpty": "Name cannot be empty",
       "emailInvalid": "Please enter a valid email",
