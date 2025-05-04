@@ -9,7 +9,6 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash1.png",
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
@@ -24,7 +23,6 @@
     },
     "android": {
       "splash": {
-        "image": "./assets/images/splash1.png",
         "resizeMode": "cover",
         "backgroundColor": "#ffffff"
       },
