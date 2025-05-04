@@ -9,6 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
+      "image": "./assets/images/splash1.png",
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
@@ -23,6 +24,7 @@
     },
     "android": {
       "splash": {
+        "image": "./assets/images/splash1.png",
         "resizeMode": "cover",
         "backgroundColor": "#ffffff"
       },
@@ -45,6 +47,18 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#ffffff",
+          "image": "./assets/images/splash1.png",
+          "imageWidth": 600,
+          "androidImageResizeMode": "cover",
+          "androidStatusBarTranslucent": true,
+          "androidStatusBarColor": "#00000000",
+          "andriodAllDrawOverMainContent": true
+        }
+      ],
       "expo-secure-store",
       "expo-video",
       [
