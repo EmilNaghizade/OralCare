@@ -9,9 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash5.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#038565"
     },
     "ios": {
       "supportsTablet": true,
@@ -24,9 +22,7 @@
     },
     "android": {
       "splash": {
-        "image": "./assets/images/splash5.png",
-        "resizeMode": "cover",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#038565"
       },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/IconOralCare2.png",
