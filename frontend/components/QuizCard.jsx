@@ -7,7 +7,7 @@ import Typo from "./Typo";
 import { useTranslation } from "react-i18next";
 
 const QuizCard = ({ item, cardWidth = 240 }) => {
-  const { i18n } = useTranslation();
+  const { i18n, t } = useTranslation();
   const cardStyle = {
     width: cardWidth,
   };
@@ -42,6 +42,8 @@ const QuizCard = ({ item, cardWidth = 240 }) => {
       item.title
     : item.title;
 
+  const quizCount = item.questions ? item.questions.length : 0;
+
   return (
     <TouchableOpacity
       style={[styles.quizCard, cardStyle]}
@@ -68,7 +70,8 @@ const QuizCard = ({ item, cardWidth = 240 }) => {
           <View style={styles.quizTagContainer}>
             <Ionicons name="help-circle-outline" size={16} color="#fff" />
             <Typo fontWeight={"600"} size={11} style={styles.quizQuestionsText}>
-              {item?.__v || 0} questions
+              {quizCount } {""} 
+               {quizCount > 1 ? t("quiz.questions") : t("quiz.question")}
             </Typo>
           </View>
 

@@ -17,6 +17,7 @@ import BackButton from "../../../components/BackButton";
 import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
 import AnimatedIcon from "../../../components/AnimatedIcon";
+import normalize from "../../../utils/normalize";
 
 const emailIcon = require("../../../assets/images/Email.png");
 
@@ -108,18 +109,28 @@ export default function ForgotPasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#fff" },
-  container: { flex: 1, justifyContent: "space-between" },
-  inputContainer: { flex: 1, justifyContent: "center", paddingHorizontal: 30 },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  container: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  inputContainer: {
+    flex: 1,
+    justifyContent: "center",
+    paddingHorizontal: normalize(30),
+  },
   title: {
-    lineHeight: 36,
+    lineHeight: normalize(36),
     textAlign: "center",
-    marginBottom: 40,
+    marginBottom: normalize(40),
     color: "#333",
   },
   input: {
-    fontSize: 24,
-    paddingVertical: 10,
+    fontSize: normalize(24),
+    paddingVertical: normalize(10),
     textAlign: "center",
     color: "#000",
   },
@@ -128,15 +139,17 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     width: "100%",
     alignItems: "center",
-    paddingHorizontal: 30,
-    paddingBottom: Platform.OS === "ios" ? 30 : 20,
+    paddingHorizontal: normalize(30),
+    paddingBottom: Platform.OS === "ios" ? normalize(30) : normalize(20),
   },
   button: {
     backgroundColor: "#038565",
-    borderRadius: 25,
+    borderRadius: normalize(25),
     width: "100%",
-    paddingVertical: 15,
+    paddingVertical: normalize(15),
     alignItems: "center",
   },
-  buttonDisabled: { backgroundColor: "#7FCFB6" },
+  buttonDisabled: {
+    backgroundColor: "#7FCFB6",
+  },
 });

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Dimensions, PixelRatio } from "react";
+import { useWindowDimensions } from "react-native";
 import {
   View,
   Text,
@@ -34,6 +35,7 @@ import {
 import QuizCard from "../../components/QuizCard"; // Adjust path if needed
 import "../../i18n";
 import { useTranslation } from "react-i18next";
+import normalize from "../../utils/normalize";
 
 const getUserLaunchedKey = (userId) =>
   `@OralCareApp:user_${userId}_hasLaunched`;
@@ -56,9 +58,10 @@ const SectionHeader = ({ titleKey, onSeeAllPress, isOnSeeAll }) => {
 
 const QuizSection = ({ authToken }) => {
   const router = useRouter();
-  const { t,i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [quizCount, setQuizCount] = useState(0);
 
   useEffect(() => {
     fetchQuizzes();
@@ -67,7 +70,7 @@ const QuizSection = ({ authToken }) => {
   const fetchQuizzes = async () => {
     try {
       setLoading(true);
-      const data = await quizApi.getAllQuizzes(authToken,i18n.language);
+      const data = await quizApi.getAllQuizzes(authToken, i18n.language);
       if (data && data.quizzes) {
         // Filter to only published quizzes and limit to 4 for display
         const publishedQuizzes = data.quizzes
@@ -77,7 +80,6 @@ const QuizSection = ({ authToken }) => {
       } else {
         setQuizzes([]);
       }
-      console.log(i18n.language)
     } catch (error) {
       console.error("Error fetching quizzes:", error);
       setQuizzes([]);
@@ -420,6 +422,9 @@ export default function HomeScreen() {
   const [userId, setUserId] = useState(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
   const { t, i18n } = useTranslation();
+  const { height: screenHeight } = useWindowDimensions();
+  const showModalImage = screenHeight > 800;
+  console.log(screenHeight, "showModalImage");
 
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
@@ -571,11 +576,13 @@ export default function HomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             {/* Top Image */}
-            <Image
-              source={require("../../assets/images/ProceedImage.png")}
-              style={styles.modalImage}
-              resizeMode="cover"
-            />
+            {showModalImage && (
+              <Image
+                source={require("../../assets/images/ProceedImage.png")}
+                style={styles.modalImage}
+                resizeMode="cover"
+              />
+            )}
 
             {/* Headline */}
             <Text style={styles.modalTitle}>
@@ -775,7 +782,7 @@ const styles = StyleSheet.create({
   // white card container
   modalCard: {
     width: "100%",
-    maxHeight: "95%", // <-- limit height
+    maxHeight: "100%", // <-- limit height
     backgroundColor: "#fff",
     borderTopLeftRadius: 20, // <-- only top corners
     borderTopRightRadius: 20,
@@ -786,60 +793,60 @@ const styles = StyleSheet.create({
   modalImage: {
     width: "90%",
     alignSelf: "center",
-    height: 200,
-    margin: 20,
+    height: normalize(200),
+    margin: normalize(20),
     borderRadius: 20,
   },
 
   // headline
   modalTitle: {
-    fontSize: 24,
+    fontSize: normalize(20),
     fontWeight: "700",
-    lineHeight: 32,
+    lineHeight: normalize(28),
     color: "#000",
-    marginHorizontal: 16,
+    paddingTop: normalize(5),
+    marginHorizontal: normalize(16),
   },
-
   // body paragraph
   modalDescription: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "500",
-    lineHeight: 20,
+    lineHeight: normalize(18),
     color: "#666",
-    marginHorizontal: 16,
-    marginTop: 8,
+    marginHorizontal: normalize(16),
+    marginTop: normalize(8),
   },
-
   // “Read more” link
   readMore: {
-    fontSize: 16,
+    fontSize: normalize(14),
     fontWeight: "600",
-    lineHeight: 24,
+    lineHeight: normalize(20),
     color: "#000",
-    marginHorizontal: 16,
-    marginTop: 12,
+    marginHorizontal: normalize(16),
+    marginTop: normalize(8),
   },
 
   // wrapper around your ArticleCard preview
   modalArticleWrapper: {
-    marginHorizontal: 16,
-    marginTop: 16,
+    marginHorizontal: normalize(16),
+    marginTop: normalize(14),
   },
 
   // big green button at bottom
   proceedButton: {
     backgroundColor: "#038565",
-    height: 56,
+    height: normalize(60),
     borderRadius: 28,
-    marginHorizontal: 16,
+    marginHorizontal: normalize(16),
     marginTop: 10,
     marginBottom: 40,
     paddingVertical: 16,
     alignItems: "center",
+    justifyContent: "center",
   },
   proceedButtonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: normalize(16),
     fontWeight: "600",
     lineHeight: 24,
     textAlign: "center",

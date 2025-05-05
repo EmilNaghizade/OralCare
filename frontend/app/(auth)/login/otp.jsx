@@ -15,6 +15,7 @@ import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
 import "../../../i18n";
 import { useTranslation } from "react-i18next";
+import normalize from "../../../utils/normalize";
 
 const BACKEND_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
@@ -122,50 +123,51 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingHorizontal: 30,
+    paddingHorizontal: normalize(20),
+    justifyContent: "center",
+  },
+  centered: {
+    flex: 1,
     justifyContent: "center",
   },
   title: {
     textAlign: "center",
-    marginBottom: 10,
+    marginBottom: normalize(10),
     color: "#000",
+  },
+  checkSpamText: {
+    textAlign: "center",
+    marginTop: normalize(8),
+    marginBottom: normalize(20),
+    color: "#888",
   },
   email: {
     textAlign: "center",
-    marginBottom: 30,
+    marginBottom: normalize(30),
     color: "#555",
   },
   input: {
-    fontSize: 24,
-
+    fontSize: normalize(24),
     textAlign: "center",
-    marginBottom: 40,
+    marginBottom: normalize(40),
     color: "#000",
-    paddingVertical: 10,
+    paddingVertical: normalize(10),
   },
   buttonContainer: {
     alignItems: "flex-end",
     flex: 1,
     justifyContent: "flex-end",
-    paddingBottom: Platform.OS === "ios" ? 30 : 20,
+    paddingBottom: Platform.OS === "ios" ? normalize(30) : normalize(20),
   },
   button: {
-    justifyContent: "flex-end",
     backgroundColor: "#038565",
-    borderRadius: 25,
+    borderRadius: normalize(25),
     width: "100%",
-    paddingVertical: 15,
-    alignItems: "flex-end",
+    paddingVertical: normalize(15),
+    alignItems: "center",
   },
   buttonDisabled: {
     backgroundColor: "#7FCFB6",
-  },
-  checkSpamText: {
-    fontSize: 14,
-    color: "#888",
-    textAlign: "center",
-    marginTop: 8,
-    marginBottom: 20,
   },
 });
 export default OtpVerifyScreen;

@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     paddingHorizontal: 30,
     // Added paddingTop to push content down from the top edge
-    paddingTop: Platform.OS === "ios" ? 20 : 60, // Adjust value as needed
+    paddingTop: Platform.OS === "ios" ? 20 : 20, // Adjust value as needed
   },
   title: {
     textAlign: "center",
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     width: "100%", // Take full width
     alignItems: "center", // Center button within the container
     paddingHorizontal: 30, // Match content padding
-    paddingBottom: Platform.OS === "ios" ? 30 : 20, // Padding at the very bottom (more for iOS home indicator)
+    paddingBottom: Platform.OS === "ios" ? 20 : 20, // Padding at the very bottom (more for iOS home indicator)
   },
   button: {
     // Assuming your custom Button takes style props for the container

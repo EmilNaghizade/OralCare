@@ -2,7 +2,6 @@
 import React, { useRef, useState } from "react";
 import {
   View,
-  Text,
   Image,
   StyleSheet,
   StatusBar,
@@ -10,6 +9,7 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Platform,
+  Text,
 } from "react-native";
 import Carousel from "react-native-reanimated-carousel";
 import { useRouter } from "expo-router";
@@ -18,6 +18,7 @@ import Typo from "../../components/Typo";
 import { useTranslation } from "react-i18next";
 import { Ionicons } from "@expo/vector-icons";
 import "../../i18n";
+import normalize from "../../utils/normalize";
 
 const { width } = Dimensions.get("window");
 
@@ -36,18 +37,30 @@ const OnboardingScreen = () => {
   const slides = [
     {
       image: require("../../assets/images/Graduation.png"),
-      title: t("onboarding.slide1.title", "Learn with Video Tutorials !"),
-      subtitle: t("onboarding.slide1.subtitle", "Follow video guides for effective oral care practices."),
+      title: t(
+        "onboarding.slide1.title",
+        "Learn with Video Tutorials !"
+      ),
+      subtitle: t(
+        "onboarding.slide1.subtitle",
+        "Follow video guides for effective oral care practices."
+      ),
     },
     {
       image: require("../../assets/images/Trophy.png"),
       title: t("onboarding.slide2.title", "Quiz your knowledge!"),
-      subtitle: t("onboarding.slide2.subtitle", "Take quizzes to test and improve your oral health knowledge."),
+      subtitle: t(
+        "onboarding.slide2.subtitle",
+        "Take quizzes to test and improve your oral health knowledge."
+      ),
     },
     {
       image: require("../../assets/images/Globe.png"),
       title: t("onboarding.slide3.title", "Get Instant Support"),
-      subtitle: t("onboarding.slide3.subtitle", "Chat with our managers or connect via your preferred messenger."),
+      subtitle: t(
+        "onboarding.slide3.subtitle",
+        "Chat with our managers or connect via your preferred messenger."
+      ),
     },
   ];
 
@@ -61,11 +74,16 @@ const OnboardingScreen = () => {
   };
 
   const currentSlideData = slides[activeSlide] || {};
-  const currentLanguage = LANGUAGES.find(lang => lang.code === i18n.language) || LANGUAGES[0];
+  const currentLanguage =
+    LANGUAGES.find((lang) => lang.code === i18n.language) ||
+    LANGUAGES[0];
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="#ffffff"
+      />
 
       {/* Header with language selector */}
       <View style={styles.header}>
@@ -73,29 +91,49 @@ const OnboardingScreen = () => {
         <View style={styles.languageSelector}>
           <TouchableOpacity
             style={styles.languageButton}
-            onPress={() => setShowLanguageDropdown(!showLanguageDropdown)}
+            onPress={() =>
+              setShowLanguageDropdown(!showLanguageDropdown)
+            }
           >
-            <Text style={styles.flagText}>{currentLanguage.flag}</Text>
-            <Text style={styles.languageButtonText}>{currentLanguage.name}</Text>
-            <Ionicons 
-              name={showLanguageDropdown ? "chevron-up" : "chevron-down"} 
-              size={16} 
-              color="#038565" 
+            <Text style={styles.flagText}>
+              {currentLanguage.flag}
+            </Text>
+            <Text style={styles.languageButtonText}>
+              {currentLanguage.name}
+            </Text>
+            <Ionicons
+              name={
+                showLanguageDropdown
+                  ? "chevron-up"
+                  : "chevron-down"
+              }
+              size={normalize(16)}
+              color="#038565"
             />
           </TouchableOpacity>
-          
+
           {showLanguageDropdown && (
             <View style={styles.dropdown}>
               {LANGUAGES.map((language) => (
                 <TouchableOpacity
                   key={language.code}
                   style={styles.dropdownItem}
-                  onPress={() => changeLanguage(language.code)}
+                  onPress={() =>
+                    changeLanguage(language.code)
+                  }
                 >
-                  <Text style={styles.flagText}>{language.flag}</Text>
-                  <Text style={styles.dropdownItemText}>{language.name}</Text>
+                  <Text style={styles.flagText}>
+                    {language.flag}
+                  </Text>
+                  <Text style={styles.dropdownItemText}>
+                    {language.name}
+                  </Text>
                   {i18n.language === language.code && (
-                    <Ionicons name="checkmark" size={16} color="#038565" />
+                    <Ionicons
+                      name="checkmark"
+                      size={normalize(16)}
+                      color="#038565"
+                    />
                   )}
                 </TouchableOpacity>
               ))}
@@ -116,7 +154,10 @@ const OnboardingScreen = () => {
           renderItem={({ item }) =>
             item ? (
               <View style={styles.imageContainer}>
-                <Image source={item.image} style={styles.image} />
+                <Image
+                  source={item.image}
+                  style={styles.image}
+                />
               </View>
             ) : null
           }
@@ -126,15 +167,30 @@ const OnboardingScreen = () => {
       {/* Content Area */}
       <View style={styles.contentArea}>
         <View style={styles.badge}>
-          <Typo fontWeight="600" size={14} style={styles.badgeText}>
-            {t("onboarding.welcome.badge", "🌟 Welcome to OralCare")}
+          <Typo
+            size={14}
+            fontWeight="600"
+            style={styles.badgeText}
+          >
+            {t(
+              "onboarding.welcome.badge",
+              "🌟 Welcome to OralCare"
+            )}
           </Typo>
         </View>
 
-        <Typo fontWeight="600" size={32} style={styles.title}>
+        <Typo
+          size={32}
+          fontWeight="600"
+          style={styles.title}
+        >
           {currentSlideData.title}
         </Typo>
-        <Typo fontWeight="400" size={18} style={styles.subtitle}>
+        <Typo
+          size={18}
+          fontWeight="400"
+          style={styles.subtitle}
+        >
           {currentSlideData.subtitle}
         </Typo>
 
@@ -142,7 +198,10 @@ const OnboardingScreen = () => {
           {slides.map((_, index) => (
             <View
               key={index}
-              style={[styles.dot, activeSlide === index && styles.activeDot]}
+              style={[
+                styles.dot,
+                activeSlide === index && styles.activeDot,
+              ]}
             />
           ))}
         </View>
@@ -152,18 +211,26 @@ const OnboardingScreen = () => {
       <View style={styles.buttonContainer}>
         <Button
           style={styles.getStartedButton}
-          onPress={() => router.push("/(auth)/register")}
+          onPress={() =>
+            router.push("/(auth)/register")
+          }
         >
-          <Typo color={"#fff"} fontWeight="600" size={16}>
+          <Typo size={16} fontWeight="600" color="#fff">
             {t("onboarding.buttons.getStarted", "Get started")}
           </Typo>
         </Button>
 
         <Button
           style={styles.loginButton}
-          onPress={() => router.push("/(auth)/login")}
+          onPress={() =>
+            router.push("/(auth)/login")
+          }
         >
-          <Typo color={"#0F172A"} fontWeight="600" size={16}>
+          <Typo
+            size={16}
+            fontWeight="600"
+            color="#0F172A"
+          >
             {t("onboarding.buttons.login", "Log in")}
           </Typo>
         </Button>
@@ -173,72 +240,64 @@ const OnboardingScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
+  container: { flex: 1, backgroundColor: "#fff" },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingTop: Platform.OS === "ios" ? 10 : 20,
-    paddingBottom: 10,
+    paddingHorizontal: normalize(20),
+    paddingTop:
+      Platform.OS === "ios"
+        ? normalize(10)
+        : normalize(20),
+    paddingBottom: normalize(10),
     width: "100%",
     zIndex: 10,
   },
-  headerSpace: {
-    flex: 1,
-  },
-  languageSelector: {
-    position: 'relative',
-    zIndex: 10,
-  },
+  headerSpace: { flex: 1 },
+  languageSelector: { position: "relative", zIndex: 10 },
   languageButton: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F0F5F7",
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    borderRadius: normalize(20),
+    paddingVertical: normalize(6),
+    paddingHorizontal: normalize(12),
   },
   languageButtonText: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "500",
     color: "#038565",
-    marginHorizontal: 6,
+    marginHorizontal: normalize(6),
   },
   flagText: {
-    fontSize: 16,
+    fontSize: normalize(16),
   },
   dropdown: {
-    position: 'absolute',
-    top: 35,
+    position: "absolute",
+    top: normalize(35),
     right: 0,
-    backgroundColor: 'white',
-    borderRadius: 10,
-    paddingVertical: 8,
-    minWidth: 100,
+    backgroundColor: "white",
+    borderRadius: normalize(10),
+    paddingVertical: normalize(8),
+    minWidth: normalize(100),
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
   },
   dropdownItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: normalize(8),
+    paddingHorizontal: normalize(12),
   },
   dropdownItemText: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "500",
     color: "#000",
-    marginHorizontal: 8,
+    marginHorizontal: normalize(8),
     flex: 1,
   },
   carouselContainer: {
@@ -247,7 +306,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   imageContainer: {
-    width: width,
+    width,
     height: "100%",
     alignItems: "center",
     justifyContent: "center",
@@ -259,73 +318,74 @@ const styles = StyleSheet.create({
   },
   contentArea: {
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingHorizontal: normalize(20),
+    paddingBottom: normalize(20),
   },
   badge: {
     backgroundColor: "#EDFAF7",
-    borderRadius: 100,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    marginBottom: 20,
+    borderRadius: normalize(100),
+    paddingVertical: normalize(8),
+    paddingHorizontal: normalize(16),
+    marginTop: normalize(20),
+    marginBottom: normalize(20),
     flexDirection: "row",
     alignItems: "center",
   },
   badgeText: {
-    fontWeight: "500",
-    marginLeft: 4,
+    marginLeft: normalize(4),
   },
   title: {
-    fontSize: 32,
-    lineHeight: 40,
+    lineHeight: normalize(40),
     fontWeight: "600",
     textAlign: "center",
     color: "#1F2937",
   },
   subtitle: {
-    fontSize: 18,
-    lineHeight: 24,
+    lineHeight: normalize(24),
     fontWeight: "400",
     textAlign: "center",
     color: "#6B7280",
-    marginTop: 8,
+    marginTop: normalize(8),
   },
   pagination: {
     flexDirection: "row",
-    marginTop: 25,
+    marginTop: normalize(25),
   },
   dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: normalize(8),
+    height: normalize(8),
+    borderRadius: normalize(4),
     backgroundColor: "#D1D5DB",
-    marginHorizontal: 4,
+    marginHorizontal: normalize(4),
   },
   activeDot: {
     backgroundColor: "#047857",
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: normalize(10),
+    height: normalize(10),
+    borderRadius: normalize(5),
   },
   buttonContainer: {
     width: "100%",
-    paddingHorizontal: 20,
-    paddingBottom: Platform.OS === "ios" ? 20 : 30,
+    paddingHorizontal: normalize(20),
+    paddingBottom:
+      Platform.OS === "ios"
+        ? normalize(20)
+        : normalize(30),
   },
   getStartedButton: {
     backgroundColor: "#038565",
     width: "100%",
-    borderRadius: 100,
-    paddingVertical: 14,
+    borderRadius: normalize(100),
+    paddingVertical: normalize(14),
     alignItems: "center",
     justifyContent: "center",
   },
   loginButton: {
     backgroundColor: "#F0F5F7",
     width: "100%",
-    marginTop: 12,
-    borderRadius: 100,
-    paddingVertical: 14,
+    marginTop: normalize(12),
+    borderRadius: normalize(100),
+    paddingVertical: normalize(14),
     alignItems: "center",
     justifyContent: "center",
   },

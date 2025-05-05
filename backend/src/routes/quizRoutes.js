@@ -23,6 +23,7 @@ router.put("/:id", protectRoute, quizController.updateQuiz);
 //Delete a quiz by ID
 router.delete("/:id", protectRoute, quizController.deleteQuiz);
 
+
 // Question management for a specific quiz
 router.post("/:id/questions", protectRoute, quizController.addQuestion);
 router.put(

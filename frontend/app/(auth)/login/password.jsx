@@ -21,6 +21,7 @@ import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
 import { useAuth } from "../../_layout";
 import AnimatedIcon from "../../../components/AnimatedIcon";
+import normalize from "../../../utils/normalize";
 
 const passwordIcon = require("../../../assets/images/Password.png");
 
@@ -130,19 +131,26 @@ export default function PasswordScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#fff" },
-  container: { flex: 1, justifyContent: "space-between" },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  container: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
   content: {
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingHorizontal: 30,
-    paddingTop: Platform.OS === "ios" ? 20 : 60,
+    paddingHorizontal: normalize(30),
+    paddingTop:
+      Platform.OS === "ios" ? normalize(20) : normalize(20),
   },
   title: {
-    lineHeight: 44,
+    lineHeight: normalize(44),
     textAlign: "center",
-    marginBottom: 40,
+    marginBottom: normalize(40),
     color: "#333",
   },
   inputWrapper: {
@@ -152,32 +160,37 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 24,
-    paddingVertical: 10,
+    fontSize: normalize(24),
+    paddingVertical: normalize(10),
     textAlign: "center",
     color: "#000",
   },
-  eyeIconContainer: { padding: 10 },
+  eyeIconContainer: {
+    padding: normalize(10),
+  },
   forgotWrapper: {
-    marginTop: 20,
+    marginTop: normalize(20),
     alignSelf: "center",
     backgroundColor: "#E0F4EE",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
+    paddingHorizontal: normalize(16),
+    paddingVertical: normalize(8),
+    borderRadius: normalize(12),
   },
   buttonContainer: {
     width: "100%",
     alignItems: "center",
-    paddingHorizontal: 30,
-    paddingBottom: Platform.OS === "ios" ? 30 : 20,
+    paddingHorizontal: normalize(30),
+    paddingBottom:
+      Platform.OS === "ios" ? normalize(30) : normalize(20),
   },
   button: {
     backgroundColor: "#038565",
-    borderRadius: 25,
+    borderRadius: normalize(25),
     width: "100%",
-    paddingVertical: 15,
+    paddingVertical: normalize(15),
     alignItems: "center",
   },
-  disabledButton: { backgroundColor: "#a5d6a7" },
+  disabledButton: {
+    backgroundColor: "#a5d6a7",
+  },
 });

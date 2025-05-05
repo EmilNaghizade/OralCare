@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: { paddingBottom: 30, backgroundColor: "#f0f2f5" },
   header: {
-    height: 140, // Header yüksekliği
+  
     justifyContent: "flex-end", // Başlığı dikeyde ortala
     backgroundColor: "#fff", // Beyaz header arka planı
     paddingBottom: 20, // Alt boşluk

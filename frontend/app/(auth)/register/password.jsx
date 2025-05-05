@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     paddingHorizontal: 30,
-    paddingTop: Platform.OS === "ios" ? 20 : 60,
+    paddingTop: Platform.OS === "ios" ? 20 : 20,
   },
   title: {
     textAlign: "center",

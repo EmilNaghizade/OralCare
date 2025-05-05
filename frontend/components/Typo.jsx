@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TextStyle, View } from "react-native";
 import React from "react";
 import { verticalScale } from "../utils/styling";
+import normalize from "../utils/normalize";
 
 const Typo = ({
   size,
@@ -11,12 +12,12 @@ const Typo = ({
   textProps = {},
 }) => {
   const textStyle = {
-    fontSize: size ? verticalScale(size) : verticalScale(18),
+    fontSize: normalize(size),
     color,
     fontWeight,
   };
   return (
-    <Text {...textProps} style={[textStyle, style]} numberOfLines={3} ellipsizeMode="tail">
+    <Text {...textProps} style={[textStyle, style]} numberOfLines={2} ellipsizeMode="tail">
       {children}
     </Text>
   );

@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import Typo from "../components/Typo";
 import Badge from "./Badge";
 import { useTranslation } from "react-i18next";
+import normalize from "../utils/normalize";
 
 
 export const ProceedArticleCard = ({ item, cardStyle }) => {
@@ -56,7 +57,7 @@ const styles = StyleSheet.create({
     width: "100%",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10,
+    marginBottom: normalize(16),
   },
   image: {
     width: "55%",

@@ -206,6 +206,27 @@ export const quizApi = {
     }
   },
 
+  // Get all questions for a specific quiz
+  getQuizQuestionsCount: async (quizId, token) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/quizzes/${quizId}/questions-count`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        `Error fetching questions for quiz with ID ${quizId}:`,
+        error
+      );
+      throw error;
+    }
+  },
+
   // Add a question to a quiz
   addQuestion: async (quizId, questionData, token) => {
     try {

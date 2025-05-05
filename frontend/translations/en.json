@@ -78,6 +78,7 @@
   },
   "quiz": {
     "questions": "questions",
+    "question": "question",
     "quiz": "quiz",
     "completed": "Completed",
     "before": "Before starting the quiz you can watch related videos below:",

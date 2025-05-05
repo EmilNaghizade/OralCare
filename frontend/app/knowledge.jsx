@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f2f5",
   },
   header: {
-    height: 200, // Header yüksekliği
+
     justifyContent: "flex-end", // Başlığı dikeyde ortala
     backgroundColor: "#fff", // Beyaz header arka planı
     paddingTop: 20, // Üst boşluk (statusBar'a göre)

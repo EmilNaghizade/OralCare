@@ -19,6 +19,7 @@ import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
 import AnimatedIcon from "../../../components/AnimatedIcon";
 import { authApi } from "../../../services/api";
+import normalize from "../../../utils/normalize";
 
 const emailIcon = require("../../../assets/images/Email.png");
 const NEXT_SCREEN_ROUTE = "/(auth)/login/password";
@@ -148,19 +149,25 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: "#fff" },
-  container: { flex: 1, justifyContent: "space-between" },
+  safeArea: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  container: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
   content: {
     flex: 1,
     alignItems: "center",
     justifyContent: "flex-start",
-    paddingHorizontal: 30,
-    paddingTop: 20,
+    paddingHorizontal: normalize(30),
+    paddingTop: normalize(20),
   },
   title: {
-    lineHeight: 44,
+    lineHeight: normalize(44),
     textAlign: "center",
-    marginBottom: 40,
+    marginBottom: normalize(40),
     color: "#000",
   },
   inputWrapper: {
@@ -170,22 +177,22 @@ const styles = StyleSheet.create({
   },
   input: {
     width: "100%",
-    fontSize: 24,
-    paddingVertical: 10,
+    fontSize: normalize(24),
+    paddingVertical: normalize(10),
     textAlign: "center",
     color: "#000",
   },
   buttonContainer: {
     width: "100%",
     alignItems: "center",
-    paddingHorizontal: 30,
-    paddingBottom: Platform.OS === "ios" ? 30 : 20,
+    paddingHorizontal: normalize(30),
+    paddingBottom: Platform.OS === "ios" ? normalize(30) : normalize(20),
   },
   button: {
     backgroundColor: "#038565",
-    borderRadius: 25,
+    borderRadius: normalize(25),
     width: "100%",
-    paddingVertical: 15,
+    paddingVertical: normalize(15),
     alignItems: "center",
   },
   buttonDisabled: {

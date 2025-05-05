@@ -6,8 +6,9 @@ import { createContentNotification } from "./notificationController.js";
 // Get all quizzes with pagination and filtering
 export const getAllQuizzes = async (req, res) => {
   try {
-    const page = req.query.page ? parseInt(req.query.page) : 1;
-    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    // 1) Parse pagination + locale
+    const page = parseInt(req.query.page || "1", 10);
+    const limit = parseInt(req.query.limit || "10", 10);
     const skip = (page - 1) * limit;
 
     const language =
@@ -15,39 +16,47 @@ export const getAllQuizzes = async (req, res) => {
       req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
       "en";
 
-    // Build filter based on query parameters
+    // 2) BUILD FILTER *before* you use it
     const filter = {};
     if (req.query.category) filter.category = req.query.category;
     if (req.query.colorScheme) filter.colorScheme = req.query.colorScheme;
-
-    // Only published quizzes for regular users
     if (!req.user || req.user.role !== "admin") {
       filter.isPublished = true;
     }
 
+    // 3) Now you can safely count & aggregate
+    const totalQuizzes = await Quiz.countDocuments(filter);
+    const agg = await Quiz.aggregate([
+      { $match: filter },
+      { $project: { num: { $size: "$questions" } } },
+      { $group: { _id: null, totalQuestions: { $sum: "$num" } } },
+    ]);
+    const totalQuestions = agg[0]?.totalQuestions || 0;
+
+    // 4) Fetch the paginated quizzes
     const quizzes = await Quiz.find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
+    // 5) Transform for i18n
     const transformQuizzes = quizzes.map((quiz) => ({
       ...quiz.toObject(),
       title: quiz.title[language] || quiz.title.en,
       description: quiz.description[language] || quiz.description.en,
       category: quiz.category[language] || quiz.category.en,
-      // Include all language versions in separate properties
       titleTranslations: quiz.title,
       descriptionTranslations: quiz.description,
       categoryTranslation: quiz.category,
     }));
 
-    const total = await Quiz.countDocuments(filter);
-
+    // 6) Return everything
     res.json({
       quizzes: transformQuizzes,
-      totalQuizzes: total,
+      totalQuizzes,
+      totalQuestions,
       currentPage: page,
-      totalPages: Math.ceil(total / limit),
+      totalPages: Math.ceil(totalQuizzes / limit),
     });
   } catch (error) {
     console.error("Error fetching quizzes:", error);
