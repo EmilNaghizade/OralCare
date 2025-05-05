@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Platform,
   StatusBar,
+  Text,
   ActivityIndicator,
 } from "react-native";
 
@@ -69,7 +70,7 @@ const RelatedVideos = ({ quizId }) => {
   if (videos.length === 0) {
     return (
       <View style={styles.emptyContainer}>
-        <Typo style={styles.emptyText}>{t("quiz.noRelatedVideos")}</Typo>
+        <Text style={styles.emptyText}>{t("quiz.noRelatedVideos")}</Text>
       </View>
     );
   }
@@ -207,12 +208,12 @@ export default function QuizDetailScreen() {
     return (
       <View style={styles.errorContainer}>
         <Ionicons name="alert-circle-outline" size={60} color="#FF3B30" />
-        <Typo style={styles.errorText}>{error}</Typo>
+        <Text style={styles.errorText}>{error}</Text>
         <TouchableOpacity
           style={styles.retryButton}
           onPress={() => router.back()}
         >
-          <Typo style={styles.retryButtonText}>Go Back</Typo>
+          <Text style={styles.retryButtonText}>Go Back</Text>
         </TouchableOpacity>
       </View>
     );
@@ -252,25 +253,25 @@ export default function QuizDetailScreen() {
           >
             <View style={styles.badge}>
               <Ionicons name="help-circle-outline" size={14} color="#fff" />
-              <Typo style={styles.badgeText}>{t("quiz.quiz")}</Typo>
+              <Text style={styles.badgeText}>{t("quiz.quiz")}</Text>
             </View>
 
             <View style={styles.badge}>
-              <Typo style={styles.badgeText}>
+              <Text style={styles.badgeText}>
                 {quiz?.questions?.length || 0}
-              </Typo>
+              </Text>
             </View>
 
             {quiz?.category && (
               <View style={styles.badge}>
-                <Typo style={styles.badgeText}>{quiz?.category}</Typo>
+                <Text style={styles.badgeText}>{quiz?.category}</Text>
               </View>
             )}
 
             {isQuizCompleted() && (
               <View style={[styles.badge, styles.completedBadge]}>
                 <Ionicons name="checkmark-circle" size={14} color="#fff" />
-                <Typo style={styles.badgeText}>{t("quiz.completed")}</Typo>
+                <Text style={styles.badgeText}>{t("quiz.completed")}</Text>
               </View>
             )}
 
@@ -298,9 +299,9 @@ export default function QuizDetailScreen() {
 
         {/* Alt Beyaz Alan - İlgili Videolar */}
         <View style={styles.contentContainer}>
-          <Typo style={styles.relatedVideosTitle}>
+          <Text style={styles.relatedVideosTitle}>
             {t("quiz.before")}
-          </Typo>
+          </Text>
 
           {/* Video Kartları */}
           <RelatedVideos quizId={quizId} />

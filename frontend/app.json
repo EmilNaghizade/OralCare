@@ -10,11 +10,10 @@
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash5.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-
       "supportsTablet": true,
       "bundleIdentifier": "com.test.oralcare",
       "infoPlist": {
@@ -25,9 +24,8 @@
     },
     "android": {
       "splash": {
-        "image": "./assets/images/splash4.png",
+        "image": "./assets/images/splash5.png",
         "resizeMode": "cover",
-
         "backgroundColor": "#ffffff"
       },
       "adaptiveIcon": {
