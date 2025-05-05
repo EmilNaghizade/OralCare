@@ -257,7 +257,7 @@ export default function QuizDetailScreen() {
 
             <View style={styles.badge}>
               <Typo style={styles.badgeText}>
-                {quiz?.questions?.length || 0} {t}
+                {quiz?.questions?.length || 0}
               </Typo>
             </View>
 

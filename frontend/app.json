@@ -9,11 +9,12 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash4.png",
+      "image": "./assets/images/splash5.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
+
       "supportsTablet": true,
       "bundleIdentifier": "com.test.oralcare",
       "infoPlist": {
