@@ -32,7 +32,7 @@ export const ArticleCard = ({ item, cardWidth = 230, params }) => {
         <Badge>{item.readTime}</Badge>
         {/* Başlık */}
         <Typo style={styles.title} numberOfLines={3}>
-           {title}12313
+           {title}
         </Typo>
 
         {/* Yayın Tarihi */}
