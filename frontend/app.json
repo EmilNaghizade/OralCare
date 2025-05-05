@@ -9,7 +9,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "resizeMode": "cover",
+      "image": "./assets/images/splash4.png",
+      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
@@ -23,8 +24,9 @@
     },
     "android": {
       "splash": {
-
+        "image": "./assets/images/splash4.png",
         "resizeMode": "cover",
+
         "backgroundColor": "#ffffff"
       },
       "adaptiveIcon": {
