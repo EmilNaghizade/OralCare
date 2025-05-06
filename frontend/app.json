@@ -9,7 +9,9 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "backgroundColor": "#038565"
+      "image": "./assets/images/splashScreen1.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true,
@@ -22,7 +24,9 @@
     },
     "android": {
       "splash": {
-        "backgroundColor": "#038565"
+        "image": "./assets/images/splashScreen1.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#ffffff"
       },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/IconOralCare2.png",
@@ -51,14 +55,6 @@
         {
           "photosPermission": "The app needs access to your photos to set a profile picture.",
           "cameraPermission": "The app needs access to your camera to take profile pictures."
-        }
-      ],
-      [
-        "expo-splash-screen",
-        {
-          "splashScreen": {
-            "enable": false
-          }
         }
       ]
     ],
