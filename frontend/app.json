@@ -13,6 +13,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#038565"
     },
+    "androidStatusBar": {
+      "backgroundColor": "#FFFFFF",
+      "barStyle": "dark-content",
+      "translucent": false
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.test.oralcare",
