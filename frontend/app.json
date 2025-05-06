@@ -52,6 +52,14 @@
           "photosPermission": "The app needs access to your photos to set a profile picture.",
           "cameraPermission": "The app needs access to your camera to take profile pictures."
         }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "splashScreen": {
+            "enable": false
+          }
+        }
       ]
     ],
     "experiments": {
