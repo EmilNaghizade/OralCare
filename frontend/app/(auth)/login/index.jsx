@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
   },
   title: {
     lineHeight: SCREEN_WIDTH < 481 ? normalize(30) : normalize(40),
-    fontSize: SCREEN_WIDTH < 350 ? normalize(24) : normalize(30),
+    fontSize: SCREEN_WIDTH < 350 ? normalize(28) : normalize(30),
     fontWeight: "600",
     textAlign: "center",
     marginBottom: normalize(40),

@@ -71,7 +71,7 @@ export default function PasswordScreen() {
           <View style={styles.content}>
             <AnimatedIcon iconSource={passwordIcon} />
 
-            <Typo fontWeight="600" size={36} style={styles.title}>
+            <Typo fontWeight="600" size={28} style={styles.title}>
               {t("login.password.title", "Enter password")}
             </Typo>
 

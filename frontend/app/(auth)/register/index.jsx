@@ -60,7 +60,7 @@ export default function register() {
         <View style={styles.content}>
           <AnimatedIcon iconSource={nameIcon} />
 
-          <Typo fontWeight="600" size={36} style={styles.title}>
+          <Typo fontWeight="600" size={28} style={styles.title}>
             {t("register.name.title", "What's your name\nand surname?")}
           </Typo>
 

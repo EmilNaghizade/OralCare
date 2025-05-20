@@ -75,7 +75,7 @@ export default function UpdatePasswordScreen() {
           <View style={styles.content}>
             <AnimatedIcon iconSource={passwordIcon} />
 
-            <Typo fontWeight="600" size={36} style={styles.title}>
+            <Typo fontWeight="600" size={28} style={styles.title}>
               {t(
                 "login.updatePassword.title",
                 "Create new password"

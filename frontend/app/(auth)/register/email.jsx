@@ -116,7 +116,7 @@ export default function EmailScreen() {
         <View style={styles.content}>
           <AnimatedIcon iconSource={emailIcon} />
 
-          <Typo fontWeight="600" size={36} style={styles.title}>
+          <Typo fontWeight="600" size={28} style={styles.title}>
             {t("register.email.title", "Enter your email")}
           </Typo>
 
@@ -174,9 +174,8 @@ const styles = StyleSheet.create({
     paddingTop:  20 ,
   },
   title: {
-    lineHeight: 44,
     textAlign: "center",
-    marginBottom: 40,
+    marginBottom: 10,
     color: "#000",
   },
   input: {
