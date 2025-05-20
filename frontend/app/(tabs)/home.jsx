@@ -35,7 +35,7 @@ import {
 import QuizCard from "../../components/QuizCard"; // Adjust path if needed
 import "../../i18n";
 import { useTranslation } from "react-i18next";
-import normalize from "../../utils/normalize";
+import normalize,{SCREEN_WIDTH} from "../../utils/normalize";
 
 const getUserLaunchedKey = (userId) =>
   `@OralCareApp:user_${userId}_hasLaunched`;
@@ -846,7 +846,7 @@ const styles = StyleSheet.create({
   },
   proceedButtonText: {
     color: "#fff",
-    fontSize: normalize(16),
+    fontSize: SCREEN_WIDTH < 481 ? 14 : 16,
     fontWeight: "600",
     lineHeight: 24,
     textAlign: "center",

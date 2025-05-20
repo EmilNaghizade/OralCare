@@ -19,7 +19,7 @@ import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
 import AnimatedIcon from "../../../components/AnimatedIcon";
 import { authApi } from "../../../services/api";
-import normalize from "../../../utils/normalize";
+import normalize, { SCREEN_WIDTH} from "../../../utils/normalize";
 
 const emailIcon = require("../../../assets/images/Email.png");
 const NEXT_SCREEN_ROUTE = "/(auth)/login/password";
@@ -107,7 +107,7 @@ export default function Login() {
         <View style={styles.content}>
           <AnimatedIcon iconSource={emailIcon} />
 
-          <Typo fontWeight="600" size={36} style={styles.title}>
+          <Typo  style={styles.title}>
             {t("login.email.title", "Enter your email")}
           </Typo>
 
@@ -165,7 +165,9 @@ const styles = StyleSheet.create({
     paddingTop: normalize(20),
   },
   title: {
-    lineHeight: normalize(44),
+    lineHeight: SCREEN_WIDTH < 481 ? normalize(30) : normalize(40),
+    fontSize: SCREEN_WIDTH < 350 ? normalize(24) : normalize(30),
+    fontWeight: "600",
     textAlign: "center",
     marginBottom: normalize(40),
     color: "#000",

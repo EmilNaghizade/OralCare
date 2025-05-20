@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import Typo from "../components/Typo";
 import Badge from "./Badge";
 import { useTranslation } from "react-i18next";
-import normalize from "../utils/normalize";
+import normalize, {SCREEN_WIDTH} from "../utils/normalize";
 
 
 export const ProceedArticleCard = ({ item, cardStyle }) => {
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     marginBottom: normalize(16),
   },
   image: {
-    width: "55%",
+    width: SCREEN_WIDTH < 481 ? "50%" : "55%",
     height: "auto",
     aspectRatio: 1.3,
     padding: 16,
@@ -79,14 +79,14 @@ const styles = StyleSheet.create({
   },
   title: {
     color: "#000",
-    fontSize: 16,
+    fontSize: SCREEN_WIDTH < 481 ? 12 : 16,
     fontWeight: "600",
     lineHeight: 20,
     marginBottom: 8,
   },
   date: {
     color: "#038565",
-    fontSize: 12,
+    fontSize: SCREEN_WIDTH < 481 ? 10 : 12,
     fontWeight: "600",
     lineHeight: 16,
   },
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     color: "#364762",
-    fontSize: 11,
+    fontSize: SCREEN_WIDTH < 481 ? 10 : 11,
     fontWeight: "500",
   },
 });

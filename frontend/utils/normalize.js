@@ -1,7 +1,8 @@
 // utils/normalize.js
 import { Dimensions, PixelRatio, Platform } from "react-native";
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
+export const { width: SCREEN_WIDTH } = Dimensions.get("window");
+export const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 // Tasarımda baz aldığın genişlik (örn. 375)
 const BASE_WIDTH = 375;
 
