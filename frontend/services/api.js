@@ -116,6 +116,29 @@ export const authApi = {
 
     return response.json(); // Success message
   },
+
+  // Token management endpoints
+  refreshToken: async (token) => {
+    const response = await fetch(`${API_URL}/api/auth/refresh-token`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return handleResponse(response);
+  },
+
+  getTokenInfo: async (token) => {
+    const response = await fetch(`${API_URL}/api/auth/token-info`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return handleResponse(response);
+  },
 };
 
 export const quizApi = {

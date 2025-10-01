@@ -78,7 +78,7 @@ const generateToken = (userId) => {
     console.log("Generating token for user ID:", userIdStr);
 
     const token = jwt.sign({ userId: userIdStr }, process.env.JWT_SECRET, {
-      expiresIn: "15d",
+      expiresIn: "90d",
     });
 
     // Verify the token is valid before returning it
@@ -462,5 +462,122 @@ export const deleteUserAccount = async (req, res) => {
   } catch (error) {
     console.error("Error deleting user account:", error);
     res.status(500).json({ error: "Internal server error deleting account" });
+  }
+};
+
+// Refresh token endpoint
+export const refreshToken = async (req, res) => {
+  try {
+    // Token already verified by middleware, user is in req.user
+    const user = req.user;
+
+    // Generate new token
+    const newToken = jwt.sign(
+      { userId: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "90d" }
+    );
+
+    res.json({
+      token: newToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// Get current token info (for debugging)
+export const getTokenInfo = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    
+    if (!token) {
+      return res.status(401).json({ error: "No token provided" });
+    }
+
+    // Decode without verification to get info
+    const decoded = jwt.decode(token, { complete: true });
+    
+    if (!decoded) {
+      return res.status(401).json({ error: "Invalid token format" });
+    }
+
+    const issuedAt = new Date(decoded.payload.iat * 1000);
+    const expiresAt = new Date(decoded.payload.exp * 1000);
+    const now = new Date();
+    const isExpired = now > expiresAt;
+
+    res.json({
+      user: req.user ? {
+        id: req.user._id,
+        name: req.user.name,
+        email: req.user.email,
+        role: req.user.role,
+      } : null,
+      tokenInfo: {
+        issuedAt: issuedAt.toISOString(),
+        expiresAt: expiresAt.toISOString(),
+        currentTime: now.toISOString(),
+        isExpired,
+        timeUntilExpiry: isExpired ? "expired" : `${Math.round((expiresAt - now) / (1000 * 60 * 60))} hours`,
+      }
+    });
+  } catch (error) {
+    console.error("Error getting token info:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+// TEMPORARY: Generate admin token (remove in production)
+export const generateAdminToken = async (req, res) => {
+  try {
+    const { secretKey } = req.body;
+    
+    // Simple security check
+    if (secretKey !== "temp-admin-access-2025") {
+      return res.status(401).json({ error: "Invalid secret key" });
+    }
+
+    // Find or create admin user
+    let adminUser = await User.findOne({ role: "admin" });
+    
+    if (!adminUser) {
+      // Create a temporary admin user
+      adminUser = await User.create({
+        name: "Temp Admin",
+        email: "temp-admin@oralcare.app",
+        password: "temp-password-123", // Will be hashed by the model
+        role: "admin"
+      });
+      console.log("Created temporary admin user");
+    }
+
+    // Generate token
+    const token = jwt.sign(
+      { userId: adminUser._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "90d" }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: adminUser._id,
+        name: adminUser.name,
+        email: adminUser.email,
+        role: adminUser.role,
+      },
+      message: "TEMPORARY admin token generated. Remove this endpoint in production!"
+    });
+  } catch (error) {
+    console.error("Error generating admin token:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };

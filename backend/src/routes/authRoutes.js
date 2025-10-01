@@ -45,4 +45,11 @@ router.post("/send-otp", authController.sendOtpToEmail); // body: { email, isRes
 router.post("/verify-email-otp", authController.verifyEmailOtp); // body: { email, otp }
 router.post("/reset-password", authController.resetPasswordWithOtp); // body: { email, otp, newPassword }
 
+// Token management endpoints
+router.post("/refresh-token", protectRoute, authController.refreshToken);
+router.get("/token-info", protectRoute, authController.getTokenInfo);
+
+// TEMPORARY: Admin token generator (remove in production)
+router.post("/generate-admin-token", authController.generateAdminToken);
+
 export default router;

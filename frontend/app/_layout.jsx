@@ -54,6 +54,10 @@ function AuthProvider({ children }) {
           if (token) {
             setAuthToken(token);
             console.log("Auth token loaded successfully");
+            console.log("🔑 Current token:", token.substring(0, 50) + "...");
+            console.log("🔑 Full token length:", token.length);
+          } else {
+            console.log("❌ No token found in storage");
           }
         } catch (e) {
           console.error("[AuthProvider] Initial state loading error:", e);
@@ -217,14 +221,36 @@ function AuthProvider({ children }) {
   // Logout fonksiyonu
   const logout = async () => {
     try {
-      await authApi.logout(authToken);
+      // Try API logout first, but don't fail if it errors
+      try {
+        await authApi.logout(authToken);
+      } catch (apiError) {
+        console.log(
+          "[AuthProvider] API logout failed, continuing with local logout:",
+          apiError
+        );
+      }
+
+      // Always clear local storage regardless of API success/failure
       setAuthToken(null);
       setUser(null);
       await SecureStore.deleteItemAsync("authToken");
       await SecureStore.deleteItemAsync("user");
+      await SecureStore.deleteItemAsync("userTotalPoints");
       router.push("/onboarding");
+      console.log("[AuthProvider] Logout completed successfully");
     } catch (error) {
       console.error("[AuthProvider logout] HATA:", error);
+      // Even if there's an error, try to clear storage
+      try {
+        setAuthToken(null);
+        setUser(null);
+        await SecureStore.deleteItemAsync("authToken");
+        await SecureStore.deleteItemAsync("user");
+        router.push("/onboarding");
+      } catch (cleanupError) {
+        console.error("[AuthProvider] Cleanup failed:", cleanupError);
+      }
     }
   };
 
