@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Text,
   Image,
   StatusBar,
   ActivityIndicator,
@@ -17,17 +18,19 @@ import Badge from "../../../components/Badge";
 import Typo from "../../../components/Typo";
 import { articleApi, newsApi } from "../../../services/api";
 import { useAuth } from "../../_layout";
+import "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 const ArticleDetail = () => {
-  const { id: contentId,  activeTab } = useLocalSearchParams(); // Get ID and type from route param
+  const { id: contentId, activeTab } = useLocalSearchParams(); // Get ID and type from route param
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { authToken } = useAuth();
   const router = useRouter();
+  const { t, i18n } = useTranslation();
 
   // Determine if we're looking at an article or news item
-
 
   console.log(activeTab, "activeTab");
 
@@ -37,9 +40,18 @@ const ArticleDetail = () => {
       try {
         let result;
         if (activeTab === "Articles") {
-          result = await articleApi.getArticleById(contentId, authToken);
+          result = await articleApi.getArticleById(
+            contentId,
+            authToken,
+            i18n.language
+          );
+          console.log(result, "43");
         } else {
-          result = await newsApi.getNewsById(contentId, authToken);
+          result = await newsApi.getNewsById(
+            contentId,
+            authToken,
+            i18n.language
+          );
         }
         setData(result);
       } catch (err) {
@@ -97,11 +109,14 @@ const ArticleDetail = () => {
   }
 
   // Format date from ISO string
-  const formattedDate = new Date(data.createdAt).toLocaleDateString("en-US", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const formattedDate = new Date(data.createdAt).toLocaleDateString(
+    i18n.language === "en" ? "en-US" : "ru-RU",
+    {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    }
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -117,7 +132,9 @@ const ArticleDetail = () => {
         </Typo>
         <View style={styles.badgeRow}>
           <Badge>{formattedDate}</Badge>
-          <Badge>{data.readingTime} min read</Badge>
+          <Badge>
+            {data.readingTime} {t("articles.minRead")}
+          </Badge>
         </View>
 
         <Image
@@ -125,11 +142,10 @@ const ArticleDetail = () => {
             uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${data.thumbnail}`,
           }}
           style={styles.coverImage}
-      
         />
 
         <View style={styles.bodyTextContainer}>
-          <Typo style={styles.bodyText}>{data.description}</Typo>
+          <Text style={styles.bodyText}>{data.description}</Text>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -179,12 +195,17 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0", // Placeholder color while loading
   },
   bodyTextContainer: {
-    // Container for body text
+    // Remove the flex: 1 which might be limiting the space
+    width: "100%",
+    height: "100%",
+    marginBottom: 20,
   },
   bodyText: {
     fontSize: 16,
     lineHeight: 26,
     color: "#333",
+    flexWrap: "wrap", // Ensure text wraps properly
+    textAlign: "left", // Align text to the left
   },
   loadingContainer: {
     flex: 1,

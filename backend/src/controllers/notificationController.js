@@ -82,7 +82,7 @@ export const createGlobalNotification = async (req, res) => {
       return res.status(403).json({ error: "Not authorized" });
     }
 
-    const { title, message, type,contentId } = req.body;
+    const { title, message, type, contentId } = req.body;
 
     if (!title || !message || !type) {
       return res.status(400).json({ error: "Missing required fields" });
@@ -120,30 +120,56 @@ export const createContentNotification = async (
   try {
     const users = await User.find({}, "_id");
 
-    let message;
+    let messageKey;
     let contentId;
+    let messageParams = {};
     switch (contentType) {
       case "video":
         contentId = contentItem._id;
-        message = `New video added: ${contentItem.title}`;
+        messageKey = "notifications.video.new";
+        messageParams = {
+          titleEn: contentItem.title.en || contentItem.name,
+          titleRu: contentItem.title.ru || contentItem.name,
+        };
         break;
       case "news":
         contentId = contentItem._id;
-        message = `New news: ${contentItem.title}`;
+        messageKey = "notifications.news.new";
+        messageParams = {
+          nameEn: contentItem.title.en || contentItem.name,
+          nameRu: contentItem.title.ru || contentItem.name,
+        };
         break;
       case "article":
         contentId = contentItem._id;
-        message = `New article published: ${contentItem.title}`;
+        messageKey = "notifications.article.new";
+        messageParams = {
+          titleEn: contentItem.title.en || contentItem.name,
+          titleRu: contentItem.title.ru || contentItem.name,
+        };
         break;
       case "product":
         contentId = contentItem._id;
-        message = `New product available: ${contentItem.name}`;
+        // For products, we need to store both language versions
+        messageKey = "notifications.product.new";
+        messageParams = {
+          nameEn: contentItem.name.en || contentItem.name,
+          nameRu: contentItem.name.ru || contentItem.name,
+        };
+        break;
+      case "quiz":
+        contentId = contentItem._id;
+        messageKey = "notifications.quiz.new";
+        messageParams = {
+          titleEn: contentItem.title.en || contentItem.name,
+          titleRu: contentItem.title.ru || contentItem.name,
+        };
         break;
       default:
-        contentId = contentItem._id || "";
-        message = `New content added`;
+        contentId = contentItem._id;
+        messageKey = "notifications.content.new";
+        messageParams = {};
     }
-
     if (!contentId) {
       console.warn(
         "Content ID is missing, notifications will lack direct links"
@@ -153,8 +179,9 @@ export const createContentNotification = async (
 
     const notifications = users.map((user) => ({
       userId: user._id,
-      title,
-      message,
+      title: title, // You might want to make this a translation key too
+      message: messageKey, // Store the translation key instead of actual message
+      messageParams: messageParams, // Store parameters for translation
       type: contentType,
       contentId: contentId.toString(), // Convert to string to ensure compatibility
     }));

@@ -99,9 +99,214 @@ export const authApi = {
     );
     return handleResponse(response);
   },
+
+  resetPasswordWithOtp: async ({ email, otp, newPassword }) => {
+    const response = await fetch(`${API_URL}/api/auth/reset-password`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, otp, newPassword }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Password reset failed");
+    }
+
+    return response.json(); // Success message
+  },
+
+  // Token management endpoints
+  refreshToken: async (token) => {
+    const response = await fetch(`${API_URL}/api/auth/refresh-token`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return handleResponse(response);
+  },
+
+  getTokenInfo: async (token) => {
+    const response = await fetch(`${API_URL}/api/auth/token-info`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return handleResponse(response);
+  },
 };
 
 export const quizApi = {
+  // Get all quizzes (for admin)
+  getAllQuizzes: async (token, page = 1, limit = 10, lang) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/quizzes?page=${page}&limit=${limit}?lang=${lang}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching quizzes:", error);
+      throw error;
+    }
+  },
+
+  // Get a specific quiz
+  getQuizById: async (quizId, token, lang) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/quizzes/${quizId}?lang=${lang}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching quiz with ID ${quizId}:`, error);
+      throw error;
+    }
+  },
+
+  // Create a new quiz
+  createQuiz: async (quizData, token) => {
+    try {
+      const response = await axios.post(`${API_URL}/api/quizzes`, quizData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error creating quiz:", error);
+      throw error;
+    }
+  },
+
+  // Update an existing quiz
+  updateQuiz: async (quizId, quizData, token) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/api/quizzes/${quizId}`,
+        quizData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating quiz with ID ${quizId}:`, error);
+      throw error;
+    }
+  },
+
+  // Delete a quiz
+  deleteQuiz: async (quizId, token) => {
+    try {
+      const response = await axios.delete(`${API_URL}/api/quizzes/${quizId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting quiz with ID ${quizId}:`, error);
+      throw error;
+    }
+  },
+
+  // Get all questions for a specific quiz
+  getQuizQuestionsCount: async (quizId, token) => {
+    try {
+      const response = await axios.get(
+        `${API_URL}/api/quizzes/${quizId}/questions-count`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(
+        `Error fetching questions for quiz with ID ${quizId}:`,
+        error
+      );
+      throw error;
+    }
+  },
+
+  // Add a question to a quiz
+  addQuestion: async (quizId, questionData, token) => {
+    try {
+      const response = await axios.post(
+        `${API_URL}/api/quizzes/${quizId}/questions`,
+        questionData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error adding question:", error);
+      throw error;
+    }
+  },
+
+  // Update a question
+  updateQuestion: async (quizId, questionId, questionData, token) => {
+    try {
+      const response = await axios.put(
+        `${API_URL}/api/quizzes/${quizId}/questions/${questionId}`,
+        questionData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating question:", error);
+      throw error;
+    }
+  },
+
+  // Delete a question
+  deleteQuestion: async (quizId, questionId, token) => {
+    try {
+      const response = await axios.delete(
+        `${API_URL}/api/quizzes/${quizId}/questions/${questionId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting question:", error);
+      throw error;
+    }
+  },
   // In your quizApi.js, make sure you're sending the token correctly
   markQuizCompleted: async (quizId) => {
     try {
@@ -143,6 +348,7 @@ export const quizApi = {
           Authorization: `Bearer ${token}`,
         },
       });
+      console.log("Completed quizzes API response:", response.data);
       return response.data;
     } catch (error) {}
   },
@@ -151,9 +357,9 @@ export const quizApi = {
 // Add these functions to your existing api.js file within the appropriate export object
 export const videoApi = {
   //get all videos
-  getAllVideos: async (token) => {
+  getAllVideos: async (token, lang) => {
     try {
-      const response = await axios.get(`${API_URL}/api/videos`, {
+      const response = await axios.get(`${API_URL}/api/videos?lang=${lang}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -221,7 +427,7 @@ export const videoApi = {
     }
   },
   // New admin methods for video management
-  getVideoById: async (videoId, token) => {
+  getVideoById: async (videoId, token, lang) => {
     try {
       // Use provided token or get it from secure storage
       const authToken = token || (await getAuthToken());
@@ -233,11 +439,14 @@ export const videoApi = {
 
       console.log(`Fetching video with ID: ${videoId} using token`);
 
-      const response = await axios.get(`${API_URL}/api/videos/${videoId}`, {
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/videos/${videoId}?lang=${lang}`,
+        {
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        }
+      );
 
       return response.data;
     } catch (error) {
@@ -401,10 +610,10 @@ export const productApi = {
 };
 
 export const articleApi = {
-  getAllArticles: async (token, page = 1, limit = 10) => {
+  getAllArticles: async (token, page = 1, limit = 10, lang) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/articles?page=${page}&limit=${limit}`,
+        `${API_URL}/api/articles?page=${page}&limit=${limit}?lang=${lang}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -418,13 +627,16 @@ export const articleApi = {
     }
   },
 
-  getArticleById: async (articleId, token) => {
+  getArticleById: async (articleId, token, lang = "en") => {
     try {
-      const response = await axios.get(`${API_URL}/api/articles/${articleId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/articles/${articleId}?lang=${lang}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error(`Error fetching article with ID ${articleId}:`, error);
@@ -434,10 +646,10 @@ export const articleApi = {
 };
 
 export const newsApi = {
-  getAllNews: async (token, page = 1, limit = 10) => {
+  getAllNews: async (token, page = 1, limit = 10, lang) => {
     try {
       const response = await axios.get(
-        `${API_URL}/api/news?page=${page}&limit=${limit}`,
+        `${API_URL}/api/news?page=${page}&limit=${limit}?lang=${lang}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -451,13 +663,16 @@ export const newsApi = {
     }
   },
 
-  getNewsById: async (newsId, token) => {
+  getNewsById: async (newsId, token, lang = "en") => {
     try {
-      const response = await axios.get(`${API_URL}/api/news/${newsId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axios.get(
+        `${API_URL}/api/news/${newsId}?lang=${lang}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error(`Error fetching news with ID ${newsId}:`, error);

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Dimensions, PixelRatio } from "react";
+import { useWindowDimensions } from "react-native";
 import {
   View,
   Text,
@@ -21,41 +22,131 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../_layout"; // Adjust path if needed
 import Typo from "../../components/Typo"; // Adjust path if needed
 import { fetchWithAuth } from "../../services/fetchWithAuth";
-import { dummyQuizzes } from "../data";
 import { VideoCard } from "../../components/VideoCard";
 import { ArticleCard } from "../../components/ArticleCard";
-import { LinearGradient } from "expo-linear-gradient";
 import ProceedArticleCard from "../../components/ProceedArticleCard";
 import {
   videoApi,
   articleApi,
   newsApi,
   notificationApi,
+  quizApi,
 } from "../../services/api";
+import QuizCard from "../../components/QuizCard"; // Adjust path if needed
+import "../../i18n";
+import { useTranslation } from "react-i18next";
+import normalize,{SCREEN_WIDTH} from "../../utils/normalize";
 
 const getUserLaunchedKey = (userId) =>
   `@OralCareApp:user_${userId}_hasLaunched`;
 const getProfile = (token) => fetchWithAuth("/api/profile/profile", token);
 
-const SectionHeader = ({ title, onSeeAllPress, isOnSeeAll }) => (
-  <View style={styles.sectionHeader}>
-    <Text style={styles.sectionTitle}>{title}</Text>
-    {isOnSeeAll && (
-      <TouchableOpacity onPress={onSeeAllPress}>
-        <Text style={styles.seeAllText}>See all</Text>
-      </TouchableOpacity>
-    )}
-  </View>
-);
+const SectionHeader = ({ titleKey, onSeeAllPress, isOnSeeAll }) => {
+  const { t } = useTranslation();
+
+  return (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{t(titleKey)}</Text>
+      {isOnSeeAll && (
+        <TouchableOpacity onPress={onSeeAllPress}>
+          <Text style={styles.seeAllText}>{t("home.seeAll")}</Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+};
+
+const QuizSection = ({ authToken }) => {
+  const router = useRouter();
+  const { t, i18n } = useTranslation();
+  const [quizzes, setQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [quizCount, setQuizCount] = useState(0);
+
+  useEffect(() => {
+    fetchQuizzes();
+  }, []);
+
+  const fetchQuizzes = async () => {
+    try {
+      setLoading(true);
+      const data = await quizApi.getAllQuizzes(authToken, i18n.language);
+      if (data && data.quizzes) {
+        // Filter to only published quizzes and limit to 4 for display
+        const publishedQuizzes = data.quizzes
+          .filter((quiz) => quiz.isPublished)
+          .slice(0, 4);
+        setQuizzes(publishedQuizzes);
+      } else {
+        setQuizzes([]);
+      }
+    } catch (error) {
+      console.error("Error fetching quizzes:", error);
+      setQuizzes([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={styles.sectionCard}>
+        <SectionHeader titleKey="home.quizSection.title" isOnSeeAll={false} />
+        <Text style={styles.sectionSubtitle}>
+          {t("home.quizSection.subtitle")}
+        </Text>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#038565" />
+        </View>
+      </View>
+    );
+  }
+
+  if (quizzes.length === 0) {
+    return (
+      <View style={styles.sectionCard}>
+        <SectionHeader titleKey="home.quizSection.title" isOnSeeAll={false} />
+        <Text style={styles.sectionSubtitle}>
+          {t("home.quizSection.subtitle")}
+        </Text>
+        <View style={styles.emptyContainer}>
+          <Typo style={styles.emptyText}>No quizzes available</Typo>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.sectionCard}>
+      <SectionHeader
+        titleKey={"home.quizSection.title"}
+        isOnSeeAll={true}
+        onSeeAllPress={() => router.push("/quizzes")}
+      />
+      <Text style={styles.sectionSubtitle}>
+        {t("home.quizSection.subtitle")}
+      </Text>
+      <FlatList
+        data={quizzes}
+        renderItem={({ item }) => <QuizCard item={item} />}
+        keyExtractor={(item) => item._id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.horizontalList}
+      />
+    </View>
+  );
+};
 
 const WatchAndLearnSection = ({ authToken }) => {
   const router = useRouter();
+  const { t, i18n } = useTranslation();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchVideos = async () => {
     try {
-      const data = await videoApi.getAllVideos(authToken);
+      const data = await videoApi.getAllVideos(authToken, i18n.language);
 
       if (data && data.videos) {
         setVideos(data.videos.slice(0, 4)); // Take only the first 4 videos
@@ -75,12 +166,12 @@ const WatchAndLearnSection = ({ authToken }) => {
     return (
       <View style={styles.sectionCard}>
         <SectionHeader
-          title="Watch & Learn"
+          titleKey="home.watchSection.title"
           onSeeAllPress={() => router.push("/education")}
           isOnSeeAll={true}
         />
         <Text style={styles.sectionSubtitle}>
-          Expert videos for step-by-step guidance
+          {t("home.watchSection.subtitle")}
         </Text>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#038565" />
@@ -94,15 +185,15 @@ const WatchAndLearnSection = ({ authToken }) => {
     return (
       <View style={styles.sectionCard}>
         <SectionHeader
-          title="Watch & Learn"
+          titleKey="home.watchSection.title"
           onSeeAllPress={() => router.push("/education")}
           isOnSeeAll={true}
         />
         <Text style={styles.sectionSubtitle}>
-          Expert videos for step-by-step guidance
+          {t("home.watchSection.subtitle")}
         </Text>
         <View style={styles.emptyContainer}>
-          <Typo style={styles.emptyText}>No videos available</Typo>
+          <Typo style={styles.emptyText}>{t("home.watchSection.empty")}</Typo>
         </View>
       </View>
     );
@@ -128,12 +219,12 @@ const WatchAndLearnSection = ({ authToken }) => {
   return (
     <View style={styles.sectionCard}>
       <SectionHeader
-        title="Watch & Learn"
+        titleKey="home.watchSection.title"
         onSeeAllPress={() => router.push("/education")}
         isOnSeeAll={true}
       />
       <Text style={styles.sectionSubtitle}>
-        Expert videos for step-by-step guidance
+        {t("home.watchSection.subtitle")}
       </Text>
       <FlatList
         data={adaptedVideos}
@@ -153,24 +244,31 @@ const KnowledgeHubSection = ({ authToken }) => {
   const [articles, setArticles] = useState([]);
   const [news, setNews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const fetchKnowledgeData = async () => {
       setLoading(true);
       try {
         if (activeKnowledgeTab === "Articles") {
-          const data = await articleApi.getAllArticles(authToken, 1, 4);
+          const data = await articleApi.getAllArticles(
+            authToken,
+            1,
+            4,
+            i18n.language
+          );
           if (data && data.articles) {
             // Map the backend data to match the expected format for ArticleCard
             const mappedArticles = data.articles.map((article) => ({
               _id: article._id,
               title: article.title,
+              titleTranslations: article.titleTranslations,
               image: {
                 uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${article.thumbnail}`,
               },
-              readTime: `${article.readingTime}min read`,
+              readTime: `${article.readingTime} ${t("articles.minRead")}`,
               createdAt: new Date(article.createdAt).toLocaleDateString(
-                "en-US",
+                i18n.language === "en" ? "en-US" : "ru-RU",
                 {
                   day: "numeric",
                   month: "long",
@@ -181,21 +279,25 @@ const KnowledgeHubSection = ({ authToken }) => {
             setArticles(mappedArticles);
           }
         } else {
-          const data = await newsApi.getAllNews(authToken, 1, 4);
+          const data = await newsApi.getAllNews(authToken, 1, 4, i18n.language);
           if (data && data.news) {
             // Map the backend data to match the expected format for ArticleCard
             const mappedNews = data.news.map((item) => ({
               _id: item._id,
               title: item.title,
+              titleTranslations: item.titleTranslations,
               image: {
                 uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${item.thumbnail}`,
               },
-              readTime: `${item.readingTime}min read`,
-              createdAt: new Date(item.createdAt).toLocaleDateString("en-US", {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              }),
+              readTime: `${item.readingTime} ${t("articles.minRead")}`,
+              createdAt: new Date(item.createdAt).toLocaleDateString(
+                i18n.language === "en" ? "en-US" : "ru-RU",
+                {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                }
+              ),
             }));
             setNews(mappedNews);
           }
@@ -220,12 +322,12 @@ const KnowledgeHubSection = ({ authToken }) => {
     return (
       <View style={styles.sectionCard}>
         <SectionHeader
-          title="Knowledge Hub"
+          titleKey="home.knowledgeSection.title"
           onSeeAllPress={() => router.push("/knowledge")}
           isOnSeeAll={true}
         />
         <Text style={styles.sectionSubtitle}>
-          Articles and news on our industry.
+          {t("home.knowledgeSection.subtitle")}
         </Text>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#038565" />
@@ -237,12 +339,12 @@ const KnowledgeHubSection = ({ authToken }) => {
   return (
     <View style={styles.sectionCard}>
       <SectionHeader
-        title="Knowledge Hub"
+        titleKey={"home.knowledgeSection.title"}
         onSeeAllPress={() => router.push("/knowledge")}
         isOnSeeAll={true}
       />
       <Text style={styles.sectionSubtitle}>
-        Articles and news on our industry.
+        {t("home.knowledgeSection.subtitle")}
       </Text>
 
       <View style={styles.knowledgeTabs}>
@@ -259,7 +361,7 @@ const KnowledgeHubSection = ({ authToken }) => {
               activeKnowledgeTab === "Articles" && styles.activeTabText,
             ]}
           >
-            Articles
+            {t("home.knowledgeSection.tabArticles")}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -275,7 +377,7 @@ const KnowledgeHubSection = ({ authToken }) => {
               activeKnowledgeTab === "News" && styles.activeTabText,
             ]}
           >
-            News
+            {t("home.knowledgeSection.tabNews")}
           </Text>
         </TouchableOpacity>
       </View>
@@ -283,7 +385,9 @@ const KnowledgeHubSection = ({ authToken }) => {
       {knowledgeItemsToShow.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Typo style={styles.emptyText}>
-            No {activeKnowledgeTab.toLowerCase()} available
+            {activeKnowledgeTab === "Articles"
+              ? t("home.knowledgeSection.emptyArticles")
+              : t("home.knowledgeSection.emptyNews")}
           </Typo>
         </View>
       ) : (
@@ -317,25 +421,26 @@ export default function HomeScreen() {
   const [showModal, setShowModal] = useState(false);
   const [userId, setUserId] = useState(null);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
+  const { t, i18n } = useTranslation();
+  const { height: screenHeight } = useWindowDimensions();
+  const showModalImage = screenHeight > 800;
+  console.log(screenHeight, "showModalImage");
 
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        if (Platform.OS === "android") {
-          BackHandler.exitApp(); // exits the app
-          return true; // prevent default behavior
-        }
-        return false;
-      };
+  useEffect(() => {
+    const handler = () => {
+      // whatever you want on back press
+      return Platform.OS === "android"; // true to swallow it
+    };
 
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handler
+    );
 
-      return () =>
-        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
-    }, [])
-  );
+    return () => subscription.remove();
+  }, []);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -406,20 +511,29 @@ export default function HomeScreen() {
 
     const getArticles = async () => {
       try {
-        const data = await articleApi.getAllArticles(authToken, 1, 4);
+        const data = await articleApi.getAllArticles(
+          authToken,
+          1,
+          4,
+          i18n.language
+        );
         if (data && data.articles) {
           const mappedArticles = data.articles.map((article) => ({
             _id: article._id,
             title: article.title,
+            titleTranslations: article.titleTranslations,
             image: {
               uri: `${process.env.EXPO_PUBLIC_API_BASE_URL}${article.thumbnail}`,
             },
-            readTime: `${article.readingTime}min read`,
-            createdAt: new Date(article.createdAt).toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            }),
+            readTime: `${article.readingTime} ${t("articles.minRead")}`,
+            createdAt: new Date(article.createdAt).toLocaleDateString(
+              i18n.language === "en" ? "en-US" : "ru-RU",
+              {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              }
+            ),
           }));
           setArticles(mappedArticles);
         }
@@ -450,72 +564,6 @@ export default function HomeScreen() {
     return () => clearInterval(interval);
   }, [authToken]);
 
-  const SectionHeader = ({ title, onSeeAllPress, isOnSeeAll }) => (
-    <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
-      {isOnSeeAll && (
-        <TouchableOpacity onPress={onSeeAllPress}>
-          <Text style={styles.seeAllText}>See all</Text>
-        </TouchableOpacity>
-      )}
-    </View>
-  );
-
-  const QuizCard = ({ item }) => {
-    const isPurple = item._id === 1;
-    const gradientColors = isPurple ? ["#8A2BE2", "#fff"] : ["#2E8B57", "#fff"];
-
-    const centerIconName = isPurple
-      ? "git-network-outline"
-      : "share-social-outline";
-
-    return (
-      <TouchableOpacity
-        style={styles.quizCard}
-        onPress={() =>
-          router.push({ pathname: "/quiz", params: { id: item._id } })
-        } // YENİ
-        activeOpacity={0.8}
-      >
-        <LinearGradient
-          colors={gradientColors}
-          style={styles.quizGradient}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
-        >
-          <Ionicons
-            name={centerIconName}
-            size={80}
-            color="#fff"
-            style={styles.quizCenterIcon}
-          />
-
-          <View style={styles.quizContentContainer}>
-            {/* Top Tag */}
-            <View style={styles.quizTagContainer}>
-              <Ionicons name="help-circle-outline" size={16} color="#fff" />
-              <Typo
-                fontWeight={"600"}
-                size={11}
-                style={styles.quizQuestionsText}
-              >
-                {item.questionCount || 0} questions
-              </Typo>
-            </View>
-
-            <Typo
-              fontWeight={"600"}
-              size={15}
-              style={styles.quizTitle}
-              numberOfLines={3}
-            >
-              {item.title}
-            </Typo>
-          </View>
-        </LinearGradient>
-      </TouchableOpacity>
-    );
-  };
   return (
     <>
       {/* 1‑time “first login” modal */}
@@ -528,28 +576,29 @@ export default function HomeScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             {/* Top Image */}
-            <Image
-              source={require("../../assets/images/ProceedImage.png")}
-              style={styles.modalImage}
-              resizeMode="cover"
-            />
+            {showModalImage && (
+              <Image
+                source={require("../../assets/images/ProceedImage.png")}
+                style={styles.modalImage}
+                resizeMode="cover"
+              />
+            )}
 
             {/* Headline */}
             <Text style={styles.modalTitle}>
-              Oral Care: Why it Matters More Than You Think
+              {t("home.onboardingModal.title")}
             </Text>
 
             {/* Body text */}
             <Text style={styles.modalDescription}>
-              Some people are religious about brushing, flossing, and using
-              mouthwash. Others? Not so much. But the difference between those
-              who invest in oral care and those who skip it goes way beyond
-              fresh breath.
+              {t("home.onboardingModal.description")}
             </Text>
 
             {/* “Read more” link */}
             <TouchableOpacity>
-              <Text style={styles.readMore}>Read more from this article</Text>
+              <Text style={styles.readMore}>
+                {t("home.onboardingModal.readMore")}
+              </Text>
             </TouchableOpacity>
 
             {/* Secondary card preview */}
@@ -579,7 +628,9 @@ export default function HomeScreen() {
                   });
               }}
             >
-              <Text style={styles.proceedButtonText}>Proceed to app</Text>
+              <Text style={styles.proceedButtonText}>
+                {t("home.onboardingModal.proceedButton")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -593,9 +644,9 @@ export default function HomeScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.welcomeHeader}>
-            <Typo size={28} fontWeight="600">
-              👋 Welcome,{" "}
-              <Typo size={28} fontWeight="600" color="#92999C">
+            <Typo size={22} fontWeight="600">
+              👋 {t("home.welcome")},{" "}
+              <Typo size={22} fontWeight="600" color="#92999C" style={{}}>
                 {firstName}
               </Typo>
             </Typo>
@@ -614,20 +665,7 @@ export default function HomeScreen() {
           {/* Watch & Learn Section */}
           <WatchAndLearnSection authToken={authToken} />
 
-          <View style={styles.sectionCard}>
-            <SectionHeader title="Test your knowledge" isOnSeeAll={false} />
-            <Text style={styles.sectionSubtitle}>
-              Take quizzes based on videos and articles
-            </Text>
-            <FlatList
-              data={dummyQuizzes} // Use dummy data
-              renderItem={({ item }) => <QuizCard item={item} />}
-              keyExtractor={(item) => item._id}
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-            />
-          </View>
+          <QuizSection authToken={authToken} />
 
           <KnowledgeHubSection authToken={authToken} />
         </ScrollView>
@@ -689,39 +727,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   horizontalList: { paddingHorizontal: 20, paddingVertical: 5 },
-  // --- Card Styles (Keep from previous version or enhance) ---
-  quizCard: {
-    width: 200,
-    height: 258,
-    marginRight: 16,
-    borderRadius: 20,
-    elevation: 3,
-    overflow: "hidden",
-    backgroundColor: "#eee", // White background
-  },
-  quizGradient: {
-    flex: 1,
-    position: "relative",
-  },
-  quizBackground: { flex: 1, resizeMode: "cover" },
-  quizCenterIcon: {
-    // Style for the faint icon in the middle
-    position: "absolute",
-    // Center it approximately - adjust top/left based on icon size/card size
-    top: "25%",
-    alignSelf: "center",
-    opacity: 0.15, // Make it faint
-    zIndex: 1, // Behind content
-  },
-  quizContentContainer: {
-    // Container for tag and title
-    flex: 1,
-    padding: 12, // Padding inside the card
-    justifyContent: "space-between", // Push tag top, title bottom
-    // Add overlay if needed (e.g., if background image is too busy)
-    // backgroundColor: 'rgba(0,0,0,0.1)',
-    zIndex: 2, // Above center icon
-  },
+
   notificationButton: {
     position: "relative",
   },
@@ -742,22 +748,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
   },
-  quizTagContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.25)", // Semi-transparent white tag background
-    borderRadius: 15, // Pill shape
-    paddingVertical: 5, // Adjust padding
-    paddingHorizontal: 10, // Adjust padding
-    alignSelf: "flex-start", // Position top-left within padding
-  },
-  quizQuestionsText: {
-    color: "#fff",
-    marginLeft: 5, // Space between icon and text
-  },
-  quizTitle: {
-    lineHeight: 20, // Adjust line height
-  },
+
   // --- Knowledge Hub Tabs ---
   knowledgeTabs: {
     flexDirection: "row",
@@ -791,7 +782,7 @@ const styles = StyleSheet.create({
   // white card container
   modalCard: {
     width: "100%",
-    maxHeight: "95%", // <-- limit height
+    maxHeight: "100%", // <-- limit height
     backgroundColor: "#fff",
     borderTopLeftRadius: 20, // <-- only top corners
     borderTopRightRadius: 20,
@@ -802,60 +793,60 @@ const styles = StyleSheet.create({
   modalImage: {
     width: "90%",
     alignSelf: "center",
-    height: 200,
-    margin: 20,
+    height: normalize(200),
+    margin: normalize(20),
     borderRadius: 20,
   },
 
   // headline
   modalTitle: {
-    fontSize: 24,
+    fontSize: normalize(20),
     fontWeight: "700",
-    lineHeight: 32,
+    lineHeight: normalize(28),
     color: "#000",
-    marginHorizontal: 16,
+    paddingTop: normalize(5),
+    marginHorizontal: normalize(16),
   },
-
   // body paragraph
   modalDescription: {
-    fontSize: 14,
+    fontSize: normalize(14),
     fontWeight: "500",
-    lineHeight: 20,
+    lineHeight: normalize(18),
     color: "#666",
-    marginHorizontal: 16,
-    marginTop: 8,
+    marginHorizontal: normalize(16),
+    marginTop: normalize(8),
   },
-
   // “Read more” link
   readMore: {
-    fontSize: 16,
+    fontSize: normalize(14),
     fontWeight: "600",
-    lineHeight: 24,
+    lineHeight: normalize(20),
     color: "#000",
-    marginHorizontal: 16,
-    marginTop: 12,
+    marginHorizontal: normalize(16),
+    marginTop: normalize(8),
   },
 
   // wrapper around your ArticleCard preview
   modalArticleWrapper: {
-    marginHorizontal: 16,
-    marginTop: 16,
+    marginHorizontal: normalize(16),
+    marginTop: normalize(14),
   },
 
   // big green button at bottom
   proceedButton: {
     backgroundColor: "#038565",
-    height: 56,
+    height: normalize(60),
     borderRadius: 28,
-    marginHorizontal: 16,
+    marginHorizontal: normalize(16),
     marginTop: 10,
     marginBottom: 40,
     paddingVertical: 16,
     alignItems: "center",
+    justifyContent: "center",
   },
   proceedButtonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: SCREEN_WIDTH < 481 ? 14 : 16,
     fontWeight: "600",
     lineHeight: 24,
     textAlign: "center",

@@ -10,7 +10,6 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 
-
 export const VideoCard = ({ item, style, styleThumbnail }) => {
   const [isLoading, setIsLoading] = useState(true);
 
@@ -41,7 +40,7 @@ export const VideoCard = ({ item, style, styleThumbnail }) => {
             <Text style={styles.videoTagText}>{item.tag}</Text>
           </View>
         )}
-        <Text style={styles.videoTitle} numberOfLines={2}>
+        <Text style={styles.videoTitle} numberOfLines={3} ellipsizeMode="tail">
           {item.title || "Video Title Placeholder"}
         </Text>
         <Text style={styles.videoDuration}>

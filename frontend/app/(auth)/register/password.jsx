@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from "react";
+// app/(auth)/register/password.jsx
+import React, { useState } from "react";
 import {
   View,
-  Text,
   TextInput,
   StyleSheet,
   SafeAreaView,
@@ -9,68 +9,66 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
-  KeyboardAvoidingView,
+  StatusBar,
   TouchableOpacity,
-  StatusBar, // For the eye icon
 } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
-import { Ionicons } from "@expo/vector-icons"; // For the eye icon
-import BackButton from "../../../components/BackButton"; // Adjust path
-import Button from "../../../components/Button"; // Adjust path
-import * as SecureStore from "expo-secure-store";
-import { useAuth } from "../../_layout"; // Import your Auth context
+import { Ionicons } from "@expo/vector-icons";
+import BackButton from "../../../components/BackButton";
+import Button from "../../../components/Button";
 import Typo from "../../../components/Typo";
+import "../../../i18n";
+import { useTranslation } from "react-i18next";
 import { authApi } from "../../../services/api";
+import { useAuth } from "../../_layout";
 import AnimatedIcon from "../../../components/AnimatedIcon";
 
-// Placeholder for PNG icon - UPDATE PATH
 const passwordIcon = require("../../../assets/images/Password.png");
 
-const PasswordScreen = () => {
+export default function PasswordScreen() {
   const router = useRouter();
-  const params = useLocalSearchParams();
+  const { name, gender, email } = useLocalSearchParams();
+  const { login } = useAuth();
+  const { t } = useTranslation();
 
-  const { name, gender, email } = params; // Get all previous data
-  const { login } = useAuth(); // Get login function from context
   const [password, setPassword] = useState("");
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false); // State for visibility
-  const [isLoading, setIsLoading] = useState(false); // State for loading indicator on button
-
-  const animatedWrapperStyle = {
-    width: "100%",
-    flexDirection: "row", // Arrange input and eye icon horizontally
-    alignItems: "center", // Align items vertically
-  };
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSignUp = async () => {
-    // Basic validation
     if (password.length < 6) {
-      // Example: Minimum 8 characters
       Alert.alert(
-        "Weak Password",
-        "Password must be at least 6 characters long."
+        t("register.password.alertWeakTitle", "Weak Password"),
+        t(
+          "register.password.alertWeakMessage",
+          "Password must be at least 6 characters long."
+        )
       );
       return;
     }
-
-    setIsLoading(true); // Show loading state
-
+    setIsLoading(true);
     try {
       const userData = { name, gender, email, password };
       const response = await authApi.register(userData);
-      // --- Handle Success ---
-      console.log("API Registration Result:", response);
-
-      // Check if the backend automatically logs the user in and sends a token
-      if (response && response.token) {
+      if (response?.token) {
         await login(email, password);
-      } 
+      } else {
+        Alert.alert(
+          t("register.password.alertFailedTitle", "Registration Failed"),
+          t(
+            "register.password.alertFailedMessage",
+            "An unexpected error occurred."
+          )
+        );
+      }
     } catch (error) {
-      // --- Handle Error ---
-      console.error("Registration Error:", error);
       Alert.alert(
-        "Registration Failed",
-        error.message || "An unexpected error occurred."
+        t("register.password.alertFailedTitle", "Registration Failed"),
+        error.message ||
+          t(
+            "register.password.alertFailedMessage",
+            "An unexpected error occurred."
+          )
       );
     } finally {
       setIsLoading(false);
@@ -80,41 +78,38 @@ const PasswordScreen = () => {
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <SafeAreaView style={styles.safeArea}>
-                    <StatusBar barStyle="dark-content" />
-        
+        <StatusBar barStyle="dark-content" />
         <BackButton />
 
         <View style={styles.container}>
           <View style={styles.content}>
-            {/* Replace with SVG if using SVG */}
             <AnimatedIcon iconSource={passwordIcon} />
 
-            <Typo fontWeight="600" size={36} style={styles.title}>
-              Create password
+            <Typo fontWeight="600" size={28} style={styles.title}>
+              {t("register.password.title", "Create password")}
             </Typo>
-            {/* Animated Wrapper for Input + Eye Icon */}
-            <View style={animatedWrapperStyle}>
+
+            <View style={styles.inputWrapper}>
               <TextInput
                 style={styles.input}
-                placeholder="Password" // Placeholder matching image
+                placeholder={t("register.password.placeholder", "Password")}
                 placeholderTextColor="#ccc"
                 value={password}
                 onChangeText={setPassword}
-                secureTextEntry={!isPasswordVisible} // Toggle based on state
+                secureTextEntry={!isPasswordVisible}
                 autoCapitalize="none"
-                autoComplete="password" // Help suggest strong passwords
-                textContentType="password" // Semantic meaning (iOS)
-                returnKeyType="done" // Keyboard return key says "Done"
+                autoComplete="password"
+                textContentType="password"
+                returnKeyType="done"
               />
-              {/* Eye Icon Button */}
               <TouchableOpacity
-                onPress={() => setIsPasswordVisible(!isPasswordVisible)}
+                onPress={() => setIsPasswordVisible((v) => !v)}
                 style={styles.eyeIconContainer}
               >
                 <Ionicons
-                  name={isPasswordVisible ? "eye-off" : "eye"} // Change icon based on state
+                  name={isPasswordVisible ? "eye-off" : "eye"}
                   size={24}
-                  color="#888" // Icon color
+                  color="#888"
                 />
               </TouchableOpacity>
             </View>
@@ -124,16 +119,15 @@ const PasswordScreen = () => {
             <Button
               style={[styles.button, isLoading && styles.disabledButton]}
               onPress={handleSignUp}
-              disabled={isLoading} // Disable button while loading
+              disabled={isLoading}
             >
-              {/* Show loading indicator or text */}
-              <Typo
-                fontWeight="600"
-                size={16}
-                color={"#fff"}
-                style={styles.buttonText}
-              >
-                {isLoading ? "Signing Up..." : "Complete sign up"}
+              <Typo fontWeight="600" size={16} color="#fff">
+                {isLoading
+                  ? t("register.password.signingUp", "Signing Up...")
+                  : t(
+                      "register.password.button",
+                      "Complete sign up"
+                    )}
               </Typo>
             </Button>
           </View>
@@ -141,51 +135,36 @@ const PasswordScreen = () => {
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  headerContainer: {
-    paddingTop: Platform.OS === "ios" ? 0 : 10,
-    paddingLeft: 15,
-    paddingBottom: 5,
-    width: "100%",
-  },
-  container: {
-    flex: 1,
-    justifyContent: "space-between",
-  },
+  safeArea: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1, justifyContent: "space-between" },
   content: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "flex-start", // Align content higher
+    justifyContent: "flex-start",
     paddingHorizontal: 30,
-    paddingTop: Platform.OS === "ios" ? 20 : 60, // Consistent padding
+    paddingTop: Platform.OS === "ios" ? 20 : 20,
   },
-
   title: {
     textAlign: "center",
     marginBottom: 40,
     color: "#333",
   },
-  // animatedWrapperStyle is defined dynamically above
-
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
   input: {
-    flex: 1, // Allow input to take available space next to icon
+    flex: 1,
     fontSize: 25,
     paddingVertical: 10,
-    paddingBottom: 10, // Space for underline
     textAlign: "center",
     color: "#333",
-    // Remove borders here - handled by wrapper
   },
-  eyeIconContainer: {
-    padding: 10, // Tappable area for the eye icon
-  },
-  // eye icon color/size set directly on component
+  eyeIconContainer: { padding: 10 },
   buttonContainer: {
     width: "100%",
     alignItems: "center",
@@ -199,13 +178,5 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: "center",
   },
-  disabledButton: {
-    // Style for loading state
-    backgroundColor: "#a5d6a7",
-  },
-  buttonText: {
-    color: "#fff",
-  },
+  disabledButton: { backgroundColor: "#a5d6a7" },
 });
-
-export default PasswordScreen;

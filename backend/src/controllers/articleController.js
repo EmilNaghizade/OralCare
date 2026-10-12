@@ -1,4 +1,3 @@
-
 // backend/src/controllers/articleController.js
 import Article from "../models/Article.js";
 import path from "path";
@@ -15,19 +14,33 @@ export const getAllArticles = async (req, res) => {
     const page = req.query.page ? Number(req.query.page) : 1;
     const limit = req.query.limit ? Number(req.query.limit) : 10;
     const skip = (page - 1) * limit;
-    
+
+    // Get the preferred language from query params or headers
+    const language =
+      req.query.lang ||
+      req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
+      "en";
+
     const articles = await Article.find()
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
-    
+
+    const transformedArticles = articles.map((article) => ({
+      ...article.toObject(),
+      title: article.title[language] || article.title.en,
+      description: article.description[language] || article.description.en,
+      // Include all language versions in separate properties
+      titleTranslations: article.title,
+      descriptionTranslations: article.description,
+    }));
     const total = await Article.countDocuments();
-    
+
     res.json({
-      articles,
+      articles: transformedArticles,
       totalArticles: total,
       currentPage: page,
-      totalPages: Math.ceil(total / limit)
+      totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
     console.error("Error fetching articles:", error);
@@ -42,8 +55,21 @@ export const getArticleById = async (req, res) => {
     if (!article) {
       return res.status(404).json({ error: "Article not found" });
     }
-    
-    res.json(article);
+
+    // Get the preferred language from query params or headers
+    const language =
+      req.query.lang ||
+      req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
+      "en";
+    const transformedArticle = {
+      ...article.toObject(),
+      title: article.title[language] || article.title.en,
+      description: article.description[language] || article.description.en,
+      titleTranslations: article.title,
+      descriptionTranslations: article.description,
+    };
+
+    res.json(transformedArticle);
   } catch (error) {
     console.error("Error fetching article:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -54,32 +80,67 @@ export const getArticleById = async (req, res) => {
 export const createArticle = async (req, res) => {
   try {
     if (!req.user || req.user.role !== "admin") {
-      return res.status(403).json({ error: "Not authorized to create articles" });
+      return res
+        .status(403)
+        .json({ error: "Not authorized to create articles" });
     }
-    
+
     const { title, description, readingTime } = req.body;
-    
+
+    // Parse title and description if they're JSON strings (for form-data)
+    let parsedTitle = title;
+    let parsedDescription = description;
+
+    if (typeof title === "string") {
+      try {
+        parsedTitle = JSON.parse(title);
+      } catch (e) {
+        parsedTitle = { en: title, ru: title };
+      }
+    }
+
+    if (typeof description === "string") {
+      try {
+        parsedDescription = JSON.parse(description);
+      } catch (e) {
+        parsedDescription = { en: description, ru: description };
+      }
+    }
+
+    // Validate that we have both language versions
+    if (
+      !parsedTitle.en ||
+      !parsedTitle.ru ||
+      !parsedDescription.en ||
+      !parsedDescription.ru
+    ) {
+      return res.status(400).json({
+        error:
+          "Title and description must be provided in both English and Russian",
+      });
+    }
+
     // Check if thumbnail file was uploaded
     if (!req.file) {
       return res.status(400).json({ error: "Thumbnail image is required" });
     }
-    
+
     // Create path for thumbnail that will be accessible from frontend
     const thumbnailUrl = `/uploads/thumbnails/${req.file.filename}`;
-    
+
     const article = new Article({
-      title,
-      description,
+      title: parsedTitle,
+      description: parsedDescription,
       thumbnail: thumbnailUrl,
       readingTime: Number(readingTime) || 5,
     });
 
     await createContentNotification(
       "New Article Available",
-      "article", 
+      "article",
       article
     );
-    
+
     await article.save();
     res.status(201).json(article);
   } catch (error) {
@@ -92,27 +153,74 @@ export const createArticle = async (req, res) => {
 export const updateArticle = async (req, res) => {
   try {
     if (!req.user || req.user.role !== "admin") {
-      return res.status(403).json({ error: "Not authorized to update articles" });
+      return res
+        .status(403)
+        .json({ error: "Not authorized to update articles" });
     }
-    
+
     const { title, description, readingTime } = req.body;
-    
+
     // Find the existing article
     const article = await Article.findById(req.params.id);
     if (!article) {
       return res.status(404).json({ error: "Article not found" });
     }
-    
+
+    let parsedTitle = title;
+    let parsedDescription = description;
+
+    if (typeof title === "string") {
+      try {
+        parsedTitle = JSON.parse(title);
+      } catch (e) {
+        parsedTitle = {
+          ...article.title,
+          en: title,
+        };
+      }
+    }
+
+    if (typeof description === "string") {
+      try {
+        parsedDescription = JSON.parse(description);
+      } catch (e) {
+        parsedDescription = {
+          ...article.description,
+          en: description,
+        };
+      }
+    }
+
     // Update basic fields
-    if (title) article.title = title;
-    if (description) article.description = description;
-    if (readingTime) article.readingTime = Number(readingTime);
+    if (parsedTitle) {
+      if (!parsedTitle.en || !parsedTitle.ru) {
+        return res.status(400).json({
+          error: "Title must be provided in both English and Russian",
+        });
+      }
+      article.title = parsedTitle;
+    }
+
+    if (parsedDescription) {
+      if (!parsedDescription.en || !parsedDescription.ru) {
+        return res.status(400).json({
+          error: "Description must be provided in both English and Russian",
+        });
+      }
+      article.description = parsedDescription;
+    }
     
+    if (readingTime) article.readingTime = Number(readingTime);
+
     // Update thumbnail if provided
     if (req.file) {
       // Delete old thumbnail if it exists
       try {
-        const oldThumbnailPath = path.join(__dirname, "../..", article.thumbnail);
+        const oldThumbnailPath = path.join(
+          __dirname,
+          "../..",
+          article.thumbnail
+        );
         if (fs.existsSync(oldThumbnailPath)) {
           fs.unlinkSync(oldThumbnailPath);
         }
@@ -120,10 +228,10 @@ export const updateArticle = async (req, res) => {
         console.error("Error deleting old thumbnail:", err);
         // Continue even if deletion fails
       }
-      
+
       article.thumbnail = `/uploads/thumbnails/${req.file.filename}`;
     }
-    
+
     await article.save();
     res.json(article);
   } catch (error) {
@@ -136,14 +244,16 @@ export const updateArticle = async (req, res) => {
 export const deleteArticle = async (req, res) => {
   try {
     if (!req.user || req.user.role !== "admin") {
-      return res.status(403).json({ error: "Not authorized to delete articles" });
+      return res
+        .status(403)
+        .json({ error: "Not authorized to delete articles" });
     }
-    
+
     const article = await Article.findById(req.params.id);
     if (!article) {
       return res.status(404).json({ error: "Article not found" });
     }
-    
+
     // Delete thumbnail file
     try {
       const thumbnailPath = path.join(__dirname, "../..", article.thumbnail);
@@ -154,7 +264,7 @@ export const deleteArticle = async (req, res) => {
       console.error("Error deleting thumbnail:", err);
       // Continue even if file deletion fails
     }
-    
+
     await Article.findByIdAndDelete(req.params.id);
     res.json({ message: "Article deleted successfully" });
   } catch (error) {

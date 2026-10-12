@@ -11,16 +11,19 @@ import {
   StatusBar
 } from "react-native";
 import { useRouter } from "expo-router";
-import Button from "../../../components/Button"; // Import your custom Button
+import Button from "../../../components/Button"; 
 import Typo from "../../../components/Typo";
 import BackButton from "../../../components/BackButton";
 import AnimatedIcon from "../../../components/AnimatedIcon";
+import "../../../i18n";
+import { useTranslation } from "react-i18next";
 
 const nameIcon = require("../../../assets/images/nameIconFinal.png");
 
 export default function register() {
   const [name, setName] = useState("");
   const router = useRouter();
+  const { t } = useTranslation();
 
   // Interpolate animation value for styles
   const animatedWrapperStyle = {
@@ -31,20 +34,22 @@ export default function register() {
   const handleNext = () => {
     const trimmedName = name.trim();
     if (!trimmedName) {
-      Alert.alert("Name Required", "Please enter your name and surname.");
+      Alert.alert(
+        t("register.validation.nameRequired.title", "Name Required"),
+        t("register.validation.nameRequired.message", "Please enter your name and surname.")
+      );
       return; // Stop execution if validation fails
     }
 
     // Navigate to the next screen (Gender Selection) and pass the name
-    // Adjust the pathname to match your file structure in expo-router
     router.push({
-      pathname: "/(auth)/register/gender", // <--- UPDATE THIS ROUTE if needed
-      params: { name: trimmedName }, // Pass the name as a parameter
+      pathname: "/(auth)/register/gender",
+      params: { name: trimmedName },
     });
   };
   return (
     <SafeAreaView style={styles.safeArea}>
-            <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle="dark-content" />
       {/* KeyboardAvoidingView helps push content up when keyboard shows */}
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -55,14 +60,14 @@ export default function register() {
         <View style={styles.content}>
           <AnimatedIcon iconSource={nameIcon} />
 
-          <Typo fontWeight="600" size={36} style={styles.title}>
-            What's your name{"\n"}and surname?
+          <Typo fontWeight="600" size={28} style={styles.title}>
+            {t("register.name.title", "What's your name\nand surname?")}
           </Typo>
 
           <Animated.View style={animatedWrapperStyle}>
             <TextInput
-              style={styles.input} // Apply base and animated styles
-              placeholder="Name Surname"
+              style={styles.input}
+              placeholder={t("register.name.placeholder", "Name Surname")}
               placeholderTextColor="#ccc"
               value={name}
               onChangeText={setName}
@@ -76,10 +81,8 @@ export default function register() {
         {/* Position the button container at the bottom */}
         <View style={styles.buttonContainer}>
           <Button style={styles.button} onPress={handleNext}>
-            {/* Use Typo or Text for button label */}
-
             <Typo color="#fff" fontWeight="bold" size={16}>
-              Next
+              {t("common.next", "Next")}
             </Typo>
           </Button>
         </View>
@@ -104,9 +107,8 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     paddingHorizontal: 30,
     // Added paddingTop to push content down from the top edge
-    paddingTop: Platform.OS === "ios" ? 20 : 60, // Adjust value as needed
+    paddingTop: Platform.OS === "ios" ? 20 : 20, // Adjust value as needed
   },
-
   title: {
     textAlign: "center",
     marginBottom: 40, // Space below title
@@ -124,7 +126,7 @@ const styles = StyleSheet.create({
     width: "100%", // Take full width
     alignItems: "center", // Center button within the container
     paddingHorizontal: 30, // Match content padding
-    paddingBottom: Platform.OS === "ios" ? 30 : 20, // Padding at the very bottom (more for iOS home indicator)
+    paddingBottom: Platform.OS === "ios" ? 20 : 20, // Padding at the very bottom (more for iOS home indicator)
   },
   button: {
     // Assuming your custom Button takes style props for the container
@@ -135,5 +137,4 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     alignItems: "center",
   },
-
 });

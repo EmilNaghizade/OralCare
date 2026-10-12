@@ -21,9 +21,9 @@ import Typo from "../../../components/Typo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { videoApi } from "../../../services/api";
 import { useAuth } from "../../_layout";
+import { useTranslation } from "react-i18next";
 
 const greenFeatureIcon = require("../../../assets/images/JasmineCircle.png");
-const localFallbackVideo = require("../../../assets/videos/Video1.mp4");
 
 export default function VideoDetailScreen() {
   const { authToken } = useAuth();
@@ -37,6 +37,7 @@ export default function VideoDetailScreen() {
   const [error, setError] = useState(null);
   const playerRef = useRef(null);
   const router = useRouter();
+  const { t, i18n } = useTranslation();
 
   // Initialize the player at the top level with a temporary source
   // We'll update the source when videoData is loaded
@@ -49,7 +50,7 @@ export default function VideoDetailScreen() {
         setError(null);
 
         // Fetch the video details from the backend
-        const response = await videoApi.getVideoById(videoId, authToken);
+        const response = await videoApi.getVideoById(videoId, authToken,i18n.language);
 
         setVideoData(response);
 
@@ -81,7 +82,7 @@ export default function VideoDetailScreen() {
     };
   }, [videoId, authToken]);
 
-  const player = useVideoPlayer(videoSource || localFallbackVideo, (player) => {
+  const player = useVideoPlayer(videoSource, (player) => {
     player.loop = false;
     player.staysActiveInBackground = true;
   });
@@ -90,7 +91,6 @@ export default function VideoDetailScreen() {
     if (watchTrackingComplete || !videoData) return;
 
     try {
-
       const response = await videoApi.markVideoAsWatched(videoId);
       setIsWatched(true);
       setWatchTrackingComplete(true);
@@ -101,7 +101,6 @@ export default function VideoDetailScreen() {
 
   // Mark video as watched when video data is loaded
   useEffect(() => {
-
     if (videoData && !watchTrackingComplete) {
       markVideoAsWatched();
     }
@@ -203,7 +202,7 @@ export default function VideoDetailScreen() {
           <Typo style={styles.errorText}>
             The video you are looking for does not exist.
           </Typo>
-  
+
           <TouchableOpacity
             style={styles.retryButton}
             onPress={() => router.back()}
@@ -240,8 +239,6 @@ export default function VideoDetailScreen() {
       </SafeAreaView>
     );
   }
-
-  
 
   return (
     <SafeAreaView style={styles.safeArea}>

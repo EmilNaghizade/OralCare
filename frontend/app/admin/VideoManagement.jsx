@@ -148,16 +148,8 @@ function VideoListScreen({ navigation }) {
                   <View style={styles.thumbnailPlaceholder} />
                 )}
                 <View style={styles.textContainer}>
-                  <Text style={styles.videoTitle}>{item.title}</Text>
+                  <Text style={styles.videoTitle} numberOfLines={3} ellipsizeMode="tail">{item.title}</Text>
                   <Text style={styles.videoCategory}>{item.category}</Text>
-                  <View style={styles.tagsContainer}>
-                    {item.tags &&
-                      item.tags.map((tag, index) => (
-                        <View key={index} style={styles.tag}>
-                          <Text style={styles.tagText}>{tag}</Text>
-                        </View>
-                      ))}
-                  </View>
                 </View>
               </View>
 

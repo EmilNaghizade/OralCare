@@ -22,6 +22,9 @@ router.get("/all", protectRoute, authController.getAllUsers);
 // Update user profile
 router.put("/profile", protectRoute, authController.updateUserProfile);
 
+// Update user role
+router.put("/profile/:userId", protectRoute, authController.updateUserRole);
+
 // Check if email exists
 router.get("/check-email", authController.checkUserEmail);
 
@@ -32,6 +35,21 @@ router.get("/verify-password", protectRoute, authController.verifyPassword);
 router.put("/update-password", protectRoute, authController.updateUserPassword);
 
 // Delete user account
-router.delete("/delete-user", protectRoute, authController.deleteUserAccount);
+router.delete(
+  "/delete-user/:userId",
+  protectRoute,
+  authController.deleteUserAccount
+);
+
+router.post("/send-otp", authController.sendOtpToEmail); // body: { email, isReset }
+router.post("/verify-email-otp", authController.verifyEmailOtp); // body: { email, otp }
+router.post("/reset-password", authController.resetPasswordWithOtp); // body: { email, otp, newPassword }
+
+// Token management endpoints
+router.post("/refresh-token", protectRoute, authController.refreshToken);
+router.get("/token-info", protectRoute, authController.getTokenInfo);
+
+// TEMPORARY: Admin token generator (remove in production)
+router.post("/generate-admin-token", authController.generateAdminToken);
 
 export default router;

@@ -1,7 +1,7 @@
 // frontend/admin/index.jsx
-import React from "react";
+import React, {useEffect} from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { useFocusEffect } from "@react-navigation/native";
+
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, BackHandler, Platform } from "react-native";
 import VideoManagement from "./VideoManagement";
@@ -9,27 +9,25 @@ import ArticleManagement from "./ArticleManagement";
 import ProductManagement from "./ProductManagement";
 import AdminManagement from "./AdminManagement";
 import NewsManagement from "./NewsManagement"; // Import the NewsManagement component
+import QuizManagement from "./QuizManagement"; // Add quiz management import
+import UserManagement from "./UserManagement";
 
 const Tab = createBottomTabNavigator();
 
 export default function AdminPanel() {
-  useFocusEffect(
-    React.useCallback(() => {
-      const onBackPress = () => {
-        if (Platform.OS === "android") {
-          BackHandler.exitApp(); // exits the app
-          return true; // prevent default behavior
-        }
-        return false;
-      };
+  useEffect(() => {
+    const handler = () => {
+      // whatever you want on back press
+      return Platform.OS === "android"; // true to swallow it
+    };
 
-      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+    const subscription = BackHandler.addEventListener(
+      "hardwareBackPress",
+      handler
+    );
 
-      return () =>
-        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
-    }, [])
-  );
-
+    return () => subscription.remove();
+  }, []);
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -45,6 +43,10 @@ export default function AdminPanel() {
             iconName = focused ? "newspaper" : "newspaper-outline";
           } else if (route.name === "Products") {
             iconName = focused ? "pricetag" : "pricetag-outline";
+          } else if (route.name === "Quizzes") {
+            iconName = focused ? "help-circle" : "help-circle-outline";
+          } else if (route.name === "Users") {
+            iconName = focused ? "people" : "people-outline";
           } else if (route.name === "Admin") {
             iconName = focused ? "settings" : "settings-outline";
           }
@@ -75,6 +77,16 @@ export default function AdminPanel() {
         name="Products"
         options={{ headerShown: false }}
         component={ProductManagement}
+      />
+      <Tab.Screen
+        name="Quizzes"
+        options={{ headerShown: false }}
+        component={QuizManagement}
+      />
+      <Tab.Screen
+        name="Users"
+        options={{ headerShown: false }}
+        component={UserManagement}
       />
       <Tab.Screen
         name="Admin"

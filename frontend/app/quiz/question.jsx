@@ -7,191 +7,213 @@ import {
   Platform,
   StatusBar,
   Animated,
+  Text,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import BackButton from "../../components/BackButton";
 import Typo from "../../components/Typo";
-import { quizzes } from "../data";
-import FeedbackToast from "../../components/QuizFeedback"; // Import the FeedbackToast component
-
-const TOTAL_TIME = 120; // 2 minutes in seconds
+import FeedbackToast from "../../components/QuizFeedback";
+import { quizApi } from "../../services/api";
+import { useAuth } from "../_layout";
+import { useTranslation } from "react-i18next";
 
 export default function QuizQuestionScreen() {
   const router = useRouter();
+  const { authToken } = useAuth();
   const params = useLocalSearchParams();
   const quizId = params.quizId;
-  const initialQuestionIndex = parseInt(
-    params.questionIndex?.toString() || "0",
-    10
-  );
+  const initialIdx = parseInt(params.questionIndex?.toString() || "0", 10);
 
-  const [quizData, setQuizData] = useState(null);
-  const [currentQuestionIndex, setCurrentQuestionIndex] =
-    useState(initialQuestionIndex);
+  const [quiz, setQuiz] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(initialIdx);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
+  const [timeLeft, setTimeLeft] = useState(null);
   const [score, setScore] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // State for feedback toast
+  const { i18n,t } = useTranslation();
+  const lang = i18n.language.substring(0, 2) || "en";
+
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrectAnswer, setIsCorrectAnswer] = useState(false);
 
-  // Timer reference
   const timerIntervalRef = useRef(null);
-  // Progress bar animation
   const progressAnim = useRef(new Animated.Value(0)).current;
 
-  const getQuizDataById = (quizId) => {
-    return quizzes[quizId] || null;
-  };
-
-  // Load quiz data
+  // Fetch quiz data
   useEffect(() => {
-    const data = getQuizDataById(quizId?.toString());
-    if (data?.questions?.length) {
-      setQuizData(data);
-    } else {
-      console.error("Quiz data not found or empty:", quizId);
-      if (router.canGoBack()) router.back();
+    async function fetchQuiz() {
+      try {
+        setLoading(true);
+        const data = await quizApi.getQuizById(quizId, authToken, lang);
+        setQuiz(data);
+        const seconds = (data.time || 2) * 60;
+        setTimeLeft(seconds);
+      } catch (e) {
+        console.error(e);
+        setError("Failed to load quiz. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     }
-  }, [quizId, router]);
+    if (quizId) fetchQuiz();
+  }, [quizId, authToken, lang]);
 
-  // Update progress bar animation
+  // Progress bar
   useEffect(() => {
-    if (quizData?.questions?.length) {
-      const newProgress =
-        (currentQuestionIndex + 1) / quizData.questions.length;
+    if (quiz?.questions?.length) {
+      const progress = (currentQuestionIndex + 1) / quiz.questions.length;
       Animated.timing(progressAnim, {
-        toValue: newProgress,
+        toValue: progress,
         duration: 300,
         useNativeDriver: false,
       }).start();
     }
-  }, [currentQuestionIndex, quizData, progressAnim]);
+  }, [currentQuestionIndex, quiz, progressAnim]);
 
-  // Start/stop timer
+  // Timer
   useEffect(() => {
-    if (quizData) {
+    if (quiz && timeLeft > 0) {
       timerIntervalRef.current = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
             clearInterval(timerIntervalRef.current);
             navigateToResults();
             return 0;
           }
-          return prevTime - 1;
+          return prev - 1;
         });
       }, 1000);
     }
+    return () => clearInterval(timerIntervalRef.current);
+  }, [quiz, timeLeft]);
 
-    return () => {
-      if (timerIntervalRef.current) {
-        clearInterval(timerIntervalRef.current);
-      }
-    };
-  }, [quizData]);
-
+  // Navigate to results
   const navigateToResults = (finalScore) => {
-    if (timerIntervalRef.current) {
-      clearInterval(timerIntervalRef.current);
-    }
+    clearInterval(timerIntervalRef.current);
     router.replace({
       pathname: "/quiz/result",
       params: {
-        quizId: quizId,
+        quizId,
         score: finalScore !== undefined ? finalScore : score,
-        totalQuestions: quizData?.questions?.length || 0,
+        totalQuestions: quiz?.questions?.length || 0,
       },
     });
   };
 
-  const handleAnswerSelect = (option) => {
+  // Answer selection
+  const handleAnswerSelect = (opt, idx) => {
     if (isAnswered) return;
-
-    const correct = option === currentQuestion?.correctAnswer;
-    setSelectedAnswer(option);
+    const q = quiz.questions[currentQuestionIndex];
+    const correct = idx === q.correctAnswer;
+    setSelectedAnswer(idx);
     setIsAnswered(true);
-
-    // Show the feedback toast
     setIsCorrectAnswer(correct);
     setShowFeedback(true);
+    if (correct) setScore((prev) => prev + 1);
 
-    // Update score if correct
-    if (correct) {
-      setScore((prevScore) => {
-        const newScore = prevScore + 1;
-
-        // Store the new score for later use
-        setTimeout(() => {
-          const nextIndex = currentQuestionIndex + 1;
-          if (nextIndex < quizData.questions.length) {
-            // Move to next question
-            setCurrentQuestionIndex(nextIndex);
-            setSelectedAnswer(null);
-            setIsAnswered(false);
-            setShowFeedback(false);
-          } else {
-            // Quiz is finished, navigate to results with the UPDATED score
-            navigateToResults(newScore);
-          }
-        }, 2000);
-
-        return newScore;
-      });
-    } else {
-      // If the answer is incorrect, we don't update the score but still need to continue
-      setTimeout(() => {
-        const nextIndex = currentQuestionIndex + 1;
-        if (nextIndex < quizData.questions.length) {
-          // Move to next question
-          setCurrentQuestionIndex(nextIndex);
-          setSelectedAnswer(null);
-          setIsAnswered(false);
-          setShowFeedback(false);
-        } else {
-          // Quiz is finished, navigate to results
-          navigateToResults(score); // Use current score
-        }
-      }, 2000);
-    }
+    setTimeout(() => {
+      const next = currentQuestionIndex + 1;
+      if (next < quiz.questions.length) {
+        setCurrentQuestionIndex(next);
+        setSelectedAnswer(null);
+        setIsAnswered(false);
+        setShowFeedback(false);
+      } else {
+        navigateToResults(correct ? score + 1 : score);
+      }
+    }, 2000);
   };
 
-  // Format time as MM:SS
-  const formatTime = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  // Format time MM:SS
+  const formatTime = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec < 10 ? "0" : ""}${sec}`;
   };
 
-  const currentQuestion = quizData?.questions?.[currentQuestionIndex];
-  const totalQuestions = quizData?.questions?.length || 0;
-
-  // Loading screen
-  if (!quizData || !currentQuestion) {
+  if (loading) {
     return (
       <SafeAreaView style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
         <View style={styles.loadingContainer}>
-          <Typo>Loading Quiz...</Typo>
+          <ActivityIndicator size="large" color="#038565" />
+          <Text style={styles.loadingText}>Loading quiz...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  if (error || !quiz) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.errorContainer}>
+          <Ionicons name="alert-circle-outline" size={48} color="#FF3B30" />
+          <Text style={styles.errorText}>{error || "Quiz not found"}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => router.back()}
+          >
+            <Typo color="#fff" fontWeight="600">
+              Go Back
+            </Typo>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
   }
 
-  // Calculate progress bar width
+  const currentQuestion = quiz.questions[currentQuestionIndex];
+  if (!currentQuestion) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.errorContainer}>
+          <Ionicons name="help-circle-outline" size={48} color="#FF3B30" />
+          <Text style={styles.errorText}>Question not found</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => router.back()}
+          >
+            <Typo color="#fff" fontWeight="600">
+              Go Back
+            </Typo>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Localize question and options
+  const questionText =
+    typeof currentQuestion.question === "object"
+      ? currentQuestion.question[lang] || currentQuestion.question.en
+      : String(currentQuestion.question);
+
+  const opts = Array.isArray(currentQuestion.options)
+    ? currentQuestion.options
+    : currentQuestion.options && typeof currentQuestion.options === "object"
+    ? currentQuestion.options[lang] || currentQuestion.options.en
+    : [];
+
   const progressWidth = progressAnim.interpolate({
     inputRange: [0, 1],
     outputRange: ["0%", "100%"],
   });
+
+  const current = currentQuestionIndex + 1;
+  const total = quiz.questions.length;
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
       <Stack.Screen options={{ headerShown: false }} />
 
-      {/* Header */}
       <View style={styles.header}>
         <BackButton />
         <View style={styles.timerContainer}>
@@ -199,55 +221,44 @@ export default function QuizQuestionScreen() {
           <Typo style={styles.timerText}>{formatTime(timeLeft)}</Typo>
         </View>
       </View>
-
-      {/* Progress Bar */}
       <View style={styles.progressTrack}>
         <Animated.View style={[styles.progressBar, { width: progressWidth }]} />
       </View>
       <Typo style={styles.questionCounter}>
-        Question {currentQuestionIndex + 1} of {totalQuestions}
-      </Typo>
 
-      {/* Question */}
+        {t("questionCount", { current, total })}
+      </Typo>
       <View style={styles.questionContainer}>
         <Typo size={22} fontWeight="600" style={styles.questionText}>
-          {currentQuestion.text}
+          {questionText}
         </Typo>
       </View>
-
-      {/* Answer Options */}
       <View style={styles.optionsContainer}>
-        {currentQuestion.options.map((option, index) => {
-          const isSelected = selectedAnswer === option;
-          const isCorrect = currentQuestion.correctAnswer === option;
-
-          // Dynamic styles for feedback
-          let optionStyle = [styles.optionButton];
-          let textStyle = [styles.optionText];
-
+        {opts.map((opt, idx) => {
+          const text =
+            typeof opt === "object" ? opt[lang] || opt.en : String(opt);
+          const isSelected = selectedAnswer === idx;
+          const isCorrect = currentQuestion.correctAnswer === idx;
+          const optStyle = [styles.optionButton];
+          const textStyle = [styles.optionText];
           if (isAnswered && isSelected) {
-            optionStyle.push(
+            optStyle.push(
               isCorrect ? styles.correctOption : styles.incorrectOption
             );
             textStyle.push(styles.selectedOptionText);
-          } else if (isAnswered && isCorrect) {
-
           }
-
           return (
             <TouchableOpacity
-              key={index}
-              style={optionStyle}
-              onPress={() => handleAnswerSelect(option)}
+              key={idx}
+              style={optStyle}
+              onPress={() => handleAnswerSelect(opt, idx)}
               disabled={isAnswered}
             >
-              <Typo style={textStyle}>{option}</Typo>
+              <Typo style={textStyle}>{text}</Typo>
             </TouchableOpacity>
           );
         })}
       </View>
-
-      {/* Feedback Toast */}
       <FeedbackToast
         isVisible={showFeedback}
         isCorrect={isCorrectAnswer}
@@ -257,16 +268,29 @@ export default function QuizQuestionScreen() {
   );
 }
 
-// Styles
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8f9fa",
-  },
-  loadingContainer: {
+  container: { flex: 1, backgroundColor: "#f8f9fa" },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { marginTop: 10, fontSize: 16, color: "#666" },
+  errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 20,
+    backgroundColor: "#fff",
+  },
+  errorText: {
+    marginTop: 10,
+    marginBottom: 20,
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+  },
+  retryButton: {
+    backgroundColor: "#038565",
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
   },
   header: {
     flexDirection: "row",
@@ -275,7 +299,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingTop: Platform.OS === "android" ? 15 : 10,
     paddingBottom: 10,
-
   },
   timerContainer: {
     flexDirection: "row",
@@ -285,12 +308,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 15,
   },
-  timerText: {
-    marginLeft: 6,
-    fontWeight: "600",
-    fontSize: 14,
-    color: "#333",
-  },
+  timerText: { marginLeft: 6, fontWeight: "600", fontSize: 14, color: "#333" },
   progressTrack: {
     height: 8,
     backgroundColor: "#e9ecef",
@@ -299,11 +317,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     overflow: "hidden",
   },
-  progressBar: {
-    height: "100%",
-    backgroundColor: "#038565",
-    borderRadius: 4,
-  },
+  progressBar: { height: "100%", backgroundColor: "#038565", borderRadius: 4 },
   questionCounter: {
     textAlign: "center",
     marginTop: 12,
@@ -312,47 +326,21 @@ const styles = StyleSheet.create({
   },
   questionContainer: {
     paddingHorizontal: 20,
-    marginTop: 25,
-    marginBottom: 35,
+    marginVertical: 30,
     alignItems: "center",
   },
-  questionText: {
-    lineHeight: 30,
-    color: "#212529",
-    textAlign: "center",
-  },
-  optionsContainer: {
-    paddingHorizontal: 20,
-    gap: 15,
-  },
+  questionText: { lineHeight: 30, color: "#212529", textAlign: "center" },
+  optionsContainer: { paddingHorizontal: 20, gap: 15 },
   optionButton: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#E4E9EB",
     paddingVertical: 18,
     paddingHorizontal: 20,
     borderRadius: 16,
-
   },
-  optionText: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#343a40",
-  },
-  correctOption: {
-    borderWidth:1,
-    borderColor: "#28a745",
-  },
-  incorrectOption: {
-    borderWidth: 1,
-    borderColor: "#dc3545",
-  },
-  selectedOptionText: {
-    fontWeight: "600",
-  },
-  feedbackIcon: {
-    marginLeft: 10,
-  },
+  optionText: { flex: 1, fontSize: 16, fontWeight: "500", color: "#343a40" },
+  correctOption: { borderWidth: 1, borderColor: "#28a745" },
+  incorrectOption: { borderWidth: 1, borderColor: "#dc3545" },
+  selectedOptionText: { fontWeight: "600" },
 });

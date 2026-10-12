@@ -14,15 +14,29 @@ export const getAllProducts = async (req, res) => {
     const limit = req.query.limit ? Number(req.query.limit) : 10;
     const skip = (page - 1) * limit;
 
+    // Get the preferred language from query params or headers
+    const language =
+      req.query.lang ||
+      req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
+      "en";
+
     const products = await Product.find()
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
+    // Transform products to include only the requested language for backward compatibility
+    const transformedProducts = products.map((product) => ({
+      ...product.toObject(),
+      name: product.name[language] || product.name.en, // Fallback to English if requested language not available
+      // Include all language versions in a separate property for clients that want to handle multiple languages
+      nameTranslations: product.name,
+    }));
+
     const total = await Product.countDocuments();
 
     res.json({
-      products,
+      products: transformedProducts,
       totalProducts: total,
     });
   } catch (error) {
@@ -48,6 +62,23 @@ export const createProduct = async (req, res) => {
         .json({ error: "Name and link are required fields" });
     }
 
+    let parsedName = name;
+    if (typeof name === "string") {
+      try {
+        parsedName = JSON.parse(name);
+      } catch (e) {
+        // If parsing fails, assume it's a simple string and use it for English
+        parsedName = { en: name, ru: name };
+      }
+    }
+
+    // Validate that we have both language versions
+    if (!parsedName.en || !parsedName.ru) {
+      return res
+        .status(400)
+        .json({ error: "Name must be provided in both English and Russian" });
+    }
+
     // Check if files were uploaded
     if (!req.files || !req.files.image) {
       return res.status(400).json({ error: "Product image is required" });
@@ -61,7 +92,7 @@ export const createProduct = async (req, res) => {
 
     // Create the product
     const product = new Product({
-      name,
+      name: parsedName,
       imageUrl,
       link,
     });
@@ -88,7 +119,19 @@ export const getProductById = async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
-    res.json(product);
+    // Get the preferred language from query params or headers
+    const language =
+      req.query.lang ||
+      req.headers["accept-language"]?.split(",")[0].substring(0, 2) ||
+      "en";
+
+    const transformedProduct = {
+      ...product.toObject(),
+      name: product.name[language] || product.name.en,
+      nameTranslations: product.name,
+    };
+
+    res.json(transformedProduct);
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -113,9 +156,32 @@ export const updateProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
+    // ——— Bracket notation ile name alanlarını oku ———
+    // Örn: name[en], name[ru], name[fr] vb.
+    let parsedName = name;
+    if (typeof name === "string") {
+      try {
+        parsedName = JSON.parse(name);
+      } catch (e) {
+        // If parsing fails, assume it's a simple string and keep existing translations
+        parsedName = {
+          ...product.name,
+          en: name, // Update only English if it's a simple string
+        };
+      }
+    }
 
     // Update the basic fields
-    product.name = name || product.name;
+    if (parsedName) {
+      // Validate that we have both language versions
+      if (!parsedName.en || !parsedName.ru) {
+        return res
+          .status(400)
+          .json({ error: "Name must be provided in both English and Russian" });
+      }
+      product.name = parsedName;
+    }
+
     product.link = link || product.link;
 
     // Update files if provided

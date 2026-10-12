@@ -16,6 +16,8 @@ import { useAuth } from "../_layout";
 import Typo from "../../components/Typo";
 import axios from "axios";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
+import "../../i18n";
 
 const PADDING = 16; // Yeni padding/gap değeri
 const { width } = Dimensions.get("window");
@@ -23,6 +25,14 @@ const ITEM_WIDTH = (width - PADDING * 3) / 2;
 
 // --- Ürün Kartı Bileşeni ---
 const ProductCard = ({ item }) => {
+  const { t, i18n } = useTranslation();
+
+  const productName = item.nameTranslations
+    ? item.nameTranslations[i18n?.language] ||
+      item.nameTranslations.en ||
+      item.name
+    : item.name;
+
   // Fix the image source handling
   let imageSource;
 
@@ -47,7 +57,6 @@ const ProductCard = ({ item }) => {
     }
   } else {
     // Fallback to default image if no image is provided
-    imageSource = require("../../assets/images/Product2.png");
   }
 
   // Get the product link based on available properties
@@ -78,7 +87,7 @@ const ProductCard = ({ item }) => {
       </View>
       {/* Product Name */}
       <Typo style={styles.productName} numberOfLines={2}>
-        {item.name}
+        {productName}
       </Typo>
     </TouchableOpacity>
   );
@@ -86,6 +95,7 @@ const ProductCard = ({ item }) => {
 
 // --- Ana Ürünler Ekranı Bileşeni ---
 export default function ProductsScreen() {
+  const { t,i18n } = useTranslation();
   const { authToken } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -93,7 +103,7 @@ export default function ProductsScreen() {
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [i18n.language]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -102,7 +112,7 @@ export default function ProductsScreen() {
     try {
       // Try to fetch products from API
       const response = await axios.get(
-        `${process.env.EXPO_PUBLIC_API_BASE_URL}/api/products`,
+        `${process.env.EXPO_PUBLIC_API_BASE_URL}/api/products?lang=${i18n.language}`,
         {
           headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
         }
@@ -139,7 +149,7 @@ export default function ProductsScreen() {
         {/* Custom Header */}
         <View style={styles.header}>
           <Typo fontWeight="600" size={20} style={styles.headerTitle}>
-            Oral Care Products
+            {t("products.headerTitle")}
           </Typo>
         </View>
         {loading ? (
@@ -158,7 +168,7 @@ export default function ProductsScreen() {
             showsVerticalScrollIndicator={false}
             ListEmptyComponent={
               <View style={styles.emptyContainer}>
-                <Typo style={styles.emptyText}>No products available</Typo>
+                <Typo style={styles.emptyText}> {t("products.empty")} </Typo>
               </View>
             }
           />
@@ -166,7 +176,7 @@ export default function ProductsScreen() {
         {/* Error message if any */}
         {error && (
           <View style={styles.errorContainer}>
-            <Typo style={styles.errorText}>{error}</Typo>
+            <Typo style={styles.errorText}>{t("products.error")}</Typo>
           </View>
         )}
       </View>
@@ -185,14 +195,19 @@ const styles = StyleSheet.create({
     height: 100, // Header yüksekliği
     justifyContent: "flex-end", // Başlığı dikeyde ortala
     backgroundColor: "#fff", // Beyaz header arka planı
-    paddingTop: Platform.OS === "android" ? 20 : 15, // Üst boşluk (statusBar'a göre)
-    paddingBottom: 16 , // Alt boşluk
-    paddingHorizontal: PADDING, // Yan boşluklar
+    paddingTop: 40, // Internal padding
+    paddingHorizontal: 20,
+
+    paddingBottom: 24, // Internal padding (adjust as needed)
     // Alt köşeleri yuvarlatma
     borderBottomLeftRadius: 24, // <<< YUVARLAK KÖŞE
     borderBottomRightRadius: 24, // <<< YUVARLAK KÖŞE
   },
   headerTitle: {
+    fontSize: 24, // Başlık boyutu
+    fontWeight: "600", // Başlık kalınlığı
+    flexWrap: "wrap", // Başlık satırları sarmalansın
+    lineHeight: 32, // Başlık satır yüksekliği
     color: "#1c1c1c", // Koyu başlık rengi
     textAlign: "left", // Başlığı ortala
   },

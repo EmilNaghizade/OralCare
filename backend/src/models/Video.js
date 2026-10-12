@@ -4,14 +4,28 @@ import mongoose from "mongoose";
 const videoSchema = new mongoose.Schema(
   {
     title: {
-      type: String,
-      required: true,
-      trim: true,
+      en: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      ru: {
+        type: String,
+        required: true,
+        trim: true,
+      },
     },
     description: {
-      type: String,
-      required: true,
-      trim: true,
+      en: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      ru: {
+        type: String,
+        required: true,
+        trim: true,
+      },
     },
     videoUrl: {
       type: String,
@@ -27,9 +41,16 @@ const videoSchema = new mongoose.Schema(
       min: 0,
     },
     category: {
-      type: String,
-      required: true,
-      trim: true,
+      en: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      ru: {
+        type: String,
+        required: true,
+        trim: true,
+      },
     },
     tags: [
       {

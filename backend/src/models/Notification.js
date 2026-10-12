@@ -18,9 +18,13 @@ const NotificationSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
+    messageParams: {
+      type: mongoose.Schema.Types.Mixed, // This allows storing objects
+      default: {},
+    },
     type: {
       type: String,
-      enum: ["video", "news", "article", "product"],
+      enum: ["video", "news", "article", "product", "quiz"],
       required: true,
     },
     contentId: {

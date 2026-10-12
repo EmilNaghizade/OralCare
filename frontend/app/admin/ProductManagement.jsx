@@ -136,7 +136,7 @@ function ProductListScreen({ navigation }) {
                   <View style={styles.thumbnailPlaceholder} />
                 )}
                 <View style={styles.textContainer}>
-                  <Text style={styles.productName}>{item.name}</Text>
+                  <Text style={styles.productName} numberOfLines={3} ellipsizeMode="tail">{item.name}</Text>
                   <Text
                     style={styles.productLink}
                     numberOfLines={1}

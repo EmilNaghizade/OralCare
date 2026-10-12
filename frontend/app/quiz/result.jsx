@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
@@ -7,6 +7,8 @@ import {
   Dimensions,
   StatusBar,
   Image,
+  Text,
+  ActivityIndicator,
 } from "react-native";
 import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,13 +16,16 @@ import ConfettiCannon from "react-native-confetti-cannon"; // <-- Konfeti kütü
 import Typo from "../../components/Typo"; // Kendi Typo bileşeniniz
 import { useAuth } from "../_layout"; // Auth context'inizi import edin
 import { quizApi } from "../../services/api";
+import { useTranslation } from "react-i18next";
+
 const POINTS_PER_QUESTION = 10; // Her doğru cevap için puan
 const resultImage = require("../../assets/images/Result.png");
 
 export default function QuizResultsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { updateUserPoints, markQuizCompleted } = useAuth(); // Context'ten puan güncelleme fonksiyonunu alın
+  const { t } = useTranslation();
+  const { updateUserPoints } = useAuth(); // Context'ten puan güncelleme fonksiyonunu alın
 
   // Parametreleri al ve number'a çevir (string gelebilirler)
   const score = parseInt(params.score?.toString() || "0", 10);
@@ -29,25 +34,40 @@ export default function QuizResultsScreen() {
 
   const earnedPoints = score * POINTS_PER_QUESTION;
   const confettiRef = useRef(null); // Konfeti için ref (opsiyonel, manuel tetikleme için)
+  const [loading, setLoading] = useState(false);
 
   // Call API to mark video as watched
-  const markQuizAsCompleted = async () => {
-    try {
-      await quizApi.markQuizCompleted(quizId);
-    } catch (error) {
-      console.error("Error marking video as watched:", error);
-      // Don't show error to user, just log it
-    }
-  };
-
-  // Puanları context/storage üzerinden güncelle (sadece component mount olduğunda bir kere çalışır)
   useEffect(() => {
-    markQuizAsCompleted();
-  }, [quizId]); // Boş dependency array, sadece bir kere çalışmasını sağlar
+    const markQuizCompleted = async () => {
+      try {
+        setLoading(true);
+        await quizApi.markQuizCompleted(quizId);
+      } catch (error) {
+        console.error("Error marking quiz as completed:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    markQuizCompleted();
+  }, [quizId]);
 
   const handleGoHome = () => {
     router.replace("/(tabs)/home"); // replace kullanarak geri tuşuyla buraya dönülmesini engelle
   };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="dark-content" />
+        <Stack.Screen options={{ headerShown: false }} />
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#038565" />
+          <Text style={styles.loadingText}>{t("quizResult.saving")}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -75,7 +95,7 @@ export default function QuizResultsScreen() {
 
       {/* Başlık */}
       <Typo size={26} fontWeight="600" style={styles.title}>
-        Congratulations on{"\n"}completing quiz!
+        {t("quizResult.completed")}
       </Typo>
 
       {/* Skor */}
@@ -83,27 +103,12 @@ export default function QuizResultsScreen() {
         <Typo style={styles.scoreAchieved}>{score}</Typo>
         <Typo style={styles.scoreTotal}>/{totalQuestions}</Typo>
       </View>
-      <Typo style={styles.scoreLabel}>Answered Correctly</Typo>
-
-      {/* Ödüller Bölümü */}
-      <View style={styles.rewardsSection}>
-        <Typo style={styles.rewardsLabel}>Rewards</Typo>
-        <View style={styles.rewardBar}>
-          {/* Ödül ikonu */}
-          <View style={styles.rewardIconContainer}>
-            {/* Basit bir daire ikonu veya özel bir ikon */}
-            <Ionicons name="ellipse" size={28} color="#038565" />
-            {/* Veya <Ionicons name="star" size={20} color="#FFD700" /> */}
-          </View>
-          {/* Ödül Metni */}
-          <Typo style={styles.rewardText}>{earnedPoints} Reward</Typo>
-        </View>
-      </View>
+      <Typo style={styles.scoreLabel}> {t("quizResult.answered")} </Typo>
 
       {/* Anasayfaya Dön Butonu */}
       <TouchableOpacity style={styles.homeButton} onPress={handleGoHome}>
         <Typo fontWeight="600" size={16} style={styles.homeButtonText}>
-          Go to home
+          {t("quizResult.goHome")}
         </Typo>
       </TouchableOpacity>
     </SafeAreaView>
@@ -119,6 +124,16 @@ const styles = StyleSheet.create({
     justifyContent: "center", // İçeriği dikeyde ortala
     paddingHorizontal: 30, // Yanlardan boşluk
     paddingBottom: 50, // Buton için altta yer
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#666",
   },
   iconContainer: {
     width: 90,

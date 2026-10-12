@@ -27,9 +27,12 @@ export default function VideoForm({ route, navigation }) {
   const API_URL = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    category: 0,
+    titleEn: "",
+    titleRu: "",
+    descriptionEn: "",
+    descriptionRu: "",
+    categoryEn: "",
+    categoryRu: "",
     duration: "",
     tags: [],
     videoFile: null,
@@ -53,9 +56,21 @@ export default function VideoForm({ route, navigation }) {
 
       if (videoData) {
         setFormData({
-          title: videoData.title || "",
-          description: videoData.description || "",
-          category: videoData.category || "",
+          titleEn: videoData.titleTranslations?.en || videoData.title.en || "",
+          titleRu: videoData.titleTranslations?.ru || videoData.title.ru || "",
+          descriptionEn:
+            videoData.descriptionTranslations?.en ||
+            videoData.description.en ||
+            "",
+          descriptionRu:
+            videoData.descriptionTranslations?.ru ||
+            videoData.description.ru ||
+            "",
+
+          categoryEn:
+            videoData.categoryTranslation?.en || videoData.category.en || "",
+          categoryRu:
+            videoData.categoryTranslation?.ru || videoData.category.ru || "",
           duration: videoData.duration ? videoData.duration.toString() : "",
           tags: Array.isArray(videoData.tags) ? videoData.tags : [],
           videoFile: null, // We don't reload the actual file
@@ -214,7 +229,14 @@ export default function VideoForm({ route, navigation }) {
 
   const handleSubmit = async () => {
     // Validate form
-    if (!formData.title || !formData.description || !formData.category) {
+    if (
+      !formData.titleEn ||
+      !formData.titleRu ||
+      !formData.descriptionEn ||
+      !formData.descriptionRu ||
+      !formData.categoryEn ||
+      !formData.categoryRu
+    ) {
       Alert.alert(
         "Missing Information",
         "Please fill in all required fields (title, description, category)"
@@ -243,9 +265,27 @@ export default function VideoForm({ route, navigation }) {
     try {
       // Create FormData object for file upload
       const formDataForUpload = new FormData();
-      formDataForUpload.append("title", formData.title);
-      formDataForUpload.append("description", formData.description);
-      formDataForUpload.append("category", formData.category);
+      const titleObject = {
+        en: formData.titleEn,
+        ru: formData.titleRu,
+      };
+
+      const descriptionObject = {
+        en: formData.descriptionEn,
+        ru: formData.descriptionRu,
+      };
+
+      const categoryObject = {
+        en: formData.categoryEn,
+        ru: formData.categoryRu,
+      };
+
+      formDataForUpload.append("title", JSON.stringify(titleObject));
+      formDataForUpload.append(
+        "description",
+        JSON.stringify(descriptionObject)
+      );
+      formDataForUpload.append("category", JSON.stringify(categoryObject));
       formDataForUpload.append("duration", formData.duration || 0);
       formDataForUpload.append("tags", JSON.stringify(formData.tags));
 
@@ -335,31 +375,58 @@ export default function VideoForm({ route, navigation }) {
     <ScrollView style={styles.container}>
       <View style={styles.formContainer}>
         <BackButton onPress={() => navigation.goBack()} />
-        <Text style={styles.label}>Title *</Text>
+        <Text style={styles.label}>Title (English) *</Text>
         <TextInput
           style={styles.input}
-          value={formData.title}
-          onChangeText={(text) => handleInputChange("title", text)}
-          placeholder="Enter video title"
+          value={formData.titleEn}
+          onChangeText={(text) => handleInputChange("titleEn", text)}
+          placeholder="Enter article title in English"
         />
 
-        <Text style={styles.label}>Description *</Text>
+        <Text style={styles.label}>Title (Russian) *</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.titleRu}
+          onChangeText={(text) => handleInputChange("titleRu", text)}
+          placeholder="Введите заголовок статьи на русском"
+        />
+
+        <Text style={styles.label}>Description (English) *</Text>
         <TextInput
           style={[styles.input, styles.textArea]}
-          value={formData.description}
-          onChangeText={(text) => handleInputChange("description", text)}
-          placeholder="Enter video description"
+          value={formData.descriptionEn}
+          onChangeText={(text) => handleInputChange("descriptionEn", text)}
+          placeholder="Enter article description in English"
           multiline={true}
           numberOfLines={4}
         />
 
-        <Text style={styles.label}>Category *</Text>
+        <Text style={styles.label}>Description (Russian) *</Text>
+        <TextInput
+          style={[styles.input, styles.textArea]}
+          value={formData.descriptionRu}
+          onChangeText={(text) => handleInputChange("descriptionRu", text)}
+          placeholder="Введите описание статьи на русском"
+          multiline={true}
+          numberOfLines={4}
+        />
+
+        <Text style={styles.label}>Category (English) *</Text>
         <TextInput
           style={styles.input}
-          value={formData.category}
-          onChangeText={(text) => handleInputChange("category", text)}
+          value={formData.categoryEn}
+          onChangeText={(text) => handleInputChange("categoryEn", text)}
           placeholder="Enter video category"
         />
+
+        <Text style={styles.label}>Category (Russian) *</Text>
+        <TextInput
+          style={styles.input}
+          value={formData.categoryRu}
+          onChangeText={(text) => handleInputChange("categoryRu", text)}
+          placeholder="Введите категорию видео"
+        />
+
 
         <Text style={styles.label}>Duration (in seconds) *</Text>
         <TextInput

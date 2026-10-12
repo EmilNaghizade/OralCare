@@ -1,3 +1,4 @@
+// app/(tabs)/settings/index.jsx
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -16,8 +17,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import Typo from "../components/Typo";
 import { useAuth } from "./_layout";
-import * as SecureStore from "expo-secure-store";
-
+import "../i18n"; // Import your i18n setup if needed
+import { useTranslation } from "react-i18next";
 
 // Custom Input Component
 const FormInput = ({
@@ -44,7 +45,12 @@ const FormInput = ({
   </View>
 );
 
-const UserSettings = () => {
+export default function UserSettings() {
+  const { t, i18n } = useTranslation();
+  const { authToken } = useAuth();
+  const router = useRouter();
+
+  // form state
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
@@ -56,14 +62,11 @@ const UserSettings = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const { authToken } = useAuth();
-  const router = useRouter();
-
-  // Fetch user profile data
+  // load profile on mount
   useEffect(() => {
-    const fetchUserProfile = async () => {
+    const fetchProfile = async () => {
       try {
-        const response = await fetch(
+        const res = await fetch(
           `${process.env.EXPO_PUBLIC_API_BASE_URL}/api/auth/profile`,
           {
             method: "GET",
@@ -73,82 +76,75 @@ const UserSettings = () => {
             },
           }
         );
-
-        if (!response.ok) {
-          throw new Error("Failed to fetch profile");
-        }
-
-        const userData = await response.json();
-        console.log(userData, "userData 89");
-        setName(userData?.user?.name || "");
-        setEmail(userData.user.email || "");
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-        setErrorMessage("Could not load profile data. Please try again later.");
+        if (!res.ok) throw new Error("fetch");
+        const { user } = await res.json();
+        setName(user.name ?? "");
+        setEmail(user.email ?? "");
+      } catch {
+        Alert.alert(
+          t("userSettings.fetchError", "Could not load profile.")
+        );
       } finally {
         setInitialLoading(false);
       }
     };
-
-    if (authToken) {
-      fetchUserProfile();
-    }
+    if (authToken) fetchProfile();
   }, [authToken]);
 
   const validateForm = () => {
-    // Reset previous messages
     setErrorMessage("");
     setSuccessMessage("");
-
-    // Validate name
-    if (name.trim() === "") {
-      setErrorMessage("Name cannot be empty");
+    if (!name.trim()) {
+      Alert.alert(
+        t("userSettings.errors.nameEmpty", "Name cannot be empty")
+      );
       return false;
     }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setErrorMessage("Please enter a valid email address");
+    const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRx.test(email)) {
+      Alert.alert(
+        t("userSettings.errors.emailInvalid", "Please enter a valid email")
+      );
       return false;
     }
-
-    // If changing password, validate password fields
     if (newPassword) {
       if (!currentPassword) {
-        setErrorMessage("Current password is required to set a new password");
+        Alert.alert(
+          t(
+            "userSettings.errors.currentPasswordRequired",
+            "Current password is required"
+          )
+        );
         return false;
       }
-
       if (newPassword.length < 6) {
-        setErrorMessage("New password must be at least 6 characters long");
+        Alert.alert(
+          t(
+            "userSettings.errors.passwordShort",
+            "New password must be at least 6 characters"
+          )
+        );
         return false;
       }
-
       if (newPassword !== confirmPassword) {
-        setErrorMessage("New passwords do not match");
+        Alert.alert(
+          t(
+            "userSettings.errors.passwordMismatch",
+            "New passwords do not match"
+          )
+        );
         return false;
       }
     }
-
     return true;
   };
 
-  const handleUpdateProfile = async () => {
+  const handleUpdate = async () => {
     if (!validateForm()) return;
-
     setLoading(true);
-    setErrorMessage("");
-    setSuccessMessage("");
-
     try {
-      // Update profile info (name and email)
-      const profilePayload = {
-        name,
-        email,
-      };
-
-      const profileResponse = await fetch(
+      // update name/email
+      const prRes = await fetch(
         `${process.env.EXPO_PUBLIC_API_BASE_URL}/api/auth/profile`,
         {
           method: "PUT",
@@ -156,38 +152,29 @@ const UserSettings = () => {
             Authorization: `Bearer ${authToken}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(profilePayload),
+          body: JSON.stringify({ name, email }),
         }
       );
+      const prData = await prRes.json();
+      if (!prRes.ok) throw new Error(prData.message || "profile");
 
-      const profileData = await profileResponse.json();
-
-      if (!profileResponse.ok) {
-        throw new Error(profileData.message || "Failed to update profile");
-      }
-
-      // If user is trying to update password, handle it separately
+      // if password change requested
       if (newPassword) {
-        // First verify current password
-        const encodedPassword = encodeURIComponent(currentPassword);
-        const verifyPasswordResponse = await fetch(
-          `${process.env.EXPO_PUBLIC_API_BASE_URL}/api/auth/verify-password?password=${encodedPassword}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${authToken}`,
-              "Content-Type": "application/json",
-            },
-          }
+        // verify
+        const verifyRes = await fetch(
+          `${
+            process.env.EXPO_PUBLIC_API_BASE_URL
+          }/api/auth/verify-password?password=${encodeURIComponent(
+            currentPassword
+          )}`,
+          { method: "GET", headers: { Authorization: `Bearer ${authToken}` } }
         );
-
-        if (!verifyPasswordResponse.ok) {
-          const errorData = await verifyPasswordResponse.json();
-          throw new Error(errorData.message || "Current password is incorrect");
+        if (!verifyRes.ok) {
+          const err = await verifyRes.json();
+          throw new Error(t("userSettings.errors.currentPasswordIncorrect"));
         }
-
-        // Now update password with a separate endpoint
-        const passwordResponse = await fetch(
+        // update
+        const pwRes = await fetch(
           `${process.env.EXPO_PUBLIC_API_BASE_URL}/api/auth/update-password`,
           {
             method: "PUT",
@@ -195,52 +182,32 @@ const UserSettings = () => {
               Authorization: `Bearer ${authToken}`,
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              currentPassword,
-              newPassword,
-            }),
+            body: JSON.stringify({ currentPassword, newPassword }),
           }
         );
-
-        const passwordData = await passwordResponse.json();
-        console.log(passwordResponse, "passwordData");
-        if (!passwordResponse.ok) {
-          throw new Error(passwordData.message || "Failed to update password");
-        }
-
-        // Clear password fields
+        const pwData = await pwRes.json();
+        if (!pwRes.ok) throw new Error(pwData.message || "password");
+        // clear fields + alert
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-
-        // Show password update success
         Alert.alert(
-          "Password Updated",
-          "Your password has been successfully changed. Please use your new password next time you log in.",
-          [{ text: "OK" }]
+          t("userSettings.passwordUpdatedTitle"),
+          t(
+            "userSettings.passwordUpdatedMessage"
+          ),
+          [{ text: t("common.ok", "OK") }]
         );
-
-        // Optionally, you can log the user out or redirect them to the login screen after alert
-        // we can do this by removing the auth token from local storage
-        // we can use setTimeout to delay the logout process
-        // to give the user time to read the alert
-        setTimeout(async () => {
-          await SecureStore.deleteItemAsync("authToken");
-          router.push("/onboarding");
-        }, 2000);
         return;
       }
 
-      setSuccessMessage("Profile updated successfully");
-
-      // Hide success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage("");
-      }, 3000);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      setErrorMessage(
-        error.message || "Failed to update profile. Please try again."
+      Alert.alert(
+        t("userSettings.profileUpdated", "Profile updated successfully")
+      );
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      Alert.alert(
+        err.message || t("userSettings.updateFailed", "Update failed")
       );
     } finally {
       setLoading(false);
@@ -259,13 +226,15 @@ const UserSettings = () => {
             <Ionicons name="arrow-back" size={24} color="#038565" />
           </TouchableOpacity>
           <Typo fontWeight="600" size={18}>
-            Profile Settings
+            {t("userSettings.profileSettings", "Profile Settings")}
           </Typo>
           <View style={{ width: 40 }} />
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#038565" />
-          <Typo style={styles.loadingText}>Loading profile...</Typo>
+          <Typo style={styles.loadingText}>
+            {t("userSettings.loadingProfile", "Loading profile...")}
+          </Typo>
         </View>
       </SafeAreaView>
     );
@@ -286,7 +255,7 @@ const UserSettings = () => {
             <Ionicons name="arrow-back" size={24} color="#038565" />
           </TouchableOpacity>
           <Typo fontWeight="600" size={18}>
-            Profile Settings
+            {t("userSettings.profileSettings")}
           </Typo>
           <View style={{ width: 40 }} />
         </View>
@@ -294,7 +263,7 @@ const UserSettings = () => {
         <ScrollView contentContainerStyle={styles.contentContainer}>
           <View style={styles.formContainer}>
             <Typo fontWeight="600" size={22} style={styles.sectionTitle}>
-              Personal Information
+              {t("userSettings.personalInformation", "Personal Information")}
             </Typo>
 
             {errorMessage ? (
@@ -320,65 +289,100 @@ const UserSettings = () => {
             ) : null}
 
             <FormInput
-              label="Full Name"
+              label={t("userSettings.fullName", "Full Name")}
               value={name}
               onChangeText={setName}
-              placeholder="Enter your full name"
+              placeholder={t(
+                "userSettings.fullNamePlaceholder",
+                "Enter your full name"
+              )}
             />
 
             <FormInput
-              label="Email Address"
+              label={t("userSettings.emailAddress", "Email Address")}
               value={email}
               onChangeText={setEmail}
-              placeholder="Enter your email address"
-              editable={true}
+              placeholder={t(
+                "userSettings.emailPlaceholder",
+                "Enter your email address"
+              )}
             />
+
+            <TouchableOpacity
+              style={styles.languageButton}
+              onPress={() => router.push("/language-selection")}
+            >
+              <Ionicons name="language-outline" size={20} color="#038565" />
+              <Typo
+                style={styles.languageButtonText}
+                fontWeight="600"
+                size={16}
+              >
+                {t("settings.selectLanguage")}
+              </Typo>
+              <Ionicons name="chevron-forward" size={20} color="#038565" />
+            </TouchableOpacity>
 
             <Typo
               fontWeight="600"
               size={22}
               style={[styles.sectionTitle, styles.passwordTitle]}
             >
-              Change Password
+              {t("userSettings.changePassword", "Change Password")}
             </Typo>
             <Typo style={styles.passwordSubtitle}>
-              Leave these fields empty if you don't want to change your password
+              {t(
+                "userSettings.passwordNote",
+                "Leave these fields empty if you don't want to change your password"
+              )}
             </Typo>
 
             <FormInput
-              label="Current Password"
+              label={t("userSettings.currentPassword", "Current Password")}
               value={currentPassword}
               onChangeText={setCurrentPassword}
-              placeholder="Enter your current password"
-              secureTextEntry={true}
+              placeholder={t(
+                "userSettings.currentPasswordPlaceholder",
+                "Enter your current password"
+              )}
+              secureTextEntry
             />
 
             <FormInput
-              label="New Password"
+              label={t("userSettings.newPassword", "New Password")}
               value={newPassword}
               onChangeText={setNewPassword}
-              placeholder="Enter new password"
-              secureTextEntry={true}
+              placeholder={t(
+                "userSettings.newPasswordPlaceholder",
+                "Enter new password"
+              )}
+              secureTextEntry
             />
 
             <FormInput
-              label="Confirm New Password"
+              label={t(
+                "userSettings.confirmNewPassword",
+                "Confirm New Password"
+              )}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              placeholder="Confirm new password"
-              secureTextEntry={true}
+              placeholder={t(
+                "userSettings.confirmPasswordPlaceholder",
+                "Confirm new password"
+              )}
+              secureTextEntry
             />
 
             <TouchableOpacity
               style={[styles.updateButton, loading && styles.disabledButton]}
-              onPress={handleUpdateProfile}
+              onPress={handleUpdate}
               disabled={loading}
             >
               {loading ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <Typo color="#fff" fontWeight="600">
-                  Update Profile
+                  {t("userSettings.updateProfile", "Update Profile")}
                 </Typo>
               )}
             </TouchableOpacity>
@@ -387,16 +391,11 @@ const UserSettings = () => {
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  container: {
-    flex: 1,
-  },
+  safeArea: { flex: 1, backgroundColor: "#fff" },
+  container: { flex: 1 },
   headerContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -407,44 +406,27 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#f0f0f0",
   },
-  backButton: {
-    padding: 8,
+  backButton: { padding: 8 },
+  contentContainer: { flexGrow: 1, paddingBottom: 40 },
+  loadingContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  loadingText: { marginTop: 10, fontSize: 16, color: "#666" },
+
+  languageRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 15,
   },
-  contentContainer: {
-    flexGrow: 1,
-    paddingBottom: 40,
-  },
-  formContainer: {
-    padding: 20,
-  },
-  sectionTitle: {
-    marginBottom: 20,
-    color: "#1c1c1c",
-  },
-  passwordTitle: {
-    marginTop: 30,
-    marginBottom: 8,
-  },
-  passwordSubtitle: {
-    fontSize: 14,
-    color: "#666",
-    marginBottom: 20,
-  },
-  fieldNote: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: -12,
-    marginBottom: 20,
-    fontStyle: "italic",
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  inputLabel: {
-    fontSize: 16,
-    color: "#333",
-    marginBottom: 8,
-  },
+  languageOption: { flexDirection: "row", alignItems: "center" },
+
+  formContainer: { padding: 20 },
+  sectionTitle: { marginBottom: 20, color: "#1c1c1c" },
+  passwordTitle: { marginTop: 30, marginBottom: 8 },
+  passwordSubtitle: { fontSize: 14, color: "#666", marginBottom: 20 },
+
+  inputContainer: { marginBottom: 20 },
+  inputLabel: { fontSize: 16, color: "#333", marginBottom: 8 },
   inputWrapper: {
     borderWidth: 1,
     borderColor: "#ddd",
@@ -453,15 +435,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     backgroundColor: "#f9f9f9",
   },
-  textInput: {
-    fontSize: 16,
-    color: "#333",
-    paddingVertical: 4,
-  },
-  disabledInput: {
-    backgroundColor: "#f0f0f0",
-    borderColor: "#e0e0e0",
-  },
+  textInput: { fontSize: 16, color: "#333", paddingVertical: 4 },
+  disabledInput: { backgroundColor: "#f0f0f0", borderColor: "#e0e0e0" },
+
   updateButton: {
     backgroundColor: "#038565",
     borderRadius: 8,
@@ -469,19 +445,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 30,
   },
-  disabledButton: {
-    opacity: 0.7,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
+  languageButton: {
+    flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#F0F5F7",
+    borderRadius: 12,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
   },
-  loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: "#666",
+  languageButtonText: {
+    flex: 1,
+    marginLeft: 12,
+    color: "#0F172A",
   },
+  disabledButton: { opacity: 0.7 },
+
   errorContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -490,12 +468,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 20,
   },
-  errorText: {
-    color: "#FF3B30",
-    fontSize: 14,
-    marginLeft: 8,
-    flex: 1,
-  },
+  errorText: { color: "#FF3B30", fontSize: 14, marginLeft: 8, flex: 1 },
   successContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -504,11 +477,5 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 20,
   },
-  successText: {
-    color: "#34C759",
-    fontSize: 14,
-    marginLeft: 8,
-  },
+  successText: { color: "#34C759", fontSize: 14, marginLeft: 8 },
 });
-
-export default UserSettings;

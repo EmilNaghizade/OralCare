@@ -16,17 +16,22 @@ import { Ionicons } from "@expo/vector-icons";
 import Typo from "../components/Typo";
 import BackButton from "../components/BackButton";
 import { useAuth } from "./_layout";
+import { useTranslation } from "react-i18next";
+import "../i18n";
 import { notificationApi } from "../services/api";
 
 export default function NotificationsScreen() {
   const router = useRouter();
   const { authToken } = useAuth();
+  const { t, i18n } = useTranslation();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  
 
   // Fetch notifications on mount
   useEffect(() => {
@@ -42,13 +47,12 @@ export default function NotificationsScreen() {
       const data = await notificationApi.getNotifications(authToken, pageNum);
 
       const notificationsList = data.notifications || [];
-
       if (pageNum === 1) {
         setNotifications(notificationsList);
       } else {
         setNotifications((prev) => [...prev, ...notificationsList]);
       }
-
+ 
       setUnreadCount(data.unreadCount || 0);
       setHasMore(notificationsList.length > 0 && pageNum < data.totalPages);
       setPage(pageNum);
@@ -121,6 +125,12 @@ export default function NotificationsScreen() {
           // For products, we'll still go to the products page as there may not be a detail view
           router.push("/(tabs)/products");
           break;
+        case "quiz":
+          router.push({
+            pathname: `/quiz`,
+            params: { id: notification.contentId },
+          });
+          break;
         default:
           router.push("/(tabs)/home");
           break;
@@ -146,6 +156,11 @@ export default function NotificationsScreen() {
         case "product":
           router.push("/(tabs)/products");
           break;
+        case "quiz":
+          router.push({
+            pathname: "/(tabs)/home",
+          });
+          break;
         default:
           router.push("/(tabs)/home");
           break;
@@ -164,6 +179,8 @@ export default function NotificationsScreen() {
         return "newspaper-outline";
       case "product":
         return "cube-outline";
+      case "quiz":
+        return "help-circle-outline";
       default:
         return "notifications-outline";
     }
@@ -187,6 +204,39 @@ export default function NotificationsScreen() {
     return notifDate.toLocaleDateString();
   };
 
+  const getTranslatedMessage = (notification) => {
+    // If the message is already translated (older notifications)
+    const { message, messageParams = {}, type } = notification;
+
+    // if it's already a raw string (old notifications), just return it
+    if (!message.startsWith("notifications.")) {
+      return message;
+    }
+  
+    // helper to pick the right language field
+    const pick = (en, ru) =>
+      i18n.language === "ru" ? (messageParams[ru] || messageParams[en]) : (messageParams[en] || messageParams[ru]);
+   
+    switch (type) {
+      case "product":
+        return t(message, { name: pick("nameEn", "nameRu") });
+      case "article":
+        return t(message, { title: pick("titleEn", "titleRu") });
+      case "news":
+        return t(message, { title: pick("nameEn", "nameRu") });
+      case "video":
+        return t(message, { title: pick("titleEn", "titleRu") });
+      case "quiz":
+        // assume quiz name / title too
+        return t(message, { title: pick("titleEn", "titleRu") });
+      default:
+        // fall back to generic translation with all params
+        return t(message, messageParams);
+    }
+  };
+
+
+
   // Render each notification item
   const renderNotificationItem = ({ item }) => (
     <TouchableOpacity
@@ -207,7 +257,7 @@ export default function NotificationsScreen() {
         <Typo
           style={[styles.notificationTitle, !item.read && styles.unreadText]}
         >
-          {item.message}
+          {getTranslatedMessage(item)}
         </Typo>
         <Typo style={styles.notificationTimestamp}>
           {formatTimestamp(item.createdAt)}
@@ -227,7 +277,7 @@ export default function NotificationsScreen() {
   const renderEmptyList = () => (
     <View style={styles.emptyContainer}>
       <Ionicons name="notifications-off-outline" size={60} color="#ccc" />
-      <Typo style={styles.emptyText}>You have no notifications yet.</Typo>
+      <Typo style={styles.emptyText}>{t("notifications.empty")}</Typo>
     </View>
   );
 
@@ -250,7 +300,9 @@ export default function NotificationsScreen() {
           style={styles.markAllReadButton}
           onPress={markAllAsRead}
         >
-          <Typo style={styles.markAllReadText}>Mark all as read</Typo>
+          <Typo style={styles.markAllReadText}>
+            {t("notifications.markAllAsRead")}
+          </Typo>
         </TouchableOpacity>
       )}
 

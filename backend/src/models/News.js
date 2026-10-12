@@ -4,14 +4,28 @@ import mongoose from "mongoose";
 const NewsSchema = new mongoose.Schema(
   {
     title: {
-      type: String,
-      required: true,
-      trim: true,
+      en: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      ru: {
+        type: String,
+        required: true,
+        trim: true,
+      },
     },
     description: {
-      type: String,
-      required: true,
-      trim: true,
+      en: {
+        type: String,
+        required: true,
+        trim: true,
+      },
+      ru: {
+        type: String,
+        required: true,
+        trim: true,
+      },
     },
     thumbnail: {
       type: String,

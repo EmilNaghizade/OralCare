@@ -135,7 +135,7 @@ function ArticleListScreen({ navigation }) {
                   <View style={styles.thumbnailPlaceholder} />
                 )}
                 <View style={styles.textContainer}>
-                  <Text style={styles.articleTitle}>{item.title}</Text>
+                  <Text style={styles.articleTitle} numberOfLines={3} ellipsizeMode="tail">{item.title}</Text>
                   <View style={styles.articleMeta}>
                     <Text style={styles.readingTime}>
                       {item.readingTime} min read

@@ -3,35 +3,76 @@ import mongoose from "mongoose";
 
 const QuizSchema = new mongoose.Schema({
   title: {
-    type: String,
-    required: true
+    en: {
+      type: String,
+      required: true,
+    },
+    ru: {
+      type: String,
+      required: true,
+    },
   },
   description: {
-    type: String
+    en: {
+      type: String,
+      required: true,
+    },
+    ru: {
+      type: String,
+      required: true,
+    },
   },
   questions: [
     {
       question: {
-        type: String,
-        required: true
+        en: {
+          type: String,
+          required: true,
+        },
+        ru: {
+          type: String,
+          required: true,
+        },
       },
-      options: [String],
+      options: {
+        en: [{ type: String, required: true }],
+        ru: [{ type: String, required: true }],
+      },
       correctAnswer: {
         type: Number, // Index of the correct option
-        required: true
-      }
-    }
+        required: true,
+      },
+    },
   ],
+  colorScheme: {
+    type: String,
+    enum: ["green", "purple", "blue", "orange"],
+    default: "green",
+  },
   category: {
-    type: String
+    en: {
+      type: String,
+      required: true,
+    },
+    ru: {
+      type: String,
+      required: true,
+    },
+  },
+  time: {
+    type: Number,
+    default: 2, // Time in minutes
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
+  isPublished: {
+    type: Boolean,
+    default: true,
+  },
 });
 
 const Quiz = mongoose.model("Quiz", QuizSchema);
 
 export default Quiz;
-

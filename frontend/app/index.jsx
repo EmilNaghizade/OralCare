@@ -1,6 +1,10 @@
+import "react-native-gesture-handler";
+import { registerRootComponent } from "expo";
+import { ExpoRoot } from "expo-router";
 import React from "react";
 import { Redirect } from "expo-router";
 import { useAuth } from "./_layout";
+registerRootComponent(ExpoRoot);
 
 export default function App() {
   const { isLoading, authToken, user } = useAuth();

@@ -135,7 +135,7 @@ function NewsListScreen({ navigation }) {
                   <View style={styles.thumbnailPlaceholder} />
                 )}
                 <View style={styles.textContainer}>
-                  <Text style={styles.newsTitle}>{item.title}</Text>
+                  <Text style={styles.newsTitle} numberOfLines={3} ellipsizeMode="tail">{item.title}</Text>
                   <View style={styles.newsMeta}>
                     <Text style={styles.readingTime}>
                       {item.readingTime} min read

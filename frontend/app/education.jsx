@@ -14,6 +14,8 @@ import { Ionicons } from "@expo/vector-icons";
 import BackButton from "../components/BackButton";
 import { VideoCard } from "../components/VideoCard";
 import { videoApi } from "../services/api";
+import "../i18n";
+import { useTranslation } from "react-i18next";
 
 import Typo from "../components/Typo";
 import { useAuth } from "./_layout";
@@ -22,6 +24,7 @@ export default function Education() {
   const { authToken } = useAuth();
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { t,i18n } = useTranslation();
 
   useEffect(() => {
     fetchVideos();
@@ -30,7 +33,7 @@ export default function Education() {
   const fetchVideos = async () => {
     try {
       setLoading(true);
-      const data = await videoApi.getAllVideos(authToken);
+      const data = await videoApi.getAllVideos(authToken,i18n.language);
       if (data && data.videos) {
         setVideos(data.videos);
       } else {
@@ -73,7 +76,7 @@ export default function Education() {
           <View style={styles.headerButtons}>
             <BackButton />
           </View>
-          <Text style={styles.headerTitle}>Watch & Learn</Text>
+          <Text style={styles.headerTitle}>{t("home.watchSection.title")}</Text>
         </View>
 
         {/* Articles Grid */}
@@ -84,7 +87,7 @@ export default function Education() {
           </View>
         ) : videos.length === 0 ? (
           <View style={styles.emptyContainer}>
-            <Typo style={styles.emptyText}>No videos available</Typo>
+            <Typo style={styles.emptyText}>{t("home.watchSection.empty")}</Typo>
           </View>
         ) : (
           <FlatList
@@ -92,7 +95,7 @@ export default function Education() {
             renderItem={renderVideos}
             keyExtractor={(item) => item._id.toString()}
             numColumns={2}
-            contentContainerStyle={styles.articleGrid}
+            contentContainerStyle={styles.videoGrid}
             showsVerticalScrollIndicator={false}
             columnWrapperStyle={styles.columnWrapper}
           />
@@ -109,7 +112,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: { paddingBottom: 30, backgroundColor: "#f0f2f5" },
   header: {
-    height: 140, // Header yüksekliği
+  
     justifyContent: "flex-end", // Başlığı dikeyde ortala
     backgroundColor: "#fff", // Beyaz header arka planı
     paddingBottom: 20, // Alt boşluk
@@ -133,9 +136,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
     color: "#000",
   },
-  shareButton: {
-    padding: 8,
-  },
   tabContainer: {
     flexDirection: "row",
     paddingVertical: 12,
@@ -146,6 +146,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     marginRight: 8,
     borderRadius: 8,
+   
   },
   activeTab: {
     backgroundColor: "#E3ECF0",
@@ -158,14 +159,16 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: "#000",
   },
-  articleGrid: {
+  videoGrid: {
     padding: 8,
     marginTop: 20,
     borderRadius: 20,
     backgroundColor: "#fff",
+   
   },
   columnWrapper: {
     justifyContent: "space-between",
+    marginBottom: 16,
   },
   loadingContainer: {
     flex: 1,

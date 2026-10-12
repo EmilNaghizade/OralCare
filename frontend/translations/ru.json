@@ -1,0 +1,303 @@
+{
+  "onboarding": {
+    "welcome": {
+      "title": "Добро пожаловать в OralCare",
+      "badge": "🌟 Добро пожаловать в Oral Care"
+    },
+    "slide1": {
+      "title": "Учитесь с видеоуроками!",
+      "subtitle": "Следуйте видеоинструкциям для эффективного ухода за полостью рта."
+    },
+    "slide2": {
+      "title": "Проверьте свои знания!",
+      "subtitle": "Пройдите тесты, чтобы проверить и улучшить свои знания о здоровье полости рта."
+    },
+    "slide3": {
+      "title": "Получите мгновенную поддержку",
+      "subtitle": "Общайтесь с нашими менеджерами или свяжитесь через свой предпочтительный мессенджер."
+    },
+    "buttons": {
+      "getStarted": "Начать",
+      "login": "Войти",
+      "language": "Язык"
+    },
+    "proceedModal": {
+      "title": "Уход за полостью рта: Почему это важнее, чем вы думаете",
+      "description": "Некоторые люди религиозно относятся к чистке зубов, использованию зубной нити и ополаскивателя для рта. Другие? Не совсем так. Но разница между теми, кто инвестирует в уход за полостью рта, и теми, кто пропускает его, выходит далеко за рамки свежего дыхания.",
+      "readMore": "Прочитать больше из этой статьи",
+      "proceedButton": "Перейти к приложению"
+    }
+  },
+  "register": {
+    "name": {
+      "title": "Как вас зовут?\nИмя и фамилия",
+      "placeholder": "Имя Фамилия"
+    },
+    "validation": {
+      "nameRequired": {
+        "title": "Требуется имя",
+        "message": "Пожалуйста, введите ваше имя и фамилию."
+      }
+    },
+    "gender": {
+      "title": "Выберите свой пол",
+      "alertTitle": "Требуется выбор",
+      "alertMessage": "Пожалуйста, выберите ваш пол.",
+      "options": {
+        "man": "Мужчина",
+        "woman": "Женщина",
+        "preferNotToSay": "Предпочитаю не указывать"
+      }
+    },
+    "email": {
+      "title": "Введите ваш электронная почта",
+      "placeholder": "user@gmail.com",
+      "alertRequiredTitle": "Требуется электронная почта",
+      "alertRequiredMessage": "Пожалуйста, введите ваш адрес электронной почты.",
+      "alertInvalidTitle": "Неверный электронная почта",
+      "alertInvalidMessage": "Пожалуйста, введите корректный адрес электронной почты.",
+      "alertExistsTitle": "Электронная почта уже существует",
+      "alertExistsMessage": "Этот электронная почта уже зарегистрирован. Пожалуйста, используйте другой адрес.",
+      "alertErrorTitle": "Ошибка",
+      "alertErrorMessage": "Произошла ошибка при проверке электронная почта. Пожалуйста, попробуйте позже."
+    },
+    "otp": {
+      "title": "Введите OTP, отправленный на",
+      "placeholder": "Введите 6-значный OTP",
+      "checkSpam": "Проверьте также папку «Спам».",
+      "button": "Подтвердить OTP",
+      "alertInvalidTitle": "Неверный OTP",
+      "alertInvalidMessage": "OTP должно быть из 6 цифр.",
+      "alertErrorTitle": "Ошибка"
+    },
+    "password": {
+      "title": "Придумайте пароль",
+      "placeholder": "Пароль",
+      "alertWeakTitle": "Слабый пароль",
+      "alertWeakMessage": "Пароль должен быть не менее 6 символов.",
+      "alertFailedTitle": "Регистрация не удалась",
+      "alertFailedMessage": "Произошла непредвиденная ошибка.",
+      "button": "Завершить регистрацию",
+      "signingUp": "Регистрация..."
+    }
+  },
+  "login": {
+    "email": {
+      "title": "Введите ваш электронная почта",
+      "placeholder": "user@gmail.com",
+      "alertRequiredTitle": "Требуется электронная почта",
+      "alertRequiredMessage": "Пожалуйста, введите адрес электронной почты.",
+      "alertInvalidTitle": "Неверный электронная почта",
+      "alertInvalidMessage": "Пожалуйста, введите корректный адрес электронной почты.",
+      "alertErrorTitle": "Ошибка",
+      "alertErrorUserNotFoundMessage": "Пользователь не найден. Пожалуйста, попробуйте снова.",
+      "alertErrorNotFoundMessage": "Пользователь не найден.",
+      "alertErrorGeneralMessage": "Произошла ошибка при входе. Пожалуйста, попробуйте позже."
+    },
+    "password": {
+      "title": "Введите пароль",
+      "placeholder": "Пароль",
+      "alertWeakTitle": "Слабый пароль",
+      "alertWeakMessage": "Пароль должен быть не менее 6 символов.",
+      "alertFailedTitle": "Ошибка входа",
+      "alertFailedMessage": "Произошла непредвиденная ошибка.",
+      "forgot": "Забыли пароль?",
+      "button": "Войти",
+      "signingIn": "Входим..."
+    },
+    "forgot": {
+      "title": "Забыли пароль?",
+      "placeholder": "Введите ваш электронная почта",
+      "button": "Отправить OTP",
+      "alertInvalidTitle": "Неверный электронная почта",
+      "alertInvalidMessage": "Пожалуйста, введите корректный адрес электронной почты.",
+      "alertErrorTitle": "Ошибка",
+      "alertErrorMessage": "Не удалось отправить OTP"
+    },
+
+    "otpVerify": {
+      "title": "Введите OTP, отправленный на",
+      "placeholder": "Введите 6-значный OTP",
+      "button": "Подтвердить OTP",
+      "checkSpam": "Проверьте также папку «Спам».",
+      "alertInvalidTitle": "Неверный OTP",
+      "alertInvalidMessage": "OTP должно быть из 6 цифр.",
+      "alertErrorTitle": "Ошибка",
+      "alertErrorMessage": "OTP не прошёл"
+    },
+    "updatePassword": {
+      "title": "Придумайте новый пароль",
+      "placeholder": "Новый пароль",
+      "button": "Сбросить пароль",
+      "alertWeakTitle": "Слабый пароль",
+      "alertWeakMessage": "Пароль должен быть не менее 6 символов.",
+      "alertSuccessTitle": "Успех",
+      "alertSuccessMessage": "Ваш пароль обновлён.",
+      "alertErrorTitle": "Ошибка",
+      "alertErrorMessage": "Не удалось обновить пароль"
+    }
+  },
+  "settings": {
+    "language": "Язык",
+    "currentLanguage": "Текущий язык",
+    "selectLanguage": "Выбрать язык"
+  },
+  "home": {
+    "seeAll": "Показать все",
+
+    "welcome": "Здравствуйте",
+
+    "quizSection": {
+      "title": "Проверьте свои знания",
+      "subtitle": "Пройдите тесты по видео и статьям",
+      "empty": "Нет доступных тестов"
+    },
+    "watchSection": {
+      "title": "Смотрите и учитесь",
+      "subtitle": "Видео от экспертов пошагово",
+      "empty": "Нет доступных видео"
+    },
+    "knowledgeSection": {
+      "title": "Центр знаний",
+      "subtitle": "Статьи и новости отрасли",
+      "tabArticles": "Статьи",
+      "tabNews": "Новости",
+      "emptyArticles": "Нет доступных статей",
+      "emptyNews": "Нет доступных новостей"
+    },
+
+    "onboardingModal": {
+      "title": "Уход за полостью рта: Почему это важнее, чем вы думаете",
+      "description": "Некоторые люди религиозно относятся к чистке зубов, использованию зубной нити и ополаскивателя. Другие? Не совсем так. Но разница между теми, кто инвестирует в уход за полостью рта, и теми, кто пропускает его, выходит далеко за рамки свежего дыхания.",
+      "readMore": "Прочитать больше из этой статьи",
+      "proceedButton": "Перейти к приложению"
+    }
+  },
+  "quiz": {
+    "questions": "Вопросы",
+    "question": "Вопрос",
+    "quiz": "Викторина",
+    "completed": "Завершено",
+    "before": "Перед началом викторины вы можете посмотреть связанные видео ниже:",
+    "noRelatedVideos": "Нет доступных связанных видео",
+    "startQuiz": "Начать викторину",
+    "retakeQuiz": "Пройти викторину заново"
+  },
+  "questionCount": "Вопрос {{current}} из {{total}}",
+  "quizResult": {
+    "goHome": "Перейти на главную",
+    "answered": "Отвечено правильно",
+    "completed": "Поздравляем с\nзавершением викторины!",
+    "correct": "Правильный ответ!",
+    "incorrect": "Неправильный ответ!",
+    "saving": "Сохраняем ваши результаты…"
+  },
+  "notifications": {
+    "video": {
+      "new": "Добавлено новое видео: {{title}}"
+    },
+    "news": {
+      "new": "Новость: {{title}}"
+    },
+    "article": {
+      "new": "Опубликована новая статья: {{title}}"
+    },
+    "product": {
+      "new": "Доступен новый продукт: {{name}}"
+    },
+    "quiz": {
+      "new": "Доступен новый тест: {{title}}"
+    },
+    "content": {
+      "new": "Добавлен новый контент"
+    },
+    "screenTitle": "Уведомления",
+    "markAllAsRead": "Отметить все как прочитанные",
+    "empty": "У вас пока нет уведомлений."
+  },
+  "articles": {
+    "minRead": "мин чтения"
+  },
+  "products": {
+    "headerTitle": "Продукция Oral Care",
+    "empty": "Нет доступных продуктов",
+    "error": "Не удалось загрузить товары с сервера. Показаны образцы."
+  },
+  "profile": {
+    "list": {
+      "profileSection": "Профиль",
+      "supportSection": "Поддержка и обратная связь"
+    },
+    "profile": "Профиль",
+    "adminPanel": "Панель администратора",
+    "inviteFriend": "Пригласить друга",
+    "notifications": "Уведомления",
+    "video": "Видео",
+    "quizzes": "Тесты",
+    "userSettings": "Настройки пользователя",
+    "chatWithUs": "Чат с нами",
+    "logOut": "Выйти",
+    "modal": {
+      "takePhoto": "Сделать фото",
+      "uploadPhoto": "Загрузить фото",
+      "deletePhoto": "Удалить фото"
+    },
+    "alert": {
+      "permissionRequired": "Требуется разрешение",
+      "cameraPermission": "Необходим доступ к камере для создания фото профиля. Пожалуйста, включите его в настройках устройства.",
+      "galleryPermission": "Необходим доступ к фото-галерее для выбора фото профиля. Пожалуйста, включите его в настройках устройства."
+    },
+    "toast": {
+      "photoAdded": "Фото профиля успешно добавлено",
+      "photoAddError": "Не удалось добавить фото",
+      "photoUploaded": "Фото профиля успешно загружено",
+      "photoUploadError": "Не удалось загрузить фото",
+      "photoRemoved": "Фото профиля успешно удалено",
+      "photoRemoveError": "Не удалось удалить фото"
+    }
+  },
+  "userSettings": {
+    "profileSettings": "Настройки профиля",
+    "loadingProfile": "Загрузка профиля...",
+    "fetchError": "Не удалось загрузить профиль.",
+    "personalInformation": "Личная информация",
+    "errors": {
+      "nameEmpty": "Имя не может быть пустым",
+      "emailInvalid": "Пожалуйста, введите корректный электронная почта",
+      "currentPasswordRequired": "Требуется текущий пароль",
+      "currentPasswordIncorrect": "Текущий пароль неверен",
+      "passwordShort": "Новый пароль должен содержать не менее 6 символов",
+      "passwordMismatch": "Пароли не совпадают"
+    },
+    "language": "Язык",
+    "changePassword": "Изменить пароль",
+    "passwordNote": "Оставьте поля пустыми, если не хотите менять пароль",
+    "fullName": "ФИО",
+    "fullNamePlaceholder": "Введите имя и фамилию",
+    "emailAddress": "Электронная почта",
+    "emailPlaceholder": "Введите адрес электронной почты",
+    "currentPassword": "Текущий пароль",
+    "currentPasswordPlaceholder": "Введите текущий пароль",
+    "newPassword": "Новый пароль",
+    "newPasswordPlaceholder": "Введите новый пароль",
+    "confirmNewPassword": "Подтвердите новый пароль",
+    "confirmPasswordPlaceholder": "Подтвердите новый пароль",
+    "passwordUpdatedTitle": "Пароль обновлен",
+    "passwordUpdatedMessage": "Ваш пароль был изменен. Пожалуйста, используйте новый пароль при следующем входе.",
+    "profileUpdated": "Профиль успешно обновлен",
+    "updateFailed": "Не удалось обновить",
+    "updateProfile": "Обновить профиль"
+  },
+  "tabs": {
+    "home": "Главная",
+    "profile": "Профиль",
+    "products": "Продукты"
+  },
+  "common": {
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "next": "Далее",
+    "back": "Назад",
+    "ok": "ОК"
+  }
+}

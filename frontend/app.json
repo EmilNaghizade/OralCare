@@ -2,12 +2,22 @@
   "expo": {
     "name": "Oral Care",
     "slug": "oral-care",
-    "version": "3.2.3",
+    "version": "3.3.4",
     "orientation": "portrait",
     "icon": "./assets/images/IconOralCare2.png",
     "scheme": "oralcare",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splashScreen1.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#038565"
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#FFFFFF",
+      "barStyle": "dark-content",
+      "translucent": false
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.test.oralcare",
@@ -18,6 +28,11 @@
       }
     },
     "android": {
+      "splash": {
+        "image": "./assets/images/splashScreen1.png",
+        "resizeMode": "contain",
+        "backgroundColor": "#038565"
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/IconOralCare2.png",
         "backgroundColor": "#ffffff"
@@ -37,15 +52,7 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/IconOralCare2.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ],
+
       "expo-secure-store",
       "expo-video",
       [
@@ -53,6 +60,14 @@
         {
           "photosPermission": "The app needs access to your photos to set a profile picture.",
           "cameraPermission": "The app needs access to your camera to take profile pictures."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splashScreen1.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#038565"
         }
       ]
     ],
