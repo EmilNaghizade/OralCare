@@ -73,7 +73,6 @@ Add real screenshots to a `screenshots/` directory and replace the placeholders 
 
 | Welcome / Login | Quiz | Profile |
 | --- | --- | --- |
-| Screenshot coming soon | Screenshot coming soon | Screenshot coming soon |
 
 A short walkthrough video or GIF is also recommended for recruiters reviewing the project.
 
@@ -146,6 +145,12 @@ As the independent developer, I worked on:
 **Completed personal project · Not published to app stores**
 
 This repository is presented as a portfolio project. Installation and configuration steps may require adjustment for your local environment.
+
+## 📱 Application Demo
+
+Watch the OralCare mobile application in action:
+
+[▶ Watch OralCare Demo on YouTube](https://youtu.be/zbWj8zQaB7Y)
 
 ## Author
 
